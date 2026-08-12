@@ -1,0 +1,12 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+implementation-*.png
+qa-*.png
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*
+!.env.example
