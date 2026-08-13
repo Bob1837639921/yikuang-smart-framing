@@ -1,0 +1,157 @@
+<view class="mini-app" style="padding-top:{{topInset}}px">
+
+  <block wx:if="{{screen === 'home'}}">
+    <scroll-view class="app-scroll" scroll-y enhanced show-scrollbar="false">
+      <view class="app-screen oneframe usable-home">
+        <view class="brand-row">
+          <view class="brand"><view class="brand-mark"><view></view><view></view><view></view><view></view></view><text>一框</text></view>
+          <button class="profile-button" bindtap="openSaved"><view class="person-icon"></view></button>
+        </view>
+        <view class="headline-block">
+          <text class="eyebrow">装裱前，先让它试一试</text>
+          <text class="home-title">给它一只<text>刚刚好的框</text></text>
+          <text class="headline-subtitle">拍照、校正，马上看到装裱效果</text>
+        </view>
+        <view class="demo-hero">
+          <image class="hero-art" src="/assets/hero-frame-world.jpg" mode="aspectFill"></image>
+          <view class="orbit-line"></view>
+          <button class="float-entry f1" bindtap="openPicker"><text class="entry-icon">▧</text><text>作品展</text></button>
+          <button class="float-entry f2" bindtap="openMaterials"><text class="entry-icon">▱</text><text>框料库</text></button>
+          <button class="float-entry f3" bindtap="openSaved"><text class="entry-icon">♙</text><text>我的方案</text></button>
+        </view>
+        <view class="actions home-actions">
+          <button class="try-button" bindtap="startCapture"><text class="button-icon">▣</text><text>拍照试装</text></button>
+          <button class="upload-button" bindtap="startCapture"><text class="upload-icon">⇧</text><text>从相册选择</text></button>
+        </view>
+        <view class="section-title"><view></view><text>测试作品</text><button bindtap="openPicker">查看全部 →</button></view>
+        <scroll-view class="sample-carousel" scroll-x enhanced show-scrollbar="false">
+          <view class="sample-row">
+            <button class="sample-card" wx:for="{{samples}}" wx:key="id" data-id="{{item.id}}" bindtap="selectArt">
+              <image src="{{item.src}}" mode="aspectFill"></image>
+              <view class="sample-copy"><text>{{item.title}}</text><text>{{item.type}} · 点击试装</text></view>
+            </button>
+          </view>
+        </scroll-view>
+        <text class="mini-note">微信小程序体验版 · 测试数据不会产生真实订单</text>
+      </view>
+    </scroll-view>
+  </block>
+
+  <block wx:elif="{{screen === 'capture'}}">
+    <view class="app-screen camera-page">
+      <view class="mini-header dark-header"><button bindtap="onBack"><view class="back-arrow"></view></button><text>拍摄作品</text><text>1 / 4</text></view>
+      <view class="camera-view">
+        <image src="/assets/test-ink.jpg" mode="aspectFill"></image>
+        <view class="camera-guide"><view></view><view></view><view></view><view></view><text>让作品四角落在框内</text></view>
+        <view class="camera-tip">光线均匀 · 避免反光 · 保留四周背景</view>
+      </view>
+      <view class="camera-actions">
+        <button bindtap="chooseImage"><text class="action-icon">⇧</text><text>相册</text></button>
+        <button class="shutter" bindtap="useDemo"><view></view></button>
+        <button bindtap="useDemo"><text class="action-icon">✦</text><text>示例</text></button>
+      </view>
+    </view>
+  </block>
+
+  <block wx:elif="{{screen === 'picker'}}">
+    <scroll-view class="app-screen flow-page" scroll-y enhanced show-scrollbar="false">
+      <view class="mini-header"><button bindtap="onBack"><view class="back-arrow"></view></button><text>选择测试作品</text><text></text></view>
+      <view class="page-intro"><text>先选一幅作品</text><text>皱宣纸案例会先体验去皱整理。</text></view>
+      <view class="case-grid">
+        <button wx:for="{{samples}}" wx:key="id" class="case-card" data-id="{{item.id}}" bindtap="selectArt">
+          <image src="{{item.src}}" mode="aspectFill"></image><view><text>{{item.title}}</text><text>{{item.type}}</text></view><text class="case-arrow">›</text>
+        </button>
+      </view>
+    </scroll-view>
+  </block>
+
+  <block wx:elif="{{screen === 'crop'}}">
+    <view class="app-screen crop-page">
+      <view class="mini-header dark-header"><button bindtap="onBack"><view class="back-arrow"></view></button><text>校正作品边缘</text><text>2 / 4</text></view>
+      <view class="crop-help"><text>拖动四个黄点贴合作品边缘</text><text>系统已经自动找边，你可以手动修正。</text></view>
+      <view class="crop-board" catchtouchmove="movePoint" bindtouchend="stopPointDrag" bindtouchcancel="stopPointDrag">
+        <image class="crop-image {{cropRotated ? 'crop-rotated' : ''}}" src="{{art.src}}" mode="aspectFill"></image>
+        <view class="crop-dim" style="clip-path:polygon({{cropPolygon}});-webkit-clip-path:polygon({{cropPolygon}})"></view>
+        <view class="crop-line" wx:for="{{lineStyles}}" wx:key="index" style="{{item}}"></view>
+        <view class="crop-point" wx:for="{{pointStyles}}" wx:key="index" style="{{item}}" data-index="{{index}}" bindtouchstart="startPointDrag"></view>
+      </view>
+      <view class="crop-tools"><button bindtap="rotateCrop">↻ 旋转</button><button bindtap="resetCrop">✧ 重新识别</button></view>
+      <button class="primary-wide crop-confirm" bindtap="confirmCrop">✓ 确认并拉正</button>
+    </view>
+  </block>
+
+  <block wx:elif="{{screen === 'processing'}}">
+    <view class="app-screen processing-page">
+      <view class="processing-frame"><view></view><view></view><view></view><view></view></view>
+      <text>正在拉正作品</text><text>校正透视、裁掉背景、生成清晰预览…</text>
+      <view class="process-track"><view></view></view>
+    </view>
+  </block>
+
+  <block wx:elif="{{screen === 'repair'}}">
+    <view class="app-screen repair-page">
+      <view class="mini-header"><button bindtap="onBack"><view class="back-arrow"></view></button><text>作品整理</text><text>3 / 5</text></view>
+      <view class="repair-alert"><text class="repair-alert-icon">✣</text><view><text>检测到明显褶皱</text><text>建议轻度整理，保留笔触和纸张纹理。</text></view></view>
+      <view class="compare-stage" catchtouchstart="startCompare" catchtouchmove="moveCompare" bindtouchend="stopCompare" bindtouchcancel="stopCompare">
+        <image src="{{art.src}}" mode="aspectFill"></image>
+        <view class="clean-layer" style="width:{{compare}}%"><image src="{{repairLevel === 'flat' ? '/assets/test-dewrinkled-real.jpg' : '/assets/test-dewrinkled-light.jpg'}}" mode="aspectFill"></image></view>
+        <view class="compare-line" style="left:{{compare}}%"><text>↔</text></view>
+        <text class="before-label">原貌</text><text class="after-label">整理后</text>
+      </view>
+      <slider class="compare-range" min="0" max="100" value="{{compare}}" activeColor="#e3a713" block-color="#e3a713" block-size="20" bindchanging="onCompareChange" bindchange="onCompareChange"></slider>
+      <view class="repair-levels">
+        <button class="{{repairLevel === 'original' ? 'active' : ''}}" data-level="original" bindtap="setRepairLevel"><text>保留原貌</text><text>只拉正，不去皱</text></button>
+        <button class="{{repairLevel === 'light' ? 'active' : ''}}" data-level="light" bindtap="setRepairLevel"><text>轻度去皱</text><text>推荐 · 保留纸纹</text></button>
+        <button class="{{repairLevel === 'flat' ? 'active' : ''}}" data-level="flat" bindtap="setRepairLevel"><text>模拟托裱</text><text>更平整的效果预览</text></button>
+      </view>
+      <button class="primary-wide repair-confirm" bindtap="confirmRepair">使用这个效果 ›</button>
+    </view>
+  </block>
+
+  <block wx:elif="{{screen === 'editor'}}">
+    <view class="app-screen editor-shell">
+      <view class="mini-header"><button bindtap="onBack"><view class="back-arrow"></view></button><text>试装效果</text><text>3 / 4</text></view>
+      <view class="editor-preview">
+        <view class="editor-caption"><text>实时预览</text><text>{{art.title}}</text></view>
+        <view class="framed-preview {{art.id === 'photo' ? 'landscape' : 'portrait'}}" style="background:{{frame.tone}};border-color:{{frame.edge}};box-shadow:0 14px 24px {{frame.shadow}}">
+          <view class="mat-board"><image src="{{editorSrc}}" mode="aspectFit"></image></view>
+        </view>
+        <button class="change-art" bindtap="openPicker">▧ 换作品</button>
+      </view>
+      <view class="editor-drawer">
+        <view class="editor-tabs"><button class="{{editorMode === 'frame' ? 'active' : ''}}" data-mode="frame" bindtap="setEditorMode">画框</button><button class="{{editorMode === 'mat' ? 'active' : ''}}" data-mode="mat" bindtap="setEditorMode">卡纸</button><button class="{{editorMode === 'size' ? 'active' : ''}}" data-mode="size" bindtap="setEditorMode">尺寸</button></view>
+        <scroll-view wx:if="{{editorMode === 'frame'}}" class="option-carousel" scroll-x enhanced show-scrollbar="false"><view class="frame-option-row"><button wx:for="{{frames}}" wx:key="id" class="frame-option {{frame.id === item.id ? 'active' : ''}}" data-id="{{item.id}}" bindtap="selectFrame"><view style="background:{{item.tone}};border-color:{{item.edge}}"></view><text>{{item.name}}</text><text>+¥{{item.price}}</text></button></view></scroll-view>
+        <view wx:elif="{{editorMode === 'mat'}}" class="mat-controls"><view><text>使用卡纸</text><button class="switch {{mat ? 'on' : ''}}" bindtap="toggleMat"><view></view></button></view><view><text>卡纸颜色</text><view class="color-row"><button wx:for="{{matColors}}" wx:key="*this" style="background:{{item}}" class="{{matColor === item ? 'active' : ''}}" data-color="{{item}}" bindtap="selectMatColor"></button></view></view><view><text>留边 {{matWidth}}mm</text><slider min="10" max="60" value="{{matWidth}}" activeColor="#e8ab13" bindchange="onMatWidthChange"></slider></view></view>
+        <view wx:else class="size-controls"><text>作品宽</text><input type="number" value="{{width}}" bindinput="onWidthChange"/><text>×</text><text>作品高</text><input type="number" value="{{height}}" bindinput="onHeightChange"/><text>cm</text></view>
+        <view class="editor-summary"><view><text>预计参考价</text><text>¥{{total}}</text></view><button class="primary-wide" bindtap="savePlan">保存方案 ›</button></view>
+      </view>
+    </view>
+  </block>
+
+  <block wx:elif="{{screen === 'confirm'}}">
+    <scroll-view class="app-screen flow-page confirm-page" scroll-y enhanced show-scrollbar="false">
+      <view class="mini-header"><button bindtap="onBack"><view class="back-arrow"></view></button><text>确认方案</text><text>4 / 4</text></view>
+      <view class="success-orbit">✓</view><text class="confirm-title">{{done ? '询价已提交' : '这套搭配很适合它'}}</text><text class="confirm-subtitle">{{done ? '门店会按测试尺寸给出最终报价。' : '价格以门店实物测量为准。'}}</text>
+      <view class="plan-card"><image src="{{editorSrc}}" mode="aspectFill"></image><view><text>{{art.title}}</text><text>{{frame.name}} · {{mat ? matWidth + 'mm 卡纸' : '无卡纸'}}</text><text>{{width}} × {{height}} cm</text><text>参考价 ¥{{total}}</text></view></view>
+      <view wx:if="{{done}}" class="contact-box"><text>一框装裱工作室</text><text>测试门店 · 预计10分钟内回复</text></view>
+      <button wx:if="{{done}}" class="primary-wide" bindtap="goHome">返回首页</button>
+      <block wx:else><button class="primary-wide" bindtap="submitPlan">提交门店询价</button><button class="secondary-wide" bindtap="onBack">← 继续调整</button></block>
+    </scroll-view>
+  </block>
+
+  <block wx:elif="{{screen === 'materials'}}">
+    <scroll-view class="app-screen flow-page" scroll-y enhanced show-scrollbar="false">
+      <view class="mini-header"><button bindtap="onBack"><view class="back-arrow"></view></button><text>框料库</text><text></text></view>
+      <view class="page-intro"><text>摸得到的不同性格</text><text>测试版先放四款常用框料。</text></view>
+      <image class="material-hero" src="/assets/frame-materials.jpg" mode="aspectFill"></image>
+      <view class="material-list"><button wx:for="{{frames}}" wx:key="id" data-id="{{item.id}}" bindtap="selectMaterial"><view style="background:{{item.tone}};border-color:{{item.edge}}"></view><view><text>{{item.name}}</text><text>参考起价 ¥{{item.price}}</text></view><text>›</text></button></view>
+    </scroll-view>
+  </block>
+
+  <block wx:elif="{{screen === 'saved'}}">
+    <scroll-view class="app-screen flow-page" scroll-y enhanced show-scrollbar="false">
+      <view class="mini-header"><button bindtap="onBack"><view class="back-arrow"></view></button><text>我的方案</text><text></text></view>
+      <view class="empty-state"><text class="empty-icon">▱</text><text>还没有保存方案</text><text>完成一次试装后，搭配和尺寸会保存在这里。</text><button class="primary-wide" bindtap="startCapture">＋ 新建试装方案</button></view>
+    </scroll-view>
+  </block>
+</view>

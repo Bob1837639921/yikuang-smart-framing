@@ -70,11 +70,36 @@ function Repair({ flow, art }: { flow: FlowControls; art: Art }) {
   const wrinkled=art.id.includes("wrinkled");
   const [level,setLevel]=useState<"original"|"light"|"flat">(wrinkled?"light":"original");
   const [compare,setCompare]=useState(58);
+  const compareStage=useRef<HTMLDivElement>(null);
+  const comparing=useRef(false);
+  const updateCompare=(clientX:number)=>{
+    if(!compareStage.current)return;
+    const rect=compareStage.current.getBoundingClientRect();
+    setCompare(Math.max(0,Math.min(100,(clientX-rect.left)/rect.width*100)));
+  };
+  const startCompare=(event:React.PointerEvent<HTMLDivElement>)=>{
+    if(event.pointerType==="mouse"&&event.button!==0)return;
+    comparing.current=true;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    updateCompare(event.clientX);
+  };
+  const moveCompare=(event:React.PointerEvent<HTMLDivElement>)=>{
+    if(comparing.current)updateCompare(event.clientX);
+  };
+  const stopCompare=(event:React.PointerEvent<HTMLDivElement>)=>{
+    comparing.current=false;
+    if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+  const nudgeCompare=(event:React.KeyboardEvent<HTMLDivElement>)=>{
+    if(event.key!=="ArrowLeft"&&event.key!=="ArrowRight")return;
+    event.preventDefault();
+    setCompare(value=>Math.max(0,Math.min(100,value+(event.key==="ArrowRight"?2:-2))));
+  };
   const light=wrinkled?"/assets/test-dewrinkled-light.png":art.src;
   const flat=wrinkled?"/assets/test-dewrinkled-real.png":art.src;
   const clean=level==="flat"?flat:light;
   const chosen={...art,src:level==="original"?art.src:clean,title:level==="original"?art.title:`${art.title}（同图去皱）`};
-  return <div className="app-screen repair-page"><Header flow={flow} title="作品整理" step="3 / 5"/><div className="repair-alert" data-warn={wrinkled}><MagicWandIcon/><span><b>{wrinkled?"检测到明显褶皱":"作品状态良好"}</b><small>{wrinkled?"建议轻度整理，保留笔触和纸张纹理。":"可以保留原貌，或预览平整效果。"}</small></span></div><div className="compare-stage"><img src={art.src} alt="作品原貌"/><div className="clean-layer" style={{width:`${compare}%`}}><img src={clean} alt="作品整理后效果"/></div><i style={{left:`${compare}%`}}/><span className="before-label">原貌</span><span className="after-label">整理后</span></div><input className="compare-range" aria-label="前后效果对比" type="range" min="0" max="100" value={compare} onChange={e=>setCompare(Number(e.target.value))}/><div className="repair-levels"><button data-active={level==="original"} onClick={()=>setLevel("original")}><b>保留原貌</b><small>只拉正，不去皱</small></button><button data-active={level==="light"} onClick={()=>setLevel("light")}><b>轻度去皱</b><small>推荐 · 保留纸纹</small></button><button data-active={level==="flat"} onClick={()=>setLevel("flat")}><b>模拟托裱</b><small>更平整的效果预览</small></button></div>{level==="flat"&&<p className="repair-note">模拟效果仅供参考，折痕、破损和水渍需由装裱师查看实物。</p>}<button className="primary-wide repair-confirm" onClick={()=>flow.push(makeEditorScreen(chosen))}>使用这个效果<ChevronRightIcon/></button></div>;
+  return <div className="app-screen repair-page"><Header flow={flow} title="作品整理" step="3 / 5"/><div className="repair-alert" data-warn={wrinkled}><MagicWandIcon/><span><b>{wrinkled?"检测到明显褶皱":"作品状态良好"}</b><small>{wrinkled?"建议轻度整理，保留笔触和纸张纹理。":"可以保留原貌，或预览平整效果。"}</small></span></div><div ref={compareStage} className="compare-stage" role="slider" tabIndex={0} aria-label="拖动查看整理前后效果" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(compare)} onPointerDown={startCompare} onPointerMove={moveCompare} onPointerUp={stopCompare} onPointerCancel={stopCompare} onKeyDown={nudgeCompare}><img src={art.src} alt="作品原貌"/><div className="clean-layer" style={{width:`${compare}%`}}><img src={clean} alt="作品整理后效果"/></div><i style={{left:`${compare}%`}}/><span className="before-label">原貌</span><span className="after-label">整理后</span></div><input className="compare-range" aria-label="前后效果对比" type="range" min="0" max="100" value={compare} onChange={e=>setCompare(Number(e.target.value))}/><div className="repair-levels"><button data-active={level==="original"} onClick={()=>setLevel("original")}><b>保留原貌</b><small>只拉正，不去皱</small></button><button data-active={level==="light"} onClick={()=>setLevel("light")}><b>轻度去皱</b><small>推荐 · 保留纸纹</small></button><button data-active={level==="flat"} onClick={()=>setLevel("flat")}><b>模拟托裱</b><small>更平整的效果预览</small></button></div>{level==="flat"&&<p className="repair-note">模拟效果仅供参考，折痕、破损和水渍需由装裱师查看实物。</p>}<button className="primary-wide repair-confirm" onClick={()=>flow.push(makeEditorScreen(chosen))}>使用这个效果<ChevronRightIcon/></button></div>;
 }
 
 function Picker({ flow }: { flow: FlowControls }) { return <MobileScroll className="app-screen"><main className="flow-page picker-page"><Header flow={flow} title="选择测试作品"/><section className="page-intro"><h2>先选一幅作品</h2><p>皱宣纸案例会先体验去皱整理。</p></section><div className="case-grid">{samples.map(art=><motion.button whileTap={{scale:.97}} key={art.id} onClick={()=>flow.push(art.id==="wrinkled"?makeRepairScreen(art):makeEditorScreen(art))}><img src={art.src} alt={art.title}/><span><b>{art.title}</b><small>{art.type}</small></span><ChevronRightIcon/></motion.button>)}</div></main></MobileScroll> }
