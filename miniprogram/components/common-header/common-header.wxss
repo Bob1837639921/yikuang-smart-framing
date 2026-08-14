@@ -1,0 +1,14 @@
+:host{display:block}
+.mini-header{width:100%;height:48px;box-sizing:border-box;display:grid;grid-template-columns:42px 1fr 42px;align-items:center;text-align:center}
+.mini-header.inset-header{padding:0 18px}
+.back-button{width:38px;height:38px;margin:0;padding:0;border:0;border-radius:50%;background:#fff4cf;display:grid;place-items:center;box-sizing:border-box}
+.back-arrow{position:relative;width:18px;height:18px}
+.back-arrow::before{content:"";position:absolute;left:1px;top:8px;width:16px;height:2px;border-radius:2px;background:#6d5a35}
+.back-arrow::after{content:"";position:absolute;left:1px;top:4px;width:8px;height:8px;border-left:2px solid #6d5a35;border-bottom:2px solid #6d5a35;transform:rotate(45deg)}
+.header-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:15px;font-weight:800}
+.header-step{font-size:10px;color:#9e813e;text-align:right;white-space:nowrap;transform:translateX(-28px);position:relative;z-index:2}
+.dark-header .back-button{background:rgba(255,255,255,.14)}
+.dark-header .back-arrow::before{background:#fff}
+.dark-header .back-arrow::after{border-color:#fff}
+.dark-header .header-title{color:#fff}
+.dark-header .header-step{color:#d5a83b}

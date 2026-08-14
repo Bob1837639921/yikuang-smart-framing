@@ -7,6 +7,8 @@
 - Do not use a conventional bottom tab bar. Navigation is represented by animated frame-corner objects orbiting the hero.
 - The main conversion action is photo/upload framing preview; artwork showcase and frame-material showcase are supporting destinations.
 - Buttons should feel alive through rebound, corner-snapping, floating, and portal-style transitions.
+- Mat design supports up to three ordered layers. The outer layer edits total border width; inner layers edit their visible reveal. Changes must update both the complete framed artwork and a magnified corner preview immediately.
+- Mat materials do not affect the quoted price. Store thickness only to render visible depth and edge shadow.
 
 ## Prototype Instructions
 
@@ -52,6 +54,18 @@ When implementing from a selected generated mock, treat that image as the source
 - Use `data-scroll-drag="ignore"` only when a control must prevent parent scrolling in every drag direction.
 
 See `src/mobile/COMPONENTS.md` for the full component and gesture contract.
+
+## Durable Prototype Decisions
+
+- The WeChat mini-program uses `miniprogram/components/common-header` for every screen header and back action so navigation spacing and icon treatment stay consistent.
+- Frame materials must become data-driven records managed outside the page code. The mini-program should consume one canonical material schema for catalog cards, swatches, pricing, and frame-preview assets; an admin workflow will own uploads, asset processing, publishing, and archival.
+- The 3D direction is frame-only: users rotate a realistic extruded frame with visible side depth, mat and glass, while the artwork remains a flat texture. The local generator caches a GLB scene by artwork/frame/config fingerprint so later use reuses the processed result.
+- Admin material creation must be explicit rather than a single generic upload: collect front texture, cross-section/side, optional miter-corner and detail images, plus manually entered width, depth, inner lip, bevel, material type, and profile type. A ruler in the reference photo is for the administrator's measurement; it is not an automatic AI measurement step.
+- Generated frame previews must keep the visual roles of the uploaded assets separate: front texture maps to the front-facing bars, side depth uses a controlled bevel/shadow treatment, and miter-corner imagery is reserved for the four corners. Do not stretch the front texture across extrusion faces, because it produces visibly incorrect grain direction and side seams.
+- Frame preview proportions must be derived from the entered artwork size and profile width instead of a fixed 2:3 placeholder. The preview must expose button zoom plus touch pinch zoom without stealing the drag-to-rotate gesture.
+- The acceptance target for finished framing is a believable 70-80% real-product impression: coherent frame width/depth, continuous material grain, mitered joints, mat, glass highlight, lighting, and cast shadow. A corner reference photo must never be pasted onto all four corners as a visible overlay; accurate corners come from procedural or authored mesh geometry, while reference photos only guide texture and profile generation.
+- A front frame-material upload represents one repeatable rail segment. Tile it at its natural aspect ratio along each rail; rotate the texture direction by 90 degrees for vertical rails, and terminate all four rails with matching 45-degree mitres. Never stretch one segment across the full rail length.
+- Mat-board materials are also data-driven and admin-managed. A mat requires one front texture image plus name, base color, thickness, default border width, and publish state. Repeat the texture at its natural scale inside the mat area; mats do not require side, corner, or 3D-profile inputs and do not affect pricing. Thickness may be used only for visible preview layering.
 
 ## Keyboard Rule
 

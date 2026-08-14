@@ -1,4 +1,7 @@
 {
   "navigationBarTitleText": "一框",
-  "disableScroll": true
+  "disableScroll": true,
+  "usingComponents": {
+    "common-header": "/components/common-header/common-header"
+  }
 }

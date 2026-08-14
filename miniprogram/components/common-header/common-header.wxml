@@ -1,0 +1,7 @@
+<view class="mini-header {{dark ? 'dark-header' : ''}} {{inset ? 'inset-header' : ''}}">
+  <button class="back-button" bindtap="handleBack" aria-label="返回">
+    <view class="back-arrow"></view>
+  </button>
+  <text class="header-title">{{title}}</text>
+  <text wx:if="{{step}}" class="header-step">{{step}}</text>
+</view>
