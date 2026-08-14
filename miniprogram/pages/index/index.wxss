@@ -229,3 +229,7 @@ image{display:block}
 .frame3d-bar.left .frame3d-face{clip-path:polygon(0 0,100% var(--frame-border,13px),100% calc(100% - var(--frame-border,13px)),0 100%)}
 .frame3d-bar.right .frame3d-face{clip-path:polygon(0 var(--frame-border,13px),100% 0,100% 100%,0 calc(100% - var(--frame-border,13px)))}
 .frame3d-face .frame3d-texture{clip-path:none!important}
+
+/* Prevent the intrinsic width of the horizontal material row from widening
+ * the phone drawer when the mat tab is opened. */
+.editor-shell,.editor-drawer,.editor-drawer>view{width:100%;min-width:0;max-width:100%;box-sizing:border-box}.mat-controls{width:100%;min-width:0;max-width:100%;box-sizing:border-box;overflow-x:hidden}.mat-corner-card,.mat-layer-tabs,.mat-width-control,.mat-layer-order{min-width:0;max-width:100%;box-sizing:border-box}.mat-corner-card>view:first-child{min-width:0;overflow:hidden}.mat-material-scroll{display:block;width:100%;min-width:0;max-width:100%;box-sizing:border-box}.mat-material-row{width:max-content;min-width:100%;box-sizing:border-box}

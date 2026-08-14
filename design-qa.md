@@ -66,3 +66,15 @@
 - verification: React production build, protected runtime integrity check and mini-program page JavaScript syntax check pass. Native mini-program rendering still requires the WeChat developer tool for a device screenshot, but the shared layer model and WXML/WXSS implementation are present.
 
 final result: passed for the implemented multi-layer mat scope
+
+## 2026-08-14 mat-tab width regression
+
+- source visual truth: user screenshots showing the card-paper tab widening past the phone viewport, `C:/Users/86159/AppData/Local/Temp/codex-clipboard-7dd06f14-1e7f-476e-803b-39e4f4b0f81c.png` and `C:/Users/86159/AppData/Local/Temp/codex-clipboard-ab056324-5d9b-486d-8ecb-ea8e874399e8.png`
+- implementation capture: `test-results/mat-tab-fix.png`
+- side-by-side review: `test-results/mat-tab-qa.png`
+- P1 fixed: the horizontal material row no longer contributes its intrinsic width to the editor grid; the drawer stays inside the calibrated phone viewport.
+- P2 fixed: parent controls now have an explicit `min-width: 0`/`max-width: 100%` boundary, while only the material card rail is allowed to scroll horizontally.
+- interaction QA: opened the card-paper tab from a fresh editor route and confirmed the drawer, corner preview and summary all stay within the phone bounds; the vertical control area remains scrollable.
+- verification: React production build, protected runtime integrity check, mini-program JavaScript syntax check and side-by-side visual review pass.
+
+final result: passed
