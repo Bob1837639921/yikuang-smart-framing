@@ -3,5 +3,5 @@
     <view class="back-arrow"></view>
   </button>
   <text class="header-title">{{title}}</text>
-  <text wx:if="{{step}}" class="header-step">{{step}}</text>
+  <view wx:if="{{step}}" class="header-step"><text class="header-step-label">步骤</text><text class="header-step-value">{{step}}</text></view>
 </view>

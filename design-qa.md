@@ -1,4 +1,4 @@
-﻿# Design QA
+# Design QA
 
 - source visual truth: selected yellow/cream animated framing concept, `exec-ca9ed254-71b6-4b18-98cf-92c0a0d0caea.png`
 - implementation: local mobile prototype at `http://127.0.0.1:4173/`
@@ -77,4 +77,51 @@ final result: passed for the implemented multi-layer mat scope
 - interaction QA: opened the card-paper tab from a fresh editor route and confirmed the drawer, corner preview and summary all stay within the phone bounds; the vertical control area remains scrollable.
 - verification: React production build, protected runtime integrity check, mini-program JavaScript syntax check and side-by-side visual review pass.
 
+## 2026-08-14 anime controls and reset pass
+
+- source visual truth: user control references, including `C:/Users/zephyr/AppData/Local/Temp/codex-clipboard-14977787-8978-4f66-a355-fe58bcd74846.png`
+- implementation screenshot: `C:/Users/zephyr/Documents/Codex/2026-08-12/x/work/oneframe-mobile/.product-design-audit/02-revised-mat.png`
+- focused state: editor route with 卡纸 tab, live corner preview, layer chips and material rail visible.
+- P2 fixed: the mat editor now reserves a scrollbar gutter and uses a dedicated narrow thumb so scrolling no longer covers labels or cards.
+- P2 fixed: buttons, chips, switches, material cards and bottom tabs share a short spring press/release motion and a clear yellow selected treatment.
+- P2 fixed: reset clears pointer/pinch state, restores the initial `-4° / -5°` rotation and `100%` zoom, and gives a short confirmation pulse.
+- interaction QA: switched 画框 / 卡纸 tabs, added a second mat layer, changed material, dragged the frame, pressed 复位, and verified the computed transform returned to the initial transform.
+- verification: `npm run check:runtime`, `npm run build`, `npm run test:sites`, and browser console checks pass.
+
 final result: passed
+
+## 2026-08-15 portrait-first 3D stage
+
+- source visual truth: selected Product Design concept 3, `C:/Users/zephyr/.codex/generated_images/01a000d4-a3c6-75b1-90f5-cc0d4dfd0ccb/exec-4e0b2e51-b64e-411b-9b35-26eeba3ae0d3.png`
+- implementation: native WeChat Mini Program editor in `miniprogram/pages/index/index.wxml` and `miniprogram/pages/index/index.wxss`
+- intended viewport: portrait mobile app viewport; default state keeps the complete 3D frame as the hero, with a compact mat summary rail and an expanded detail sheet
+- implementation screenshot: unavailable; WeChat Developer Tools is not installed in this environment, so the native simulator cannot be opened or captured
+- static verification: mini-program JavaScript syntax, protected runtime integrity, 3D service tests, Sites package tests, and production build all pass
+- comparison status: blocked because the native rendered implementation could not be captured for the required source/implementation comparison
+
+final result: blocked
+
+## 2026-08-15 frame option copy regression
+
+- source visual truth: `C:/Users/zephyr/AppData/Local/Temp/codex-clipboard-3cff51b4-4f80-4fab-9450-1a27cd38fe55.png`
+- implementation: native WeChat Mini Program frame picker in `miniprogram/pages/index/index.wxml` and `miniprogram/pages/index/index.wxss`
+- root cause fixed: the legacy direct-child `view` thumbnail rule also styled `.frame-option-copy`, turning the name/price wrapper into a second bordered swatch and clipping both labels
+- verified state: WeChat Developer Tools, iPhone 12/13 simulator, editor route, 画框 tab
+- visual result: every material card now has one corner swatch plus readable material name and `¥X/米`; the active check remains visible without covering the copy
+- verification: protected runtime integrity, TypeScript, production build, frame 3D service tests, and Sites packaging tests pass
+
+final result: passed
+
+## 2026-08-15 frame-material swatch book
+
+- source visual truth: selected revised Product Design option 2, `C:/Users/zephyr/.codex/generated_images/01a000d4-a3c6-75b1-90f5-cc0d4dfd0ccb/exec-5bdb13b4-5365-41f9-bd0b-f21abd9fe49a.png`
+- implementation: native WeChat Mini Program material library in `miniprogram/pages/index/index.wxml`, `index.wxss`, and `index.js`
+- intended viewport/state: portrait material-library route with the 推荐 filter active, 原木时光 selected, two-column corner-sample grid, and fixed 3D-preview action bar
+- source assets: six independent photographic 45-degree corner samples in `miniprogram/assets/frame-catalog/`, compressed to 237 KB total for the mini-program package
+- interaction implementation: category filtering, card selection without premature navigation, explicit 3D-preview CTA, selected-state animation, and fallback rendering for admin-uploaded materials
+- pricing implementation: canonical `pricePerMeter`, explicit `¥X/米` catalog/editor display, required admin “框料单价（元/米）” validation, and perimeter-derived final frame cost
+- static verification: mini-program JavaScript syntax, catalog interaction harness, WXSS brace balance, protected runtime integrity, 3D service tests, and `git diff --check` pass
+- implementation screenshot: intentionally not captured because the user asked that the WeChat Developer Tools not be operated for page testing
+- comparison status: blocked from visual side-by-side QA by the requested no-simulator-testing constraint
+
+final result: blocked

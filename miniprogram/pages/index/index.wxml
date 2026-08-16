@@ -109,17 +109,21 @@
   </block>
 
   <block wx:elif="{{screen === 'editor'}}">
-    <view class="app-screen editor-shell">
+    <view class="app-screen editor-shell editor-mode-{{editorMode}} {{editorExpanded ? 'editor-expanded' : 'editor-compact'}}">
       <common-header title="试装效果" step="3 / 4" inset="{{true}}" bind:back="onBack"></common-header>
       <view class="editor-preview">
         <view class="editor-preview-head">
-          <view class="editor-caption"><text>实时预览</text><text>{{art.title}}</text></view>
-          <view wx:if="{{frame.geometry}}" class="editor-frame-meta">{{frame.geometry.profileType}} · {{frame.geometry.widthMm}} × {{frame.geometry.depthMm}}mm</view>
+          <view class="editor-caption"><view class="editor-caption-live"><view class="live-dot"></view><text>实时预览</text></view><view wx:if="{{frame.geometry}}" class="editor-caption-meta">{{frame.geometry.profileType}} · {{frame.geometry.widthMm}} × {{frame.geometry.depthMm}}mm</view><text class="editor-caption-art">{{art.title}}</text></view>
         </view>
-        <view class="frame3d-stage {{art.id === 'photo' ? 'landscape' : 'portrait'}}" catchtouchstart="startFrameRotate" catchtouchmove="moveFrameRotate" bindtouchend="stopFrameRotate" bindtouchcancel="stopFrameRotate" binddbltap="resetFrameRotate" bindwheel="onFrameWheel">
+        <view class="frame3d-stage {{art.id === 'photo' || art.id === 'abstract' ? 'landscape' : 'portrait'}}" catchtouchstart="startFrameRotate" catchtouchmove="moveFrameRotate" bindtouchend="stopFrameRotate" bindtouchcancel="stopFrameRotate" binddbltap="resetFrameRotate" bindwheel="onFrameWheel">
+          <canvas type="2d" id="frame3dCanvas" class="frame3d-canvas"></canvas>
           <view class="frame3d-model" style="transform:rotateX({{frameRotateX}}deg) rotateY({{frameRotateY}}deg) scale({{frameZoom}});box-shadow:0 18px 28px {{frame.shadow}};{{frameTextureStyle}}">
             <view class="frame3d-back" style="{{frameTextureStyle}}"></view>
-            <view class="frame3d-art"><view wx:for="{{mat ? matLayerViews : []}}" wx:key="id" class="frame3d-mat-layer" style="{{item.previewStyle}}"></view><view class="frame3d-artwork" style="inset:{{mat ? matImageInset : 0}}px"><image src="{{editorSrc}}" mode="aspectFill"></image></view></view>
+            <view class="frame3d-shell frame3d-shell-top"><view class="frame3d-shell-texture"></view></view>
+            <view class="frame3d-shell frame3d-shell-right"><view class="frame3d-shell-texture"></view></view>
+            <view class="frame3d-shell frame3d-shell-bottom"><view class="frame3d-shell-texture"></view></view>
+            <view class="frame3d-shell frame3d-shell-left"><view class="frame3d-shell-texture"></view></view>
+            <view class="frame3d-art"><view wx:for="{{mat ? matLayerViews : []}}" wx:key="id" class="frame3d-mat-layer" style="{{item.previewStyle}}"><view class="frame3d-mat-side frame3d-mat-side-top"></view><view class="frame3d-mat-side frame3d-mat-side-right"></view><view class="frame3d-mat-side frame3d-mat-side-bottom"></view><view class="frame3d-mat-side frame3d-mat-side-left"></view></view><view class="frame3d-artwork" style="inset:{{mat ? matImageInset : 0}}px"><image src="{{editorSrc}}" mode="aspectFill"></image></view><view wx:if="{{mat && editorMode === 'mat'}}" class="frame3d-mat-selection" style="{{activeMatPreviewStyle}}"></view></view>
             <view class="frame3d-glass"></view>
             <view class="frame3d-bar top" style="{{frameTextureStyle}}"><view class="frame3d-face"><view class="frame3d-texture"></view></view></view>
             <view class="frame3d-bar right" style="{{frameTextureStyle}}"><view class="frame3d-face"><view class="frame3d-texture"></view></view></view>
@@ -127,22 +131,29 @@
             <view class="frame3d-bar left" style="{{frameTextureStyle}}"><view class="frame3d-face"><view class="frame3d-texture"></view></view></view>
           </view>
         </view>
-        <view class="frame3d-zoom" catchtouchstart="stopZoomTouch"><button catchtap="zoomFrameOut" hover-class="none">−</button><text>{{frameZoomPercent}}%</text><button catchtap="zoomFrameIn" hover-class="none">＋</button><button class="frame3d-reset" catchtap="resetFrameRotate" hover-class="none">复位</button></view>
-        <text class="frame3d-hint">拖动旋转 · 双指/滚轮缩放</text>
-        <button class="change-art" bindtap="openPicker">▧ 换作品</button>
+        <view class="editor-preview-actions"><view class="frame3d-zoom"><text class="frame3d-zoom-hint">拖动旋转 · 双指/滚轮缩放</text><text class="frame3d-zoom-value">{{frameZoomPercent}}%</text><button class="frame3d-reset {{resetPulse ? 'reset-pulse' : ''}}" catchtap="resetFrameRotate" hover-class="none">复位</button></view><view class="change-art" role="button" aria-label="更换作品" data-action="change-art" catchtap="openEditorPicker"><text class="change-art-icon">▧</text><text>换作品</text></view></view>
       </view>
       <view class="editor-drawer">
+        <button wx:if="{{editorMode === 'mat'}}" class="editor-drawer-handle" bindtap="toggleEditorExpanded" hover-class="none" aria-label="展开或收起卡纸编辑"><view></view></button>
+        <view wx:else class="editor-drawer-handle editor-drawer-handle-static"><view></view></view>
         <view class="editor-tabs"><button class="{{editorMode === 'frame' ? 'active' : ''}}" data-mode="frame" bindtap="setEditorMode">画框</button><button class="{{editorMode === 'mat' ? 'active' : ''}}" data-mode="mat" bindtap="setEditorMode">卡纸</button><button class="{{editorMode === 'size' ? 'active' : ''}}" data-mode="size" bindtap="setEditorMode">尺寸</button></view>
-        <scroll-view wx:if="{{editorMode === 'frame'}}" class="option-carousel" scroll-x enhanced show-scrollbar="false"><view class="frame-option-row"><button wx:for="{{frames}}" wx:key="id" class="frame-option {{frame.id === item.id ? 'active' : ''}}" data-id="{{item.id}}" bindtap="selectFrame"><view class="frame-option-swatch"><image wx:if="{{item.assets && item.assets.swatch}}" src="{{item.assets.swatch}}" mode="aspectFill"></image><view wx:else style="background:{{item.tone}};border-color:{{item.edge}}"></view></view><text>{{item.name}}</text><text>+¥{{item.price}}</text></button></view></scroll-view>
-        <scroll-view wx:elif="{{editorMode === 'mat'}}" class="mat-controls" scroll-y enhanced show-scrollbar="false">
-          <view class="mat-switch-row"><text>使用卡纸</text><button class="switch {{mat ? 'on' : ''}}" bindtap="toggleMat"><view></view></button></view>
-          <view class="mat-corner-card"><view><text class="mat-corner-title">转角放大预览</text><text class="mat-corner-help">毫米级露边在这里看得更清楚</text></view><view class="mat-corner-preview"><view wx:for="{{matLayerViews}}" wx:key="id" class="mat-corner-layer {{activeMatLayerIndex === index ? 'active' : ''}}" style="{{item.cornerStyle}}" data-index="{{index}}" bindtap="selectMatLayer"></view><view class="mat-corner-art" style="inset:{{matCornerInset}}px"></view></view></view>
-          <view class="mat-layer-tabs"><button wx:for="{{matLayers}}" wx:key="id" class="{{activeMatLayerIndex === index ? 'active' : ''}}" data-index="{{index}}" bindtap="selectMatLayer">第{{index + 1}}层 · {{item.widthMm}}mm</button><button wx:if="{{matLayers.length < 3}}" bindtap="addMatLayer">＋ 加一层</button><button wx:if="{{matLayers.length > 1}}" bindtap="removeMatLayer">移除</button></view>
-          <scroll-view class="mat-material-scroll" scroll-x enhanced show-scrollbar="false"><view class="mat-material-row"><button wx:for="{{mats}}" wx:key="id" class="mat-material-option {{selectedMat.id === item.id ? 'active' : ''}}" data-id="{{item.id}}" bindtap="selectMatMaterial"><view class="mat-material-swatch" style="background-color:{{item.color}};background-image:{{item.texture ? 'url(' + item.texture + ')' : 'none'}}"></view><view><text>{{item.name}}</text><text>厚度 {{item.thicknessMm}}mm</text></view></button></view></scroll-view>
-          <view class="mat-width-row"><text>{{activeMatWidthLabel}}</text><view class="mat-width-control"><button data-direction="-1" bindtap="adjustMatWidth">−</button><text>{{matWidth}}mm</text><button data-direction="1" bindtap="adjustMatWidth">＋</button><slider min="{{activeMatMin}}" max="{{activeMatMax}}" step="{{activeMatStep}}" value="{{matWidth}}" activeColor="#e8ab13" bindchange="onMatWidthChange"></slider></view></view>
-          <view wx:if="{{matLayers.length > 1}}" class="mat-layer-order"><text>层级顺序（外 → 内）</text><button disabled="{{activeMatLayerIndex === 0}}" data-delta="-1" bindtap="moveMatLayer">向外移</button><button disabled="{{activeMatLayerIndex === matLayers.length - 1}}" data-delta="1" bindtap="moveMatLayer">向内移</button></view>
-        </scroll-view>
-        <view wx:else class="size-controls"><text>作品宽</text><input type="number" value="{{width}}" bindinput="onWidthChange"/><text>×</text><text>作品高</text><input type="number" value="{{height}}" bindinput="onHeightChange"/><text>cm</text></view>
+        <view wx:if="{{editorMode === 'frame'}}" class="editor-panel frame-panel">
+          <scroll-view class="option-carousel" scroll-x enhanced show-scrollbar="false"><view class="frame-option-row"><button wx:for="{{frames}}" wx:key="id" class="frame-option {{frame.id === item.id ? 'active' : ''}}" data-id="{{item.id}}" bindtap="selectFrame"><view class="frame-option-swatch"><image wx:if="{{item.assets && item.assets.swatch}}" src="{{item.assets.swatch}}" mode="aspectFill"></image><view wx:else style="background:{{item.tone}};border-color:{{item.edge}}"></view></view><view class="frame-option-copy"><text>{{item.name}}</text><text>¥{{item.pricePerMeter}}/米</text></view><text wx:if="{{frame.id === item.id}}" class="frame-option-check">✓</text></button></view></scroll-view>
+        </view>
+        <view wx:elif="{{editorMode === 'mat'}}" class="mat-editor-shell">
+          <view wx:if="{{!editorExpanded}}" class="mat-compact-summary">
+            <view class="mat-focus-card mat-compact-focus-card"><view class="mat-focus-copy"><view class="mat-compact-focus-head"><button class="switch {{mat ? 'on' : ''}}" bindtap="toggleMat"><view></view></button><view class="mat-compact-focus-label"><text>{{mat ? activeMatLayerLabel : '未使用卡纸'}}</text><text class="mat-live-badge">实时</text></view><button class="mat-expand-action" bindtap="toggleEditorExpanded" hover-class="none"><text>展开编辑</text><text>›</text></button></view><text>{{activeMatLayerIndex === 0 ? '外层控制整圈卡纸宽度' : '内层控制相邻卡纸的露边'}}</text><text>点击右侧转角可切换下一层</text></view><mat-corner-preview layers="{{matLayerViews}}" active-index="{{activeMatLayerIndex}}" art-inset="{{matCornerInset}}" active-ring-style="{{activeMatCornerStyle}}" pulse="{{cornerPulse}}" bind:matcycle="cycleMatLayer" bind:matlayerselect="selectMatLayer"></mat-corner-preview></view>
+          </view>
+          <view wx:else class="mat-controls-clip"><scroll-view class="mat-controls" scroll-y="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}">
+            <view class="mat-detail-heading"><view><text>编辑卡纸</text><text>选层后调整材质与露边</text></view><view class="mat-heading-actions"><button class="switch {{mat ? 'on' : ''}}" bindtap="toggleMat"><view></view></button><button class="mat-collapse-action" bindtap="toggleEditorExpanded" hover-class="none">收起</button></view></view>
+            <view class="mat-layer-toolbar"><scroll-view class="mat-layer-tabs" scroll-x enhanced show-scrollbar="false"><view class="mat-layer-tabs-inner"><button wx:for="{{matLayers}}" wx:key="id" class="{{activeMatLayerIndex === index ? 'active' : ''}}" data-index="{{index}}" bindtap="selectMatLayer">第{{index + 1}}层 <text>{{item.widthMm}}mm</text></button></view></scroll-view><button wx:if="{{matLayers.length < 3}}" class="mat-layer-add" bindtap="addMatLayer">＋</button><button wx:if="{{matLayers.length > 1}}" class="mat-layer-remove" bindtap="removeMatLayer">移除</button></view>
+            <view class="mat-focus-card"><view class="mat-focus-copy"><view><text>{{activeMatLayerLabel}}</text><text class="mat-live-badge">实时</text></view><text>{{activeMatLayerIndex === 0 ? '外层控制整圈卡纸宽度' : '内层控制相邻卡纸的露边'}}</text><text>点击右侧转角可切换下一层</text></view><mat-corner-preview layers="{{matLayerViews}}" active-index="{{activeMatLayerIndex}}" art-inset="{{matCornerInset}}" active-ring-style="{{activeMatCornerStyle}}" pulse="{{cornerPulse}}" bind:matcycle="cycleMatLayer" bind:matlayerselect="selectMatLayer"></mat-corner-preview></view>
+            <view class="mat-section-heading"><text>卡纸材质</text><text>{{selectedMat.name}} · {{selectedMat.thicknessMm}}mm</text></view>
+            <scroll-view class="mat-material-scroll" scroll-x="{{true}}" enhanced="{{true}}" show-scrollbar="{{false}}"><view class="mat-material-row"><button wx:for="{{mats}}" wx:key="id" class="mat-material-option {{selectedMat.id === item.id ? 'active' : ''}}" data-id="{{item.id}}" bindtap="selectMatMaterial"><view class="mat-material-swatch" style="background-color:{{item.color}};background-image:{{item.texture ? 'url(' + item.texture + ')' : 'none'}}"></view><view><text>{{item.name}}</text><text>厚度 {{item.thicknessMm}}mm</text></view><view wx:if="{{selectedMat.id === item.id}}" class="mat-selected-mark">✓</view></button></view></scroll-view>
+            <view class="mat-width-row"><view class="mat-width-heading"><text>{{activeMatWidthLabel}}</text><text>{{matWidth}}mm</text></view><view class="mat-width-control"><button data-direction="-1" bindtap="adjustMatWidth">−</button><view class="mat-slider-clip"><slider min="{{activeMatMin}}" max="{{activeMatMax}}" step="{{activeMatStep}}" value="{{matWidth}}" activeColor="#e8ab13" bindchange="onMatWidthChange"></slider></view><button data-direction="1" bindtap="adjustMatWidth">＋</button></view></view>
+          </scroll-view></view>
+        </view>
+        <view wx:else class="editor-panel size-panel"><view class="size-panel-head"><text>作品实际尺寸</text><text>用于生成真实比例的画框</text></view><view class="size-controls"><label><text>宽度</text><view><input type="number" value="{{width}}" bindinput="onWidthChange"/><text>cm</text></view></label><text class="size-times">×</text><label><text>高度</text><view><input type="number" value="{{height}}" bindinput="onHeightChange"/><text>cm</text></view></label></view></view>
         <view class="editor-summary"><view><text>预计参考价</text><text>¥{{total}}</text></view><button class="primary-wide" bindtap="savePlan">保存方案 ›</button></view>
       </view>
     </view>
@@ -175,39 +186,41 @@
         <view class="admin-status"><text>管理员模式</text><text>UUID 已授权 · 本机配置</text></view>
         <view class="admin-form">
           <text class="admin-section-title">新增并生成 3D 框料</text>
-          <text class="admin-hint">不接 AI，系统不会自动猜尺寸。请在拍照时把尺子放在框料旁边，再手动填写宽度、深度和内沿。</text>
+          <text class="admin-hint">不接 AI，系统不会自动猜尺寸。请在拍照时把尺子放在框料旁边，再手动填写宽度、深度、侧面显示宽度和内沿；图片只需上传正面和侧面纹理。</text>
           <view class="admin-upload-grid">
             <button class="admin-upload admin-upload-small" data-kind="frontImage" bindtap="chooseMaterialImage"><image wx:if="{{adminDraft.frontImage}}" src="{{adminDraft.frontImage}}" mode="aspectFill"></image><text wx:else>＋ 正面纹理（必传）</text></button>
-            <button class="admin-upload admin-upload-small" data-kind="profileImage" bindtap="chooseMaterialImage"><image wx:if="{{adminDraft.profileImage}}" src="{{adminDraft.profileImage}}" mode="aspectFill"></image><text wx:else>＋ 截面/侧面（必传）</text></button>
-            <button class="admin-upload admin-upload-small" data-kind="cornerImage" bindtap="chooseMaterialImage"><image wx:if="{{adminDraft.cornerImage}}" src="{{adminDraft.cornerImage}}" mode="aspectFill"></image><text wx:else>＋ 45°拼角（可选）</text></button>
-            <button class="admin-upload admin-upload-small" data-kind="detailImage" bindtap="chooseMaterialImage"><image wx:if="{{adminDraft.detailImage}}" src="{{adminDraft.detailImage}}" mode="aspectFill"></image><text wx:else>＋ 雕花细节（可选）</text></button>
+            <button class="admin-upload admin-upload-small" data-kind="profileImage" bindtap="chooseMaterialImage"><image wx:if="{{adminDraft.profileImage}}" src="{{adminDraft.profileImage}}" mode="aspectFill"></image><text wx:else>＋ 侧面纹理（必传）</text></button>
           </view>
           <input class="admin-input" value="{{adminDraft.name}}" placeholder="框料名称" bindinput="onAdminNameInput"></input>
-          <input class="admin-input" type="number" value="{{adminDraft.price}}" placeholder="参考起价" bindinput="onAdminPriceInput"></input>
+          <view class="admin-price-field"><view><text>框料单价</text><text>必填 · 元/米</text></view><view class="admin-price-input"><text>¥</text><input type="digit" value="{{adminDraft.pricePerMeter}}" placeholder="168" bindinput="onAdminPriceInput"></input><text>/米</text></view></view>
           <view class="admin-picker-row"><picker mode="selector" range="{{materialTypes}}" value="{{adminMaterialTypeIndex}}" bindchange="onAdminMaterialTypeChange"><view class="admin-select">材质：{{adminMaterialTypeLabel}} ▾</view></picker><picker mode="selector" range="{{profileTypes}}" value="{{adminProfileTypeIndex}}" bindchange="onAdminProfileTypeChange"><view class="admin-select">截面：{{adminProfileTypeLabel}} ▾</view></picker></view>
           <view class="admin-dimension-grid"><input class="admin-input" type="number" value="{{adminDraft.widthMm}}" placeholder="框宽 mm" bindinput="onAdminWidthInput"></input><input class="admin-input" type="number" value="{{adminDraft.depthMm}}" placeholder="框深 mm" bindinput="onAdminDepthInput"></input><input class="admin-input" type="number" value="{{adminDraft.innerLipMm}}" placeholder="内沿 mm" bindinput="onAdminInnerLipInput"></input><input class="admin-input" type="number" value="{{adminDraft.bevelMm}}" placeholder="倒角 mm" bindinput="onAdminBevelInput"></input></view>
-          <view class="admin-color-row"><input class="admin-input admin-color-input" value="{{adminDraft.tone}}" placeholder="框体色值" bindinput="onAdminToneInput"></input><input class="admin-input admin-color-input" value="{{adminDraft.edge}}" placeholder="边缘色值" bindinput="onAdminEdgeInput"></input></view>
-          <text class="admin-hint">宽框、细框主要改“框宽/框深”；欧式和雕花选择对应截面。当前本地版会生成可旋转的 3D 框体配置并缓存。</text>
+          <view class="admin-side-width-field"><view><text>侧面显示宽度</text><text>控制旋转时可见的侧面厚度，不改变报价</text></view><input class="admin-input" type="number" value="{{adminDraft.sideWidthMm}}" placeholder="例如 18" bindinput="onAdminSideWidthInput"></input><text>mm</text></view>
+          <text class="admin-hint">颜色以上传纹理为准；框宽控制正面边框，框深/侧面显示宽度控制立体厚度，内沿控制画面被压住的内侧边，倒角控制边缘明暗过渡。编辑器中的作品宽高会按实际比例适配。</text>
           <button class="primary-wide" disabled="{{adminGenerating}}" bindtap="saveFrameMaterial">{{adminGenerating ? '正在生成 3D…' : '生成 3D 并发布'}}</button>
           <view wx:if="{{adminGenerating}}" class="admin-progress"><view class="admin-progress-head"><text>正在生成</text><text>{{adminProgress}}%</text></view><view class="admin-progress-track"><view style="width:{{adminProgress}}%"></view></view><text>{{adminNotice}}</text></view>
           <view wx:if="{{adminResult}}" class="admin-result-card"><view class="admin-result-status"><text class="admin-result-icon">✓</text><view><text>{{adminResult.cached ? '生成完成，已命中本地缓存' : '生成成功，已保存并发布'}}</text><text>3D 框体已经写入本机配置。</text></view></view><text class="admin-result-meta">缓存 key：{{adminResult.cacheKey}}</text><text class="admin-result-meta">保存位置：local-cache/frame-scenes/{{adminResult.cacheKey}}/</text><button bindtap="openGeneratedPreview">查看旋转效果</button></view>
           <text wx:if="{{adminNotice && !adminGenerating && !adminResult}}" class="admin-success">{{adminNotice}}</text>
           <text wx:if="{{adminError}}" class="admin-error">{{adminError}}</text>
         </view>
-        <view class="admin-form"><text class="admin-section-title">已配置框料</text><view class="admin-material-list"><view wx:for="{{frames}}" wx:key="id" class="admin-material-row"><view><text>{{item.name}}</text><text>{{item.source === 'admin-upload' ? (item.model3d && item.model3d.status === 'ready' ? '本机上传 · 3D 已生成' : '本机上传 · 待生成') : '演示素材'}}</text></view><button wx:if="{{item.source === 'admin-upload'}}" data-id="{{item.id}}" bindtap="deleteFrameMaterial">移除</button></view></view></view>
+        <view class="admin-form"><text class="admin-section-title">已配置框料</text><view class="admin-material-list"><view wx:for="{{frames}}" wx:key="id" class="admin-material-row"><view><text>{{item.name}}</text><text>¥{{item.pricePerMeter}}/米 · {{item.source === 'admin-upload' ? (item.model3d && item.model3d.status === 'ready' ? '3D 已生成' : '待生成') : '演示素材'}}</text></view><button wx:if="{{item.source === 'admin-upload'}}" data-id="{{item.id}}" bindtap="deleteFrameMaterial">移除</button></view></view></view>
         <view class="admin-form"><text class="admin-section-title">新增卡纸</text><text class="admin-hint">卡纸只需一张正面纹理图，系统会在留边区域按自然比例重复平铺；厚度用于旋转预览中的层级表现，不参与报价。</text><button class="admin-upload admin-mat-upload" bindtap="chooseMatTexture"><image wx:if="{{adminMatDraft.textureImage}}" src="{{adminMatDraft.textureImage}}" mode="aspectFill"></image><text wx:else>＋ 卡纸正面纹理（必传）</text></button><input class="admin-input" value="{{adminMatDraft.name}}" placeholder="卡纸名称" bindinput="onAdminMatNameInput"></input><view class="admin-dimension-grid"><input class="admin-input" value="{{adminMatDraft.color}}" placeholder="底色 #fffaf0" bindinput="onAdminMatColorInput"></input><input class="admin-input" type="digit" value="{{adminMatDraft.thicknessMm}}" placeholder="厚度 mm" bindinput="onAdminMatThicknessInput"></input><input class="admin-input" type="number" value="{{adminMatDraft.defaultWidthMm}}" placeholder="默认留边 mm" bindinput="onAdminMatWidthInput"></input></view><button class="primary-wide" bindtap="saveMatMaterial">保存并发布卡纸</button><text wx:if="{{adminMatNotice}}" class="admin-success">{{adminMatNotice}}</text></view>
       </view>
     </scroll-view>
   </block>
 
   <block wx:elif="{{screen === 'materials'}}">
-    <scroll-view class="app-screen flow-page" scroll-y scroll-top="{{scrollTop}}" enhanced show-scrollbar="false">
-      <common-header title="框料库" bind:back="onBack"></common-header>
-      <view class="page-intro"><text>摸得到的不同性格</text><text>测试版先放四款常用框料。</text></view>
-      <image class="material-hero" src="/assets/frame-materials.jpg" mode="aspectFill"></image>
-      <view class="material-admin-entry"><view><text>管理员入口</text><text>上传正面、截面和拼角图片，生成可旋转 3D 框料</text></view><button bindtap="openAdmin">进入管理</button></view>
-      <view class="material-list"><button wx:for="{{frames}}" wx:key="id" data-id="{{item.id}}" bindtap="selectMaterial"><view class="material-swatch"><image wx:if="{{item.assets && item.assets.swatch}}" src="{{item.assets.swatch}}" mode="aspectFill"></image><view wx:else class="material-swatch-color" style="background:{{item.tone}};border-color:{{item.edge}}"></view></view><view><text>{{item.name}}</text><text>参考起价 ¥{{item.price}}</text></view><text>›</text></button></view>
-    </scroll-view>
+    <view class="app-screen material-library-page">
+      <common-header title="框料库" inset="{{true}}" bind:back="onBack"></common-header>
+      <scroll-view class="material-catalog-scroll" scroll-y scroll-top="{{scrollTop}}" enhanced show-scrollbar="false">
+        <view class="material-library-intro"><view><text>像翻样册一样挑框</text><text>看转角、宽度与材质，再去试装</text></view><button bindtap="openAdmin">管理框料</button></view>
+        <scroll-view class="material-filter-scroll" scroll-x enhanced show-scrollbar="false"><view class="material-filters"><button wx:for="{{frameFilters}}" wx:key="*this" class="{{materialFilter === item ? 'active' : ''}}" data-filter="{{item}}" bindtap="setMaterialFilter">{{item}}</button></view></scroll-view>
+        <view class="material-grid"><button wx:for="{{visibleFrames}}" wx:key="id" class="material-card {{frame.id === item.id ? 'active' : ''}}" data-id="{{item.id}}" bindtap="selectMaterial"><view class="material-card-image"><image wx:if="{{item.assets && item.assets.catalog}}" src="{{item.assets.catalog}}" mode="aspectFill"></image><view wx:else class="material-card-fallback" style="background:{{item.tone}}"></view><text wx:if="{{frame.id === item.id}}" class="material-selected-badge">已选</text></view><view class="material-card-copy"><text>{{item.name}}</text><view><text>{{item.geometry.widthMm}}mm · {{item.materialLabel}}</text><text>¥{{item.pricePerMeter}}/米</text></view></view></button></view>
+        <view wx:if="{{!visibleFrames.length}}" class="material-empty">这个分类还没有框料</view>
+        <view class="material-scroll-spacer"></view>
+      </scroll-view>
+      <view class="material-selection-bar"><view class="material-selection-swatch"><image wx:if="{{frame.assets && frame.assets.catalog}}" src="{{frame.assets.catalog}}" mode="aspectFill"></image><view wx:else style="background:{{frame.tone}}"></view></view><view class="material-selection-copy"><text>已选：{{frame.name}}</text><text>¥{{frame.pricePerMeter}}/米 · 按实际用量计价</text></view><button bindtap="previewSelectedMaterial">查看 3D 试装</button></view>
+    </view>
   </block>
 
   <block wx:elif="{{screen === 'saved'}}">

@@ -29,12 +29,15 @@ type Frame3DPreviewProps = {
 };
 
 function Frame3DPreview({ artSrc, artAlt, frame, matColor, matTexture, matThickness = 1.4, matEnabled = true, matLayers, matWidth, ratio, artWidthCm, artHeightCm }: Frame3DPreviewProps) {
+  const initialRotation = { x: -4, y: -5 };
+  const initialZoom = 1;
   const defaultArtWidth = ratio === "landscape" ? 60 : 40;
   const defaultArtHeight = ratio === "landscape" ? 40 : 60;
   const artworkWidth = Number.isFinite(Number(artWidthCm)) ? Number(artWidthCm) : defaultArtWidth;
   const artworkHeight = Number.isFinite(Number(artHeightCm)) ? Number(artHeightCm) : defaultArtHeight;
-  const [rotation, setRotation] = useState({ x: -4, y: -5 });
-  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(initialRotation);
+  const [zoom, setZoom] = useState(initialZoom);
+  const [resetPulse, setResetPulse] = useState(0);
   const drag = useRef<{ x: number; y: number; rotationX: number; rotationY: number } | null>(null);
   const pointers = useRef(new Map<number, { x: number; y: number }>());
   const pinch = useRef<{ distance: number; zoom: number } | null>(null);
@@ -76,8 +79,12 @@ function Frame3DPreview({ artSrc, artAlt, frame, matColor, matTexture, matThickn
   });
 
   const resetPreview = () => {
-    setRotation({ x: -4, y: -5 });
-    setZoom(1);
+    drag.current = null;
+    pinch.current = null;
+    pointers.current.clear();
+    setRotation({ ...initialRotation });
+    setZoom(initialZoom);
+    setResetPulse(pulse => pulse + 1);
   };
   const updateZoom = (next: number) => setZoom(Math.max(0.75, Math.min(1.8, Number(next.toFixed(2)))));
   const distanceBetween = (a: { x: number; y: number }, b: { x: number; y: number }) => Math.hypot(a.x - b.x, a.y - b.y);
@@ -133,10 +140,17 @@ function Frame3DPreview({ artSrc, artAlt, frame, matColor, matTexture, matThickn
       </div>
     </div>
     <div className="frame3d-zoom" aria-label="框体预览缩放">
-      <button type="button" aria-label="缩小" onClick={() => updateZoom(zoom - 0.1)}>−</button>
+      <motion.button type="button" whileTap={{ scale: .82, rotate: -8 }} aria-label="缩小" onClick={() => updateZoom(zoom - 0.1)}>−</motion.button>
       <span aria-live="polite">{Math.round(zoom * 100)}%</span>
-      <button type="button" aria-label="放大" onClick={() => updateZoom(zoom + 0.1)}>＋</button>
-      <button type="button" className="frame3d-reset" onClick={resetPreview}>复位</button>
+      <motion.button type="button" whileTap={{ scale: .82, rotate: 8 }} aria-label="放大" onClick={() => updateZoom(zoom + 0.1)}>＋</motion.button>
+      <motion.button
+        type="button"
+        className="frame3d-reset"
+        aria-label="恢复初始视角"
+        animate={resetPulse ? { scale: [1, .88, 1], rotate: [0, -5, 0] } : undefined}
+        transition={{ duration: .42, ease: "easeOut" }}
+        onClick={resetPreview}
+      >复位</motion.button>
     </div>
     <span className="frame3d-hint">拖动旋转 · 双指/滚轮缩放</span>
   </div>;

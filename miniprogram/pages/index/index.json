@@ -2,6 +2,7 @@
   "navigationBarTitleText": "一框",
   "disableScroll": true,
   "usingComponents": {
-    "common-header": "/components/common-header/common-header"
+    "common-header": "/components/common-header/common-header",
+    "mat-corner-preview": "/components/mat-corner-preview/mat-corner-preview"
   }
 }
