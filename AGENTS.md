@@ -31,6 +31,8 @@ Before making substantial visual changes, use the Product Design plugin's `get-c
 
 ## Durable Prototype Decisions
 
+- The public-facing store and website brand name is “正好书画社”. “一框智能装裱” is the core product capability rather than the storefront name. The official website may use bolder, more cinematic web-native effects and freer spatial storytelling while maintaining a premium feel.
+- The official website may provide its own web-native framing try-on experience for uploading artwork, choosing frame and mat materials, and previewing the result. Design this as a desktop/responsive web interaction rather than copying native mini-program screens, navigation, or page structure.
 - The root is a two-app workspace: `miniprogram/` is the WeChat Mini Program and `website/` is the official React website/preview. Keep their entrypoints and assets separate; shared generation services and repository tooling stay at the root.
 - The WeChat frame preview must use the native 2D Canvas projection renderer for frame depth. Nested CSS 3D faces are flattened by the mini-program view layer and must not be used as the production 3D path.
 - The WeChat mini-program uses `miniprogram/components/common-header` for every screen header and back action so navigation spacing and icon treatment stay consistent.
