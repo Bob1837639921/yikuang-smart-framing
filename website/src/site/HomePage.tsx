@@ -5,9 +5,23 @@ import SiteHeader from "./SiteHeader";
 import "./homepage.css";
 
 const chapters = [
-  { eyebrow: "01 / 作品", title: "先让它被看见", copy: "一幅作品的气息，从它被认真观看的那一刻开始。" },
-  { eyebrow: "02 / 装裱", title: "再让它被托住", copy: "框、纸与光，都是为作品留出的分寸与呼吸。" },
-  { eyebrow: "03 / 归处", title: "最后正好落下", copy: "当材质与画面相遇，作品会找到属于自己的墙面。" },
+  { eyebrow: "01 / 检查", title: "先确认作品状态", copy: "先看作品的材质、方向与边缘，决定适合的装框方式。" },
+  { eyebrow: "02 / 测量", title: "再量出装框尺寸", copy: "记录画芯与开窗尺寸，给卡纸、玻璃和框体留下准确余量。" },
+  { eyebrow: "03 / 搭配", title: "选框，也选卡纸", copy: "按作品气质、尺寸与陈设空间，确定框型、颜色、卡纸与开窗比例。" },
+  { eyebrow: "04 / 固定", title: "把作品稳稳托住", copy: "使用适合作品材质的固定方式，把画芯连接到承托板，避免滑移与受力。" },
+  { eyebrow: "05 / 隔离", title: "让画面远离玻璃", copy: "用卡纸或间隔条留出安全距离，保护画面，也形成更舒展的观看层次。" },
+  { eyebrow: "06 / 封装", title: "依次装入每一层", copy: "清洁玻璃或亚克力，再装入作品、承托板与背板，封好背面并安装挂件。" },
+  { eyebrow: "07 / 检查", title: "确认无尘，再上墙", copy: "检查灰尘、平整度、结构与挂装强度，让作品安全地回到生活。" },
+];
+
+const storyVisuals = [
+  { label: "原作检查", meta: "材质 · 方向 · 边缘" },
+  { label: "尺寸标记", meta: "画芯 420 × 560 mm" },
+  { label: "框型 / 卡纸", meta: "木框 · 开窗比例" },
+  { label: "承托固定", meta: "画芯连接承托板" },
+  { label: "安全间隔", meta: "玻璃前留出 3 mm" },
+  { label: "封装完成", meta: "玻璃 · 背板 · 挂件" },
+  { label: "最终检查", meta: "无尘 · 平整 · 可挂装" },
 ];
 
 function scrollToId(id: string) {
@@ -48,7 +62,9 @@ export default function HomePage() {
       const nextProgress = Math.min(Math.max(-rect.top / travel, 0), 1);
       const roundedProgress = Math.round(nextProgress * 1000) / 1000;
       setStoryProgress(roundedProgress);
-      setActiveChapter(Math.min(chapters.length - 1, Math.floor(nextProgress * chapters.length)));
+      // The seven process stops are evenly distributed through the sticky track;
+      // use the nearest stop so the highlighted tab and scene never disagree.
+      setActiveChapter(Math.min(chapters.length - 1, Math.round(nextProgress * (chapters.length - 1))));
     };
     const requestStoryUpdate = () => {
       if (!frame) frame = window.requestAnimationFrame(updateStoryProgress);
@@ -136,7 +152,7 @@ export default function HomePage() {
             <div className="home-story-sticky">
               <div className="home-story-layout home-reveal is-visible">
                 <div className="home-story-rail" role="tablist" aria-label="正好书画社品牌故事">
-                  <div className="home-story-rail-heading"><span>SCROLL STORY</span><small>01—03</small></div>
+                  <div className="home-story-rail-heading"><span>装裱流程</span><small>01—07</small></div>
                   <div className="home-story-rail-line" aria-hidden="true"><span style={{ "--story-progress-line": `${Math.max(storyProgress * 100, 6)}%`, "--story-active-line": `${((activeChapter + 1) / chapters.length) * 100}%` } as CSSProperties} /></div>
                   <div className="home-story-tabs">
                     {chapters.map((chapter, index) => (
@@ -148,20 +164,22 @@ export default function HomePage() {
                   <p className="home-story-scroll-hint"><span aria-hidden="true">↓</span>向下滚动，观看装裱发生</p>
                 </div>
                 <div className="home-story-stage" id="story-stage" role="tabpanel" aria-live="polite" style={{ "--story-progress": storyProgress } as CSSProperties}>
-                  <div className="home-story-stage-topline"><span>正好书画社 / 01—03</span><span>让观看成为一种抵达</span></div>
+                  <div className="home-story-stage-topline"><span>正好书画社 / 01—07</span><span>从原作到正好归处</span></div>
                   <div className={`home-story-stage-scene home-story-chapter-${activeChapter}`}>
                     <div className="home-story-art" aria-label="装裱层次演示">
                       <div className="home-story-art-frame">
-                        <img className="home-story-art-image home-story-art-image-ink" src="/assets/home-ink-portal.png" alt="水墨山水作品在画框中的展示" />
+                        <img className="home-story-art-image home-story-art-image-raw" src="/assets/test-ink.png" alt="待装裱的水墨山水作品" />
                         <img className="home-story-art-image home-story-art-image-material" src="/assets/home-material-macro.png" alt="胡桃木与卡纸的装裱材质细节" />
+                        <img className="home-story-art-image home-story-art-image-framed" src="/assets/home-ink-portal.png" alt="完成装裱的水墨山水作品" />
                         <span className="home-story-art-mat" aria-hidden="true" />
                         <span className="home-story-art-glass" aria-hidden="true" />
+                        <span className={`home-story-art-operation home-story-art-operation-${activeChapter}`} aria-hidden="true"><b>{storyVisuals[activeChapter].label}</b><small>{storyVisuals[activeChapter].meta}</small></span>
                       </div>
-                      <span className="home-story-art-label">{activeChapter === 0 ? "作品" : activeChapter === 1 ? "框 · 纸" : "光 · 归处"}</span>
+                      <span className="home-story-art-label">{["作品状态", "尺寸 / 开窗", "框型 / 卡纸", "固定 / 承托", "卡纸 / 间隔", "玻璃 / 背板", "检查 / 挂装"][activeChapter]}</span>
                     </div>
                     <div className="home-story-copy" key={activeChapter}><span>{chapters[activeChapter].eyebrow}</span><h3>{chapters[activeChapter].title}</h3><p>{chapters[activeChapter].copy}</p><span className="home-story-copy-rule" aria-hidden="true" /></div>
                   </div>
-                  <div className="home-story-stage-footer"><span>SCROLL TO COMPOSE</span><span>{String(activeChapter + 1).padStart(2, "0")} / 03</span></div>
+                  <div className="home-story-stage-footer"><span>SCROLL TO COMPOSE</span><span>{String(activeChapter + 1).padStart(2, "0")} / {String(chapters.length).padStart(2, "0")}</span></div>
                 </div>
               </div>
             </div>

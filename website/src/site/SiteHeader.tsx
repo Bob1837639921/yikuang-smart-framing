@@ -1,4 +1,5 @@
 import { useState } from "react";
+import BrandMark from "./BrandMark";
 
 type SiteHeaderProps = { onEnterTryOn: () => void };
 
@@ -15,8 +16,8 @@ export default function SiteHeader({ onEnterTryOn }: SiteHeaderProps) {
   return (
     <header className="home-header">
       <a className="home-brand" href="#top" aria-label="正好书画社首页" onClick={closeMenu}>
-        <span className="home-brand-mark" aria-hidden="true">正</span>
-        <span><strong>正好书画社</strong><small>一框智能装裱</small></span>
+        <BrandMark />
+        <span className="home-brand-copy"><strong>正好书画社</strong><small>一框智能装裱</small></span>
       </a>
       <button className="home-menu-toggle" type="button" aria-expanded={open} aria-label={open ? "关闭导航菜单" : "打开导航菜单"} onClick={() => setOpen((value) => !value)}><span /><span /></button>
       <nav className={open ? "home-nav is-open" : "home-nav"} aria-label="主导航">

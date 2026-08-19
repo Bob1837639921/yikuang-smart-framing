@@ -1,67 +1,48 @@
-# Design QA — 正好书画社首页
+# Design QA
 
-## Source visual truth
+- Source visual truth paths:
+  - `C:\Users\zephyr\AppData\Local\Temp\codex-clipboard-5bcfba54-2674-448f-94fd-1cab241ccc25.png`
+  - `C:\Users\zephyr\AppData\Local\Temp\codex-clipboard-97bea1c9-9108-4841-a73c-fe3f60749aa0.png`
+- Implementation target: `http://localhost:4173/`
+- Source pixels: 2210 × 218 (header crop) and 642 × 694 (process-rail crop).
+- Intended CSS viewport: current Codex Desktop in-app browser desktop viewport; source density is a direct desktop capture.
+- State: homepage header and framing-story process rail.
+- Implementation screenshot: unavailable. The in-app browser refused localhost capture under its URL security policy after the code change.
 
-- Source: `C:\Users\86159\.codex\generated_images\01a018ba-298e-7fd3-8820-1d6768d4512a\exec-06afc51b-4229-42e2-b650-770670de4ef1.png`
-- Source pixels: 1536 × 1024.
-- Selected state: the light ink-gallery homepage concept with the framed landscape centered in a misty water space.
+## Full-view comparison evidence
 
-## Implementation evidence
+The two source crops were opened and inspected. They show a centered, capped header surface and a narrow vertical seven-step rail. The implementation was changed to a viewport-wide header surface with content aligned to a 1760px composition and a 1600px desktop story region whose seven steps are equal-width horizontal tabs above the linked stage.
 
-- Desktop first viewport: `qa-implementation-home-1440.png`.
-- Scroll-story viewport: `qa-implementation-home-story.png`.
-- Materials viewport: `qa-implementation-home-materials.png`.
-- Experience/studio viewport: `qa-implementation-home-studio.png`.
-- Portal transition state: `qa-implementation-home-portal.png`.
-- Mobile first viewport: `qa-implementation-home-mobile.png`.
-- Water-ripple interaction state: `qa-implementation-home-ripple.png` (desktop) and `qa-implementation-home-ripple-mobile.png` (mobile).
-- Hero entrance states: `qa-implementation-home-entry-early.png`, `qa-implementation-home-entry-final.png`, plus mobile early/final captures.
-- Story scroll theatre states: `qa-story-scroll-initial.png`, `qa-story-scroll-middle.png`, `qa-story-scroll-final.png`, `qa-story-mobile.png`, and `qa-story-mobile-chapter3.png`.
-- Side-by-side source/implementation comparison: `qa-comparison-home.png`.
-- Desktop CSS viewport: 1440 × 1024; browser capture pixels: 1425 × 1013 because of the vertical scrollbar.
-- Mobile CSS viewport: 390 × 844.
-- Source and implementation were normalized to a common 768px comparison height in `qa-comparison-home.png`.
+## Focused region comparison evidence
 
-## State and interaction checks
+Focused implementation evidence is unavailable because browser capture was blocked. Static CSS inspection confirms the intended structural changes, but static inspection is not sufficient for visual QA.
 
-- Initial desktop homepage at `/`, scroll position 0.
-- Pointer movement changes the hero artwork transform for a restrained parallax response.
-- On first entry, the kicker fades in, the three hero title columns reveal from the side in sequence, then the description and actions settle in underneath; the mobile layout keeps the same stagger without the vertical writing mode.
-- Desktop story scroll pins the stage while progress moves through three chapters; the art layer crossfades from ink scene to frame/material macro, and the active chapter can also be reached by clicking its tab.
-- Mobile story removes the long sticky scroll, keeps the chapter rail horizontally scrollable, and switches the same stage through the active tab without horizontal page overflow.
-- Story tabs switch between all three narrative chapters and update the active progress line.
-- Header and material-story anchors scroll to the correct sections.
-- Primary “进入试装空间” CTA opens a full-screen portal transition; close and “先看体验流程” actions work.
-- Water surface responds to a desktop click or mobile tap in the lower hero: an impact ripple expands through three soft rings and fades after roughly 1.5s; ambient rings and a low glimmer continue breathing underneath.
-- The permanent oversized gold ring treatment was removed; the water plane now uses a low-contrast reflection, while the brighter ripple exists only during the short interaction state.
-- Mobile menu opens and closes at 390px; desktop navigation remains inline.
-- Browser console contained no error-level entries after desktop and mobile checks.
+## Findings
 
-## Comparison history
+- [P1] Browser-rendered implementation evidence is missing.
+  - Location: homepage header and `.home-story-rail`.
+  - Evidence: both reference crops are available, but the revised localhost page could not be captured.
+  - Impact: exact header alignment, seven-column wrapping, typography, and sticky-stage proportions cannot be visually certified.
+  - Fix: refresh the local preview in the user's in-app browser and capture the revised header, story rail, and one active stage for a same-state comparison.
 
-### Pass 1
-
-- Finding: desktop headline was horizontal while the selected reference uses a vertical editorial title treatment.
-- Fix: changed the desktop hero headline to three vertical writing-mode columns and preserved a horizontal layout below 720px.
-- Evidence after fix: `qa-comparison-home.png`, `qa-implementation-home-1440.png`.
-
-### Pass 2
-
-- Finding: story section had a static tab list and copy panel, so the brand narrative stopped before the material detail could be felt.
-- Fix: introduced a sticky scroll theatre on desktop, a progress ink rail, three chapter-driven image/mat/glass layers, and a mobile tabbed fallback.
-- Evidence after fix: `qa-story-scroll-initial.png`, `qa-story-scroll-middle.png`, `qa-story-scroll-final.png`, and `qa-story-mobile-chapter3.png`.
+- [P2] Earlier stage visuals were too generic for their copy.
+  - Location: `.home-story-art` stage.
+  - Evidence: the prior implementation only cross-faded three broad images across seven labels.
+  - Impact: measurement, mounting, spacing, and final inspection were not visually legible as distinct operations.
+  - Fix: map raw/material/finished assets to the relevant stages and add operation-specific visual states for measurement, support, spacing, glazing/backing, and final inspection.
 
 ## Required fidelity surfaces
 
-- Fonts and typography: serif display hierarchy, compact sans-serif labels, vertical desktop title, responsive mobile fallback, and visible focus outlines are present.
-- Spacing and layout rhythm: large hero stage, restrained left copy column, full-bleed artwork, generous section intervals, and compact editorial rails match the source direction.
-- Colors and visual tokens: cream, fog gray, walnut, ink charcoal, and signature gold/yellow are centralized in homepage tokens.
-- Image quality and asset fidelity: hero and material imagery are raster assets generated for this visual direction; the supplied ink artwork identity is preserved inside the frame scene. No placeholder image is used.
-- Copy and content: storefront is consistently branded as “正好书画社”; “一框智能装裱” is treated as the service signature.
+- Fonts and typography: source inspected; revised implementation not visually captured.
+- Spacing and layout rhythm: source inspected; CSS now uses a full-width header and equal seven-column rail, but visual confirmation is blocked.
+- Colors and visual tokens: unchanged from the existing cream, ink, and gold system; visual confirmation is blocked.
+- Image quality and asset fidelity: no image assets were changed in this iteration.
+- Copy and content: seven existing process labels and linked stage content are preserved.
 
-## Residual polish notes
+## Comparison history
 
-- The clean hero asset intentionally keeps more negative space on the left than the selected mock, so editable copy remains readable and the page works responsively.
-- The homepage CTA opens a branded handoff layer; the full web try-on workspace remains a separate next page by design.
+- Iteration 1: identified capped header width and narrow vertical process rail from the user-provided screenshots.
+- Fixes made: full-bleed header; 1760px content alignment; 1600px story section; seven equal-width horizontal desktop steps; horizontal scrolling at narrow breakpoints.
+- Post-fix visual evidence: blocked by the in-app browser URL policy.
 
-final result: passed
+final result: blocked
