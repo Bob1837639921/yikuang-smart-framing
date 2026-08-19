@@ -121,7 +121,7 @@ export default function HomePage() {
 
       <main>
         <section className="home-hero" ref={heroRef} onPointerMove={handlePointerMove} onPointerDown={handleWaterPointerDown} aria-labelledby="hero-title">
-          <img className="home-hero-image" src="/assets/home-ink-portal.png" alt="水墨山水作品立于雾气与水面之间的木质画框" />
+          <img className="home-hero-image" src="/assets/home-ink-portal.webp" alt="水墨山水作品立于雾气与水面之间的木质画框" width="1900" height="1188" fetchPriority="high" decoding="async" />
           <div className="home-hero-shade" aria-hidden="true" />
           <div className="home-hero-vignette" aria-hidden="true" />
           <div className="home-water-glimmer" aria-hidden="true" />
@@ -168,11 +168,7 @@ export default function HomePage() {
                   <div className={`home-story-stage-scene home-story-chapter-${activeChapter}`}>
                     <div className="home-story-art" aria-label="装裱层次演示">
                       <div className="home-story-art-frame">
-                        <img className="home-story-art-image home-story-art-image-raw" src="/assets/test-ink.png" alt="待装裱的水墨山水作品" />
-                        <img className="home-story-art-image home-story-art-image-material" src="/assets/home-material-macro.png" alt="胡桃木与卡纸的装裱材质细节" />
-                        <img className="home-story-art-image home-story-art-image-framed" src="/assets/home-ink-portal.png" alt="完成装裱的水墨山水作品" />
-                        <span className="home-story-art-mat" aria-hidden="true" />
-                        <span className="home-story-art-glass" aria-hidden="true" />
+                        <span className="home-story-art-atlas" role="img" aria-label={`第 ${activeChapter + 1} 步：${storyVisuals[activeChapter].label}`} />
                         <span className={`home-story-art-operation home-story-art-operation-${activeChapter}`} aria-hidden="true"><b>{storyVisuals[activeChapter].label}</b><small>{storyVisuals[activeChapter].meta}</small></span>
                       </div>
                       <span className="home-story-art-label">{["作品状态", "尺寸 / 开窗", "框型 / 卡纸", "固定 / 承托", "卡纸 / 间隔", "玻璃 / 背板", "检查 / 挂装"][activeChapter]}</span>
@@ -187,7 +183,7 @@ export default function HomePage() {
         </section>
 
         <section className="home-materials home-section" id="materials" aria-labelledby="materials-title">
-          <div className="home-material-image-wrap home-reveal"><img src="/assets/home-material-macro.png" alt="胡桃木画框、金色内线与米白卡纸的材质细节" /><span className="home-image-index">02 / 04</span></div>
+          <div className="home-material-image-wrap home-reveal"><img src="/assets/home-material-macro.webp" alt="胡桃木画框、金色内线与米白卡纸的材质细节" width="1400" height="1749" loading="lazy" decoding="async" /><span className="home-image-index">02 / 04</span></div>
           <div className="home-material-copy home-reveal"><p className="home-kicker"><span />框料与纸的美学</p><h2 id="materials-title">材质不是背景，<br /><em>它决定作品如何发光。</em></h2><p className="home-body-copy">我们相信，好的装裱不应该抢走作品的目光。它更像一束被调好的光，让木纹、纸张和画面之间，保持一段正好的距离。</p><a className="home-outline-link" href="#studio">看我们的装裱故事 <span aria-hidden="true">↗</span></a><div className="home-material-notes" aria-label="材质细节"><span>天然木纹</span><span>手工卡纸</span><span>柔和玻璃</span></div></div>
         </section>
 

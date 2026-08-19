@@ -41,7 +41,7 @@
 .home-menu-toggle { display: none; border: 0; background: transparent; }
 
 .home-hero { position: relative; display: flex; min-height: 100svh; align-items: center; isolation: isolate; overflow: hidden; background: #d8d0c4; --pointer-x: 50%; --pointer-y: 50%; }
-.home-hero::before { position: absolute; z-index: -4; inset: -36px; background: linear-gradient(90deg, rgba(244, 240, 232, 0.88) 0%, rgba(244, 240, 232, 0.25) 48%, rgba(27, 29, 27, 0.12) 100%), url("/assets/home-ink-portal.png") center / cover no-repeat; content: ""; filter: blur(18px); opacity: 0.68; pointer-events: none; transform: scale(1.04); }
+.home-hero::before { position: absolute; z-index: -4; inset: -36px; background: linear-gradient(90deg, rgba(244, 240, 232, 0.88) 0%, rgba(244, 240, 232, 0.25) 48%, rgba(27, 29, 27, 0.12) 100%), url("/assets/home-ink-portal.webp") center / cover no-repeat; content: ""; filter: blur(18px); opacity: 0.68; pointer-events: none; transform: scale(1.04); }
 .home-hero-image { position: absolute; z-index: -3; inset: 4%; width: 92%; height: 92%; object-fit: contain; object-position: center; transform: translate3d(calc((var(--pointer-x) - 50%) * -0.01), calc((var(--pointer-y) - 50%) * -0.01), 0); transition: transform 500ms cubic-bezier(.2,.8,.2,1); }
 .home-hero-shade { position: absolute; z-index: -2; inset: 0; background: rgba(248, 244, 235, 0.1); }
 .home-hero-vignette { position: absolute; z-index: -1; inset: 0; background: rgba(247, 242, 232, 0.07); box-shadow: inset 0 0 140px rgba(27, 29, 27, 0.14); pointer-events: none; }
@@ -118,24 +118,15 @@
 .home-story-chapter-1 .home-story-art { transform: translateY(0) scale(1); }
 .home-story-chapter-2 .home-story-art { transform: translateY(-5px) scale(1.03); }
 .home-story-art-frame { position: relative; aspect-ratio: 0.76; overflow: hidden; border: 12px solid rgba(75, 62, 43, 0.84); background: #cfc3ae; box-shadow: 14px 18px 0 rgba(65, 53, 38, 0.14), inset 0 0 0 1px rgba(242, 196, 62, 0.58); }
-.home-story-chapter-0 .home-story-art-frame, .home-story-chapter-1 .home-story-art-frame, .home-story-chapter-3 .home-story-art-frame { border: 1px solid rgba(27, 29, 27, 0.16); background: #f1eadf; box-shadow: 14px 18px 0 rgba(65, 53, 38, 0.08); }
-.home-story-chapter-1 .home-story-art-frame::after { position: absolute; inset: 11%; border: 1px dashed rgba(201, 150, 35, 0.72); content: ""; opacity: 0.72; pointer-events: none; }
-.home-story-art-image { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; transition: opacity 720ms ease, transform 900ms cubic-bezier(.2,.8,.2,1); }
-.home-story-art-image-raw { object-position: center; opacity: 0; }
-.home-story-art-image-material { object-position: center; opacity: 0; mix-blend-mode: multiply; transform: scale(1.08); }
-.home-story-art-image-framed { object-position: center 48%; opacity: 0; transform: scale(1.05); }
-.home-story-chapter-0 .home-story-art-image-raw, .home-story-chapter-1 .home-story-art-image-raw, .home-story-chapter-3 .home-story-art-image-raw { opacity: 1; transform: scale(1); }
-.home-story-chapter-2 .home-story-art-image-raw, .home-story-chapter-4 .home-story-art-image-raw { opacity: 0.16; transform: scale(1.03); }
-.home-story-chapter-2 .home-story-art-image-material, .home-story-chapter-4 .home-story-art-image-material { opacity: 1; transform: scale(1); }
-.home-story-chapter-5 .home-story-art-image-material { opacity: 0.16; transform: scale(1.04); }
-.home-story-chapter-5 .home-story-art-image-framed, .home-story-chapter-6 .home-story-art-image-framed { opacity: 1; transform: scale(1); }
-.home-story-art-mat { position: absolute; inset: 8%; border: 1px solid rgba(242, 196, 62, 0.7); opacity: 0; transform: scale(1.05); transition: opacity 520ms ease, transform 720ms cubic-bezier(.2,.8,.2,1); }
-.home-story-chapter-3 .home-story-art-mat, .home-story-chapter-4 .home-story-art-mat { opacity: 0.68; transform: scale(1); }
-.home-story-chapter-5 .home-story-art-mat, .home-story-chapter-6 .home-story-art-mat { opacity: 0.9; transform: scale(0.98); }
-.home-story-art-glass { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 30% 68%, rgba(255, 255, 255, 0.08)); opacity: 0.34; transition: opacity 520ms ease; }
-.home-story-chapter-0 .home-story-art-glass, .home-story-chapter-1 .home-story-art-glass, .home-story-chapter-2 .home-story-art-glass, .home-story-chapter-3 .home-story-art-glass, .home-story-chapter-4 .home-story-art-glass { opacity: 0; }
-.home-story-chapter-5 .home-story-art-glass { opacity: 0.48; }
-.home-story-chapter-6 .home-story-art-glass { opacity: 0.7; }
+.home-story-chapter-0 .home-story-art-frame, .home-story-chapter-1 .home-story-art-frame, .home-story-chapter-2 .home-story-art-frame, .home-story-chapter-3 .home-story-art-frame, .home-story-chapter-4 .home-story-art-frame, .home-story-chapter-5 .home-story-art-frame, .home-story-chapter-6 .home-story-art-frame { border: 1px solid rgba(27, 29, 27, 0.16); background: #f1eadf; box-shadow: 14px 18px 0 rgba(65, 53, 38, 0.08); }
+.home-story-art-atlas { position: absolute; inset: 0; display: block; background-image: url("/assets/home-framing-process-atlas.webp"); background-repeat: no-repeat; background-size: 400% 200%; background-position: 0% 0%; transition: background-position 720ms cubic-bezier(.2,.8,.2,1); }
+.home-story-chapter-0 .home-story-art-atlas { background-position: 0% 0%; }
+.home-story-chapter-1 .home-story-art-atlas { background-position: 33.333% 0%; }
+.home-story-chapter-2 .home-story-art-atlas { background-position: 66.666% 0%; }
+.home-story-chapter-3 .home-story-art-atlas { background-position: 100% 0%; }
+.home-story-chapter-4 .home-story-art-atlas { background-position: 0% 100%; }
+.home-story-chapter-5 .home-story-art-atlas { background-position: 33.333% 100%; }
+.home-story-chapter-6 .home-story-art-atlas { background-position: 100% 100%; }
 .home-story-art-operation { position: absolute; z-index: 4; right: 14px; bottom: 14px; display: grid; gap: 4px; min-width: 132px; padding: 9px 11px; border-left: 2px solid var(--home-gold); background: rgba(244, 240, 232, 0.84); box-shadow: 0 8px 18px rgba(75, 62, 43, 0.12); color: var(--home-ink); }
 .home-story-art-operation b { font-size: 11px; font-weight: 600; letter-spacing: 0.12em; }
 .home-story-art-operation small { color: rgba(27, 29, 27, 0.68); font-size: 9px; letter-spacing: 0.08em; line-height: 1.4; }
@@ -144,8 +135,6 @@
 .home-story-art-operation-2, .home-story-art-operation-4 { right: 14px; bottom: 14px; }
 .home-story-art-operation-3 { top: 14px; right: auto; bottom: auto; left: 14px; }
 .home-story-art-operation-5, .home-story-art-operation-6 { right: 14px; bottom: 14px; }
-.home-story-chapter-3 .home-story-art-frame::before { position: absolute; z-index: 3; inset: 7%; border: 1px solid rgba(201, 150, 35, 0.7); box-shadow: inset 0 0 0 10px rgba(244, 240, 232, 0.32); content: ""; pointer-events: none; }
-.home-story-chapter-5 .home-story-art-frame::before, .home-story-chapter-6 .home-story-art-frame::before { position: absolute; z-index: 3; inset: 0; border: 1px solid rgba(255, 255, 255, 0.28); content: ""; pointer-events: none; }
 .home-story-art-label { display: flex; justify-content: space-between; margin-top: 14px; color: rgba(27, 29, 27, 0.64); font-size: 10px; font-weight: 500; letter-spacing: 0.16em; }
 .home-story-art-label::after { width: 28px; height: 1px; margin-top: 5px; background: var(--home-gold); content: ""; }
 .home-story-copy { position: relative; max-width: 430px; padding: 20px 0 34px; animation: home-copy-in 520ms cubic-bezier(.2,.8,.2,1); }
