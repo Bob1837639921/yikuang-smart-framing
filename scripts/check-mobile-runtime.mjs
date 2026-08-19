@@ -24,10 +24,10 @@ for (const [relativePath, expectedHash] of Object.entries(lockedFiles)) {
 }
 
 if (failures.length > 0) {
-  console.error("Mobile runtime integrity check failed:\n");
+  console.error("Website runtime integrity check failed:\n");
   for (const failure of failures) console.error(`- ${failure}`);
-  console.error("\nRestore the protected runtime. Put app UI in src/Prototype.tsx and src/prototype.css.");
+  console.error("\nRestore the protected website runtime. Put official website UI in website/src/.");
   process.exit(1);
 }
 
-console.log(`Mobile runtime integrity check passed (${Object.keys(lockedFiles).length} protected files).`);
+console.log(`Website runtime integrity check passed (${Object.keys(lockedFiles).length} protected files).`);
