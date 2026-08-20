@@ -186,10 +186,11 @@
         <view class="admin-status"><text>管理员模式</text><text>UUID 已授权 · 本机配置</text></view>
         <view class="admin-form">
           <text class="admin-section-title">新增并生成 3D 框料</text>
-          <text class="admin-hint">不接 AI，系统不会自动猜尺寸。请在拍照时把尺子放在框料旁边，再手动填写宽度、深度、侧面显示宽度和内沿；图片只需上传正面和侧面纹理。</text>
+          <text class="admin-hint">系统不会自动猜尺寸。请手动填写宽度、深度、侧面显示宽度和内沿；正面、侧面负责材质外观，白底截面轮廓图负责记录真实型面。</text>
           <view class="admin-upload-grid">
             <button class="admin-upload admin-upload-small" data-kind="frontImage" bindtap="chooseMaterialImage"><image wx:if="{{adminDraft.frontImage}}" src="{{adminDraft.frontImage}}" mode="aspectFill"></image><text wx:else>＋ 正面纹理（必传）</text></button>
             <button class="admin-upload admin-upload-small" data-kind="profileImage" bindtap="chooseMaterialImage"><image wx:if="{{adminDraft.profileImage}}" src="{{adminDraft.profileImage}}" mode="aspectFill"></image><text wx:else>＋ 侧面纹理（必传）</text></button>
+            <button class="admin-upload admin-upload-small" data-kind="sectionImage" bindtap="chooseMaterialImage"><image wx:if="{{adminDraft.sectionImage}}" src="{{adminDraft.sectionImage}}" mode="aspectFit"></image><text wx:else>＋ 截面轮廓（必传）</text></button>
           </view>
           <input class="admin-input" value="{{adminDraft.name}}" placeholder="框料名称" bindinput="onAdminNameInput"></input>
           <view class="admin-price-field"><view><text>框料单价</text><text>必填 · 元/米</text></view><view class="admin-price-input"><text>¥</text><input type="digit" value="{{adminDraft.pricePerMeter}}" placeholder="168" bindinput="onAdminPriceInput"></input><text>/米</text></view></view>

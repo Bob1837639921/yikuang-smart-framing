@@ -1,5 +1,5 @@
-import HomePage from "./site/HomePage";
+import SiteApp from "./site/SiteApp";
 
 export default function App() {
-  return <HomePage />;
+  return <SiteApp />;
 }

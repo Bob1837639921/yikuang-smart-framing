@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
 import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
+import { goToTryOn } from "./navigation";
 import "./homepage.css";
 
 const chapters = [
@@ -33,7 +34,6 @@ export default function HomePage() {
   const storyTrackRef = useRef<HTMLDivElement>(null);
   const [activeChapter, setActiveChapter] = useState(0);
   const [storyProgress, setStoryProgress] = useState(0);
-  const [portalOpen, setPortalOpen] = useState(false);
   const [waterRipples, setWaterRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
 
   useEffect(() => {
@@ -117,7 +117,7 @@ export default function HomePage() {
 
   return (
     <div className="home-page" id="top">
-      <SiteHeader onEnterTryOn={() => setPortalOpen(true)} />
+      <SiteHeader onEnterTryOn={goToTryOn} />
 
       <main>
         <section className="home-hero" ref={heroRef} onPointerMove={handlePointerMove} onPointerDown={handleWaterPointerDown} aria-labelledby="hero-title">
@@ -136,7 +136,7 @@ export default function HomePage() {
             <h1 id="hero-title"><span className="home-title-column">给作品</span><span className="home-title-column">一个正好的</span><span className="home-title-column home-title-accent">归处</span></h1>
             <p className="home-hero-lede">正好书画社，把观看、选择与装裱，变成一段值得慢下来的体验。</p>
             <div className="home-hero-actions">
-              <button className="home-button home-button-primary" type="button" onClick={() => setPortalOpen(true)}>进入试装空间 <span aria-hidden="true">→</span></button>
+              <button className="home-button home-button-primary" type="button" onClick={goToTryOn}>进入试装空间 <span aria-hidden="true">→</span></button>
               <a className="home-text-link" href="#story">认识正好的故事 <span aria-hidden="true">↘</span></a>
             </div>
           </div>
@@ -188,16 +188,14 @@ export default function HomePage() {
         </section>
 
         <section className="home-experience home-section" id="experience" aria-labelledby="experience-title">
-          <div className="home-experience-intro home-reveal"><p className="home-kicker"><span />从首页，进入下一幕</p><h2 id="experience-title">先看见，<br /><em>再决定。</em></h2><p className="home-body-copy">在线试装会把这段观看继续下去：上传作品，进入一间只属于你的装裱空间。</p><button className="home-button home-button-dark" type="button" onClick={() => setPortalOpen(true)}>进入试装空间 <span aria-hidden="true">→</span></button></div>
+          <div className="home-experience-intro home-reveal"><p className="home-kicker"><span />从首页，进入下一幕</p><h2 id="experience-title">先看见，<br /><em>再决定。</em></h2><p className="home-body-copy">在线试装会把这段观看继续下去：上传作品，进入一间只属于你的装裱空间。</p><button className="home-button home-button-dark" type="button" onClick={goToTryOn}>进入试装空间 <span aria-hidden="true">→</span></button></div>
           <div className="home-experience-list home-reveal"><div className="home-experience-item"><span>01</span><strong>上传作品</strong><p>让画面先回到它自己的比例。</p></div><div className="home-experience-item"><span>02</span><strong>看见装裱</strong><p>框、纸、玻璃与侧面深度实时回应。</p></div><div className="home-experience-item"><span>03</span><strong>留下方案</strong><p>喜欢的样子，可以带去门店继续完成。</p></div></div>
         </section>
 
         <section className="home-studio" id="studio" aria-labelledby="studio-title"><div className="home-studio-inner home-reveal"><p className="home-kicker"><span />正好书画社</p><h2 id="studio-title">把一件作品，<br /><em>郑重地放回生活。</em></h2><div className="home-studio-bottomline"><p>书画 · 装裱 · 新体验</p><a className="home-outline-link home-outline-link-light" href="#contact">预约到店 <span aria-hidden="true">↗</span></a></div></div></section>
       </main>
 
-      <SiteFooter onEnterTryOn={() => setPortalOpen(true)} />
-
-      {portalOpen && <div className="home-portal" role="dialog" aria-modal="true" aria-labelledby="portal-title"><div className="home-portal-glow" aria-hidden="true" /><button className="home-portal-close" type="button" onClick={() => setPortalOpen(false)} aria-label="关闭试装空间入口">关闭</button><div className="home-portal-content"><p className="home-kicker"><span />一框智能装裱</p><h2 id="portal-title">下一站，<br /><em>试装空间。</em></h2><p>首页负责让你看见正好，下一页会让你亲手把作品放进去。</p><button className="home-button home-button-primary" type="button" onClick={() => { setPortalOpen(false); scrollToId("experience"); }}>先看体验流程 <span aria-hidden="true">→</span></button></div></div>}
+      <SiteFooter onEnterTryOn={goToTryOn} />
     </div>
   );
 }

@@ -8,19 +8,22 @@
     "update:runtime-lock": "node scripts/update-mobile-runtime-lock.mjs",
     "local:3d": "node local-service/server.mjs",
     "test:3d": "node --test local-service/server.test.mjs",
+    "test:tryon": "node --experimental-strip-types --test tests/tryon-interaction.test.mjs tests/tryon-memory.test.mjs",
     "test:sites": "node --test tests/sites-worker.test.mjs",
     "predev": "npm run check:runtime",
-    "dev": "vite",
+    "dev": "node scripts/dev-supervisor.mjs",
     "prebuild": "npm run check:runtime",
     "build": "tsc && vite build && node scripts/prepare-sites-build.mjs"
   },
   "dependencies": {
     "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react-dom": "19.2.7",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@types/react": "19.2.17",
     "@types/react-dom": "19.2.3",
+    "@types/three": "^0.185.4",
     "@vitejs/plugin-react": "6.0.3",
     "typescript": "7.0.2",
     "vite": "8.1.3"

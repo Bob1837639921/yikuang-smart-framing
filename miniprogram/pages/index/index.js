@@ -63,6 +63,7 @@ const emptyAdminDraft = {
   image: '',
   frontImage: '',
   profileImage: '',
+  sectionImage: '',
   surfaceType: '木纹',
   profileType: '平直',
   widthMm: '40',
@@ -143,7 +144,7 @@ function makeMatLayerPresentation(layers, mats) {
 
 function makeFrameModelKey(draft) {
   const values = [
-    'frame-3d-v1', draft.name, draft.frontImage, draft.profileImage,
+    'frame-3d-v2', draft.name, draft.frontImage, draft.profileImage, draft.sectionImage,
     draft.surfaceType, draft.profileType, draft.widthMm,
     draft.depthMm, draft.sideWidthMm, draft.innerLipMm, draft.bevelMm, draft.pricePerMeter
   ]
@@ -1178,8 +1179,8 @@ Page({
     }
     const draft = this.data.adminDraft || emptyAdminDraft
     const pricePerMeter = Number(draft.pricePerMeter)
-    if (!draft.name || !draft.frontImage || !draft.profileImage || !Number(draft.widthMm) || !Number(draft.depthMm) || !Number(draft.sideWidthMm) || !Number.isFinite(pricePerMeter) || pricePerMeter <= 0) {
-      this.setData({ adminError: '请填写名称、框料单价（元/米）、框宽、框深、侧面显示宽度，并上传正面纹理和侧面纹理' })
+    if (!draft.name || !draft.frontImage || !draft.profileImage || !draft.sectionImage || !Number(draft.widthMm) || !Number(draft.depthMm) || !Number(draft.sideWidthMm) || !Number.isFinite(pricePerMeter) || pricePerMeter <= 0) {
+      this.setData({ adminError: '请填写名称、框料单价（元/米）、框宽、框深、侧面显示宽度，并上传正面纹理、侧面纹理和截面轮廓图' })
       return
     }
     this.setData({ adminError: '', adminNotice: '正在读取图片并整理 3D 参数…', adminGenerating: true, adminProgress: 16, adminResult: null })
@@ -1208,7 +1209,8 @@ Page({
         texture: draft.frontImage,
         front: draft.frontImage,
         profile: draft.profileImage,
-        side: draft.profileImage
+        side: draft.profileImage,
+        profileReference: draft.sectionImage
       },
       geometry: {
         profileType: draft.profileType,
@@ -1222,7 +1224,8 @@ Page({
       surface: {
         type: draft.surfaceType,
         textureSource: draft.frontImage,
-        profileSource: draft.profileImage
+        profileSource: draft.profileImage,
+        sectionSource: draft.sectionImage
       },
       model3d: {
         status: 'ready',
