@@ -5,6 +5,8 @@ import { calculateColorMatchGains } from "../website/src/site/material-admin/tex
 import { normalizeDimensionInput } from "../website/src/site/tryon/dimension-input.ts";
 
 const stageSource = await readFile(new URL("../website/src/site/tryon/ThreeFrameStage.tsx", import.meta.url), "utf8");
+const previewSource = await readFile(new URL("../website/src/site/tryon/FramePreview.tsx", import.meta.url), "utf8");
+const tryonModelSource = await readFile(new URL("../website/src/site/tryon/model.ts", import.meta.url), "utf8");
 const storageSource = await readFile(new URL("../website/src/site/material-admin/model.ts", import.meta.url), "utf8");
 const devSource = await readFile(new URL("../scripts/dev-supervisor.mjs", import.meta.url), "utf8");
 
@@ -21,6 +23,33 @@ test("3D preview renders on demand and updates mat selection without rebuilding"
   assert.match(stageSource, /runtime\.matFaceMaterials\.forEach/);
   const sceneDependencies = stageSource.match(/\}, \[(props\.artworkUrl[^\]]+)\]\);/)?.[1] || "";
   assert.doesNotMatch(sceneDependencies, /activeLayerIndex/);
+});
+
+test("mat borders expand the frame while preserving the entered artwork opening", () => {
+  assert.match(stageSource, /frameInnerWidth = artworkWidth \+ totalLeftRightReveal \* 2/);
+  assert.match(stageSource, /frameInnerHeight = artworkHeight \+ totalTopBottomReveal \* 2/);
+  assert.match(stageSource, /let openingWidth = frameInnerWidth/);
+  assert.match(stageSource, /let openingHeight = frameInnerHeight/);
+});
+
+test("frame lighting keeps dark materials from washing out to silver", () => {
+  assert.match(stageSource, /HemisphereLight\(0xfff8e7, 0x51483d, 1\.7\)/);
+  assert.match(stageSource, /DirectionalLight\(0xd9e5ff, 0\.72\)/);
+  assert.match(stageSource, /props\.frame\.material === "铝合金" \? 0\.3 : 0\.025/);
+  assert.match(stageSource, /props\.frame\.material === "铝合金" \? 0\.56 : 0\.64/);
+});
+
+test("only the gallery space exposes live rotation controls", () => {
+  assert.match(previewSource, /const isInteractive = scene === "gallery"/);
+  assert.match(tryonModelSource, /exhibition: \{ rotation:/);
+  assert.match(tryonModelSource, /study: \{ rotation:/);
+  assert.match(tryonModelSource, /wallWidthCm: 720, wallHeightCm: 420/);
+  assert.match(tryonModelSource, /wallWidthCm: 420, wallHeightCm: 260/);
+  assert.match(previewSource, /if \(event\.button !== 0 \|\| !event\.isPrimary\) return/);
+  assert.match(previewSource, /mode: "move"/);
+  assert.match(previewSource, /translate3d\(\$\{staticOffset\.x\}px, \$\{staticOffset\.y\}px, 0\)/);
+  assert.match(previewSource, /参考墙面 \{staticView\?\.wallWidthCm\} × \{staticView\?\.wallHeightCm\} cm · 拖动画框平移/);
+  assert.match(previewSource, /复位位置/);
 });
 
 test("large generated material assets stay out of localStorage", () => {

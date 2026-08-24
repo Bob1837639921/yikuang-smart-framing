@@ -56,6 +56,18 @@ const defaultMats = [
   { id: 'mat-sage', name: '雾绿麻纹', color: '#d8e7db', texture: '', thicknessMm: 3, defaultWidthMm: 28, source: 'demo' },
   { id: 'mat-charcoal', name: '炭黑绒面', color: '#22211e', texture: '', thicknessMm: 3, defaultWidthMm: 24, source: 'demo' }
 ]
+const MAX_OUTER_MAT_WIDTH_MM = 200
+
+function normalizeMatLayer(layer) {
+  const legacyWidth = Math.max(0, Number(layer && layer.widthMm) || 0)
+  const topBottom = Number(layer && layer.topBottomMm)
+  const leftRight = Number(layer && layer.leftRightMm)
+  return {
+    ...layer,
+    topBottomMm: Number.isFinite(topBottom) ? topBottom : legacyWidth,
+    leftRightMm: Number.isFinite(leftRight) ? leftRight : legacyWidth
+  }
+}
 
 const emptyAdminDraft = {
   name: '',
@@ -108,38 +120,56 @@ function fitMatReveals(values, maxTotal, minimums) {
 }
 
 function makeMatLayerPresentation(layers, mats) {
-  let previewInset = 0
-  let cornerInset = 0
-  const layerList = layers || []
+  let previewTopInset = 0
+  let previewSideInset = 0
+  let cornerTopInset = 0
+  let cornerSideInset = 0
+  const layerList = (layers || []).map(normalizeMatLayer)
   const hitBand = Math.max(14, Math.floor(42 / Math.max(1, layerList.length)))
-  const rawPreviewReveals = layerList.map((layer, index) => index === 0
-    ? Math.max(10, Math.round(Number(layer.widthMm) * 0.42))
-    : Math.max(3, Math.round(Number(layer.widthMm) * 0.7)))
-  const previewReveals = fitMatReveals(rawPreviewReveals, 52, layerList.map((layer, index) => index === 0 ? 10 : 3))
-  const rawCornerReveals = layerList.map((layer, index) => index === 0
-    ? Math.max(14, Math.round(Number(layer.widthMm) * 0.82))
-    : Math.max(3, Math.round(Number(layer.widthMm) * 1.35)))
-  const cornerReveals = fitMatReveals(rawCornerReveals, 22, layerList.map((layer, index) => index === 0 ? 8 : 3))
+  const minimumPreview = layerList.map((layer, index) => index === 0 ? 10 : 3)
+  const minimumCorner = layerList.map((layer, index) => index === 0 ? 8 : 3)
+  const makeReveals = (key, outerFactor, innerFactor, maxTotal, minimums) => {
+    const raw = layerList.map((layer, index) => index === 0
+      ? Math.max(minimums[index], Math.round(Number(layer[key]) * outerFactor))
+      : Math.max(minimums[index], Math.round(Number(layer[key]) * innerFactor)))
+    return { raw, total: raw.reduce((sum, value) => sum + value, 0), maxTotal }
+  }
+  const previewTop = makeReveals('topBottomMm', 0.42, 0.7, 52, minimumPreview)
+  const previewSide = makeReveals('leftRightMm', 0.42, 0.7, 52, minimumPreview)
+  const previewLargest = Math.max(1, previewTop.total, previewSide.total)
+  const previewTopReveals = fitMatReveals(previewTop.raw, Math.max(16, Math.round(52 * previewTop.total / previewLargest)), minimumPreview)
+  const previewSideReveals = fitMatReveals(previewSide.raw, Math.max(16, Math.round(52 * previewSide.total / previewLargest)), minimumPreview)
+  const cornerTop = makeReveals('topBottomMm', 0.82, 1.35, 22, minimumCorner)
+  const cornerSide = makeReveals('leftRightMm', 0.82, 1.35, 22, minimumCorner)
+  const cornerLargest = Math.max(1, cornerTop.total, cornerSide.total)
+  const cornerTopReveals = fitMatReveals(cornerTop.raw, Math.max(12, Math.round(22 * cornerTop.total / cornerLargest)), minimumCorner)
+  const cornerSideReveals = fitMatReveals(cornerSide.raw, Math.max(12, Math.round(22 * cornerSide.total / cornerLargest)), minimumCorner)
   const views = layerList.map((layer, index) => {
     const material = mats.find((item) => item.id === layer.matId) || mats[0] || defaultMats[0]
-    const previewReveal = previewReveals[index] || 0
-    const cornerReveal = cornerReveals[index] || 0
     const view = {
       ...layer,
       index,
       name: material.name,
       thicknessMm: material.thicknessMm,
-      previewStyle: `inset:${previewInset}px;z-index:${3 + index};${makeMatTextureStyle(material)}`,
-      cornerStyle: `inset:${cornerInset}px;z-index:${3 + index};${makeMatTextureStyle(material)}`,
+      previewStyle: `top:${previewTopInset}px;right:${previewSideInset}px;bottom:${previewTopInset}px;left:${previewSideInset}px;z-index:${3 + index};${makeMatTextureStyle(material)}`,
+      cornerStyle: `top:${cornerTopInset}px;right:${cornerSideInset}px;bottom:${cornerTopInset}px;left:${cornerSideInset}px;z-index:${3 + index};${makeMatTextureStyle(material)}`,
       cornerHitStyle: `left:0;right:0;top:${index * hitBand}px;height:${hitBand}px;z-index:${30 + index}`,
-      cornerRingStyle: `inset:${cornerInset}px`,
-      previewRingStyle: `inset:${previewInset}px`
+      cornerRingStyle: `top:${cornerTopInset}px;right:${cornerSideInset}px;bottom:${cornerTopInset}px;left:${cornerSideInset}px`,
+      previewRingStyle: `top:${previewTopInset}px;right:${previewSideInset}px;bottom:${previewTopInset}px;left:${previewSideInset}px`
     }
-    previewInset += previewReveal
-    cornerInset += cornerReveal
+    previewTopInset += previewTopReveals[index] || 0
+    previewSideInset += previewSideReveals[index] || 0
+    cornerTopInset += cornerTopReveals[index] || 0
+    cornerSideInset += cornerSideReveals[index] || 0
     return view
   })
-  return { views, previewInset, cornerInset }
+  return {
+    views,
+    previewArtStyle: `top:${previewTopInset}px;right:${previewSideInset}px;bottom:${previewTopInset}px;left:${previewSideInset}px`,
+    cornerArtStyle: `top:${cornerTopInset}px;right:${cornerSideInset}px;bottom:${cornerTopInset}px;left:${cornerSideInset}px`,
+    previewTopInset,
+    previewSideInset
+  }
 }
 
 function makeFrameModelKey(draft) {
@@ -475,6 +505,9 @@ function drawCanvasTiledRail(ctx, image, points, options = {}) {
   return true
 }
 
+const initialMatLayers = [{ id: 'layer-1', matId: defaultMats[0].id, topBottomMm: 24, leftRightMm: 24 }]
+const initialMatPresentation = makeMatLayerPresentation(initialMatLayers, defaultMats)
+
 Page({
   data: {
     topInset: 54,
@@ -503,7 +536,8 @@ Page({
     mat: true,
     matColor: '#fffaf0',
     matColors: ['#fffaf0', '#f4ead1', '#d8e7db', '#22211e'],
-    matWidth: 24,
+    matTopBottomMm: 24,
+    matLeftRightMm: 24,
     width: 40,
     height: 60,
     total: 218,
@@ -518,18 +552,17 @@ Page({
     resetPulse: false,
     matVisualWidth: 10,
     matTextureStyle: makeMatTextureStyle(defaultMats[0]),
-    matLayers: [{ id: 'layer-1', matId: defaultMats[0].id, widthMm: 24 }],
+    matLayers: initialMatLayers,
     activeMatLayerIndex: 0,
-    activeMatWidthLabel: '主卡纸总留边',
     activeMatMin: 10,
-    activeMatMax: 60,
+    activeMatMax: MAX_OUTER_MAT_WIDTH_MM,
     activeMatStep: 1,
-    matLayerViews: makeMatLayerPresentation([{ id: 'layer-1', matId: defaultMats[0].id, widthMm: 24 }], defaultMats).views,
-    matImageInset: 10,
-    matCornerInset: 20,
+    matLayerViews: initialMatPresentation.views,
+    matImageInsetStyle: initialMatPresentation.previewArtStyle,
+    matCornerArtStyle: initialMatPresentation.cornerArtStyle,
     activeMatCornerStyle: 'inset:0px',
     activeMatPreviewStyle: 'inset:0px',
-    activeMatLayerLabel: '第1层 · 24mm',
+    activeMatLayerLabel: '第1层 · 上下24 / 左右24mm',
     cornerPulse: false,
     adminUuidInput: '',
     adminAuthorized: false,
@@ -662,7 +695,16 @@ Page({
     ctx.clearRect(0, 0, canvasWidth, canvasHeight)
 
     const zoom = Number(this.data.frameZoom) || 1
-    const frameGeometry = resolveFrameCanvasGeometry(frame, this.data.width, this.data.height, canvasWidth, canvasHeight, zoom)
+    const normalizedMatLayers = (this.data.matLayers || []).map(normalizeMatLayer)
+    const topBottomBorderMm = this.data.mat
+      ? normalizedMatLayers.reduce((sum, layer) => sum + Math.max(0, layer.topBottomMm), 0)
+      : 0
+    const leftRightBorderMm = this.data.mat
+      ? normalizedMatLayers.reduce((sum, layer) => sum + Math.max(0, layer.leftRightMm), 0)
+      : 0
+    const framedOpeningWidthCm = Number(this.data.width) + leftRightBorderMm / 5
+    const framedOpeningHeightCm = Number(this.data.height) + topBottomBorderMm / 5
+    const frameGeometry = resolveFrameCanvasGeometry(frame, framedOpeningWidthCm, framedOpeningHeightCm, canvasWidth, canvasHeight, zoom)
     const { outerWidth, outerHeight, depth, sideDepth, borderPx, innerLipPx, bevelPx, profileType, scale } = frameGeometry
     const frontZ = depth / 2
     const backZ = -depth / 2
@@ -715,13 +757,11 @@ Page({
     fillCanvasQuad(ctx, inner, this.data.mat ? (matMaterial.color || '#fffaf0') : (frame.tone || '#f4ead7'))
     if (matImage && this.data.mat) drawCanvasImageQuad(ctx, matImage, inner)
 
-    const matBorderMm = this.data.mat
-      ? (this.data.matLayers || []).reduce((sum, layer) => sum + Math.max(0, Number(layer.widthMm) || 0), 0)
-      : 0
-    const maxInset = Math.min(innerWidth, innerHeight) * 0.42
-    const matInset = clamp(matBorderMm / 10 * scale, 0, maxInset)
-    const artInset = clamp(matInset + innerLipPx, 0, maxInset)
-    const artQuad = quad(Math.max(12, innerWidth - artInset * 2), Math.max(12, innerHeight - artInset * 2), frontZ + 1)
+    const maxInsetX = innerWidth * 0.42
+    const maxInsetY = innerHeight * 0.42
+    const artInsetX = clamp(leftRightBorderMm / 10 * scale + innerLipPx, 0, maxInsetX)
+    const artInsetY = clamp(topBottomBorderMm / 10 * scale + innerLipPx, 0, maxInsetY)
+    const artQuad = quad(Math.max(12, innerWidth - artInsetX * 2), Math.max(12, innerHeight - artInsetY * 2), frontZ + 1)
     if (!drawCanvasImageQuad(ctx, artImage, artQuad)) fillCanvasQuad(ctx, artQuad, '#efe5ca')
 
     const rails = [
@@ -973,34 +1013,37 @@ Page({
   toggleMat() {
     const mat = !this.data.mat
     const total = this.recalculateTotal({ mat })
-    this.setData({ mat, total, matVisualWidth: mat ? Math.max(8, Math.round(this.data.matWidth * 0.42)) : 0 }, () => this.requestFrameCanvasDraw())
+    const visualWidth = Math.max(Number(this.data.matTopBottomMm) || 0, Number(this.data.matLeftRightMm) || 0)
+    this.setData({ mat, total, matVisualWidth: mat ? Math.max(8, Math.round(visualWidth * 0.42)) : 0 }, () => this.requestFrameCanvasDraw())
   },
   refreshMatLayers(nextLayers, requestedIndex, matsOverride) {
     const mats = matsOverride || this.data.mats || defaultMats
-    const layers = nextLayers && nextLayers.length ? nextLayers : [{ id: `layer-${Date.now()}`, matId: mats[0].id, widthMm: 24 }]
+    const layers = (nextLayers && nextLayers.length
+      ? nextLayers
+      : [{ id: `layer-${Date.now()}`, matId: mats[0].id, topBottomMm: 24, leftRightMm: 24 }])
+      .map(normalizeMatLayer)
     const activeMatLayerIndex = clamp(Number(requestedIndex) || 0, 0, layers.length - 1)
     const activeLayer = layers[activeMatLayerIndex]
     const selectedMat = mats.find((item) => item.id === activeLayer.matId) || mats[0] || defaultMats[0]
     const presentation = makeMatLayerPresentation(layers, mats)
     const isOuter = activeMatLayerIndex === 0
-    const isLine = activeMatLayerIndex === 2
     this.setData({
       matLayers: layers,
       matLayerViews: presentation.views,
-      matImageInset: presentation.previewInset,
-      matCornerInset: presentation.cornerInset,
+      matImageInsetStyle: presentation.previewArtStyle,
+      matCornerArtStyle: presentation.cornerArtStyle,
       activeMatCornerStyle: presentation.views[activeMatLayerIndex].cornerRingStyle,
       activeMatPreviewStyle: presentation.views[activeMatLayerIndex].previewRingStyle,
-      activeMatLayerLabel: `第${activeMatLayerIndex + 1}层 · ${activeLayer.widthMm}mm`,
+      activeMatLayerLabel: `第${activeMatLayerIndex + 1}层 · 上下${activeLayer.topBottomMm} / 左右${activeLayer.leftRightMm}mm`,
       activeMatLayerIndex,
-      activeMatWidthLabel: isOuter ? '主卡纸总留边' : isLine ? '装饰线露出' : '内衬露出',
-      activeMatMin: isOuter ? 10 : isLine ? 0.5 : 1,
-      activeMatMax: isOuter ? 60 : isLine ? 4 : 12,
-      activeMatStep: isLine ? 0.5 : 1,
+      activeMatMin: isOuter ? 10 : activeMatLayerIndex === 2 ? 0.5 : 1,
+      activeMatMax: isOuter ? MAX_OUTER_MAT_WIDTH_MM : 30,
+      activeMatStep: isOuter ? 1 : 0.5,
       selectedMat,
       matColor: selectedMat.color,
-      matWidth: activeLayer.widthMm,
-      matVisualWidth: presentation.previewInset,
+      matTopBottomMm: activeLayer.topBottomMm,
+      matLeftRightMm: activeLayer.leftRightMm,
+      matVisualWidth: Math.max(presentation.previewTopInset, presentation.previewSideInset),
       matTextureStyle: makeMatTextureStyle(selectedMat)
     }, () => this.requestFrameCanvasDraw())
   },
@@ -1026,7 +1069,7 @@ Page({
     const index = this.data.matLayers.length
     const material = this.data.mats[Math.min(index, this.data.mats.length - 1)] || this.data.mats[0]
     const widthMm = index === 1 ? 5 : 1.5
-    const layers = [...this.data.matLayers, { id: `layer-${Date.now()}`, matId: material.id, widthMm }]
+    const layers = [...this.data.matLayers, { id: `layer-${Date.now()}`, matId: material.id, topBottomMm: widthMm, leftRightMm: widthMm }]
     this.setData({ mat: true })
     this.refreshMatLayers(layers, layers.length - 1)
   },
@@ -1036,13 +1079,16 @@ Page({
     this.refreshMatLayers(layers, Math.max(0, this.data.activeMatLayerIndex - 1))
   },
   adjustMatWidth(event) {
+    const axis = event.currentTarget.dataset.axis === 'leftRight' ? 'leftRight' : 'topBottom'
     const delta = (Number(event.currentTarget.dataset.direction) || 0) * (Number(this.data.activeMatStep) || 1)
-    this.updateActiveMatWidth(Number(this.data.matWidth) + delta)
+    const current = axis === 'leftRight' ? this.data.matLeftRightMm : this.data.matTopBottomMm
+    this.updateActiveMatWidth(axis, Number(current) + delta)
   },
-  updateActiveMatWidth(value) {
+  updateActiveMatWidth(axis, value) {
     const step = Number(this.data.activeMatStep) || 1
     const widthMm = Math.round(clamp(Number(value), this.data.activeMatMin, this.data.activeMatMax) / step) * step
-    const layers = this.data.matLayers.map((layer, index) => index === this.data.activeMatLayerIndex ? { ...layer, widthMm } : layer)
+    const key = axis === 'leftRight' ? 'leftRightMm' : 'topBottomMm'
+    const layers = this.data.matLayers.map((layer, index) => index === this.data.activeMatLayerIndex ? { ...normalizeMatLayer(layer), [key]: widthMm } : layer)
     this.refreshMatLayers(layers, this.data.activeMatLayerIndex)
   },
   selectMatMaterial(event) {
@@ -1052,7 +1098,10 @@ Page({
     this.setData({ mat: true })
     this.refreshMatLayers(layers, this.data.activeMatLayerIndex)
   },
-  selectMatColor(event) { this.setData({ matColor: event.currentTarget.dataset.color, mat: true, matVisualWidth: Math.max(8, Math.round(this.data.matWidth * 0.42)) }, () => this.requestFrameCanvasDraw()) },
+  selectMatColor(event) {
+    const visualWidth = Math.max(Number(this.data.matTopBottomMm) || 0, Number(this.data.matLeftRightMm) || 0)
+    this.setData({ matColor: event.currentTarget.dataset.color, mat: true, matVisualWidth: Math.max(8, Math.round(visualWidth * 0.42)) }, () => this.requestFrameCanvasDraw())
+  },
   recalculateTotal(next = {}) {
     const frame = next.frame || this.data.frame
     const width = next.width === undefined ? this.data.width : next.width
@@ -1065,7 +1114,8 @@ Page({
     return Math.round(frameCost + glazingAndBacking)
   },
   onMatWidthChange(event) {
-    this.updateActiveMatWidth(Number(event.detail.value))
+    const axis = event.currentTarget.dataset.axis === 'leftRight' ? 'leftRight' : 'topBottom'
+    this.updateActiveMatWidth(axis, Number(event.detail.value))
   },
   onWidthChange(event) {
     const width = Number(event.detail.value) || 1

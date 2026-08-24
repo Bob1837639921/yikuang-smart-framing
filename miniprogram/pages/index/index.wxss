@@ -561,6 +561,7 @@ button[disabled]{transition:none}
 .mat-controls-clip .mat-material-row{height:62px;min-height:62px;padding:1px 1px 4px!important}
 .mat-controls-clip .mat-material-option{width:112px;min-width:112px;height:56px!important;min-height:56px!important}
 .mat-controls-clip .mat-width-row{padding:7px 9px 8px!important;border-radius:14px}
+.mat-direction-widths{display:grid!important;gap:7px}
 .mat-width-heading{display:flex!important;align-items:center;justify-content:space-between}
 .mat-width-heading text:first-child{font-size:9px;font-weight:800;color:#725d37}
 .mat-width-heading text:last-child{font-size:11px;font-weight:900;color:#533f1d}

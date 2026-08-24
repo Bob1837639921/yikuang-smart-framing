@@ -117,7 +117,7 @@ export default function HomePage() {
 
   return (
     <div className="home-page" id="top">
-      <SiteHeader onEnterTryOn={goToTryOn} />
+      <SiteHeader />
 
       <main>
         <section className="home-hero" ref={heroRef} onPointerMove={handlePointerMove} onPointerDown={handleWaterPointerDown} aria-labelledby="hero-title">
@@ -141,7 +141,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="home-hero-signature" aria-hidden="true"><span>正好书画社</span><span>一框智能装裱</span></div>
+          <div className="home-hero-signature" role="img" aria-label="正好书画社，一框纳山河"><span aria-hidden="true">正好书画社</span><span aria-hidden="true">一框纳山河</span></div>
           <button className="home-scroll-cue" type="button" onClick={() => scrollToId("story")}><span className="home-scroll-line" aria-hidden="true" /><span>向下探索</span></button>
           <div className="home-water-reflection" aria-hidden="true" />
         </section>

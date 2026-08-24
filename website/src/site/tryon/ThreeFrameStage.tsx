@@ -259,15 +259,15 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05 * (props.brightness / 100);
+    renderer.toneMappingExposure = 1 * (props.brightness / 100);
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 100);
-    scene.add(new THREE.HemisphereLight(0xfff8e7, 0x51483d, 2.25));
-    const keyLight = new THREE.DirectionalLight(0xfff3d8, 4.2);
+    scene.add(new THREE.HemisphereLight(0xfff8e7, 0x51483d, 1.7));
+    const keyLight = new THREE.DirectionalLight(0xfff3d8, 3.15);
     keyLight.position.set(-1.1, 1.6, 9.5);
     scene.add(keyLight);
-    const rimLight = new THREE.DirectionalLight(0xd9e5ff, 1.5);
+    const rimLight = new THREE.DirectionalLight(0xd9e5ff, 0.72);
     rimLight.position.set(5, 1.5, 3);
     scene.add(rimLight);
 
@@ -328,7 +328,7 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
   useEffect(() => {
     const runtime = runtimeRef.current;
     if (runtime) {
-      runtime.renderer.toneMappingExposure = 1.05 * (props.brightness / 100);
+      runtime.renderer.toneMappingExposure = 1 * (props.brightness / 100);
       runtime.requestRender();
     }
   }, [props.brightness]);
@@ -360,10 +360,14 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
       const frameGroup = new THREE.Group();
       const artworkWidth = Math.max(0.8, props.widthCm / 10);
       const artworkHeight = Math.max(0.8, props.heightCm / 10);
+      const totalTopBottomReveal = props.matEnabled ? props.matLayers.reduce((sum, layer) => sum + Math.max(0, layer.topBottomMm / 100), 0) : 0;
+      const totalLeftRightReveal = props.matEnabled ? props.matLayers.reduce((sum, layer) => sum + Math.max(0, layer.leftRightMm / 100), 0) : 0;
+      const frameInnerWidth = artworkWidth + totalLeftRightReveal * 2;
+      const frameInnerHeight = artworkHeight + totalTopBottomReveal * 2;
       const railWidth = Math.max(0.18, props.frame.widthMm / 100);
       const depth = Math.max(0.08, props.frame.depthMm / 100);
-      const outerWidth = artworkWidth + railWidth * 2;
-      const outerHeight = artworkHeight + railWidth * 2;
+      const outerWidth = frameInnerWidth + railWidth * 2;
+      const outerHeight = frameInnerHeight + railWidth * 2;
       const sideTexture = props.frame.sideTexture ? textureAt(props.frame.sideTexture) : undefined;
       if (sideTexture) {
         sideTexture.colorSpace = THREE.SRGBColorSpace;
@@ -383,12 +387,12 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
           heightTexture.wrapT = THREE.ClampToEdgeWrapping;
         }
         const faceMaterial = props.frame.pbr
-          ? new THREE.MeshPhysicalMaterial({ map: texture, bumpMap: heightTexture, bumpScale: props.frame.pbr.bumpScale, color: 0xffffff, roughness: 0.52, metalness: 0, clearcoat: props.frame.pbr.clearcoat, clearcoatRoughness: props.frame.pbr.clearcoatRoughness, sheen: 0.08, sheenColor: new THREE.Color(props.frame.edge), sheenRoughness: 0.72 })
-          : new THREE.MeshStandardMaterial({ map: texture, color: 0xffffff, roughness: props.frame.material === "铝合金" ? 0.32 : 0.58, metalness: props.frame.material === "铝合金" ? 0.72 : 0.05 });
+          ? new THREE.MeshPhysicalMaterial({ map: texture, bumpMap: heightTexture, bumpScale: props.frame.pbr.bumpScale, color: 0xffffff, roughness: Math.max(0.62, props.frame.pbr.clearcoatRoughness), metalness: 0, clearcoat: props.frame.pbr.clearcoat * 0.55, clearcoatRoughness: Math.max(0.68, props.frame.pbr.clearcoatRoughness), sheen: 0.025, sheenColor: new THREE.Color(props.frame.edge), sheenRoughness: 0.84 })
+          : new THREE.MeshStandardMaterial({ map: texture, color: 0xffffff, roughness: props.frame.material === "铝合金" ? 0.56 : 0.64, metalness: props.frame.material === "铝合金" ? 0.3 : 0.025 });
         const sideMaterial = props.frame.pbr
-          ? new THREE.MeshPhysicalMaterial({ ...(sideTexture ? { map: sideTexture, color: 0xffffff } : { color: props.frame.tone }), roughness: 0.56, metalness: 0, clearcoat: props.frame.pbr.clearcoat, clearcoatRoughness: props.frame.pbr.clearcoatRoughness })
-          : new THREE.MeshStandardMaterial({ ...(sideTexture ? { map: sideTexture, color: 0xffffff } : { color: props.frame.tone }), roughness: 0.62, metalness: props.frame.material === "铝合金" ? 0.58 : 0.02 });
-        const geometry = new THREE.ExtrudeGeometry(railShape(side, outerWidth, outerHeight, artworkWidth, artworkHeight), { depth, bevelEnabled: false, curveSegments: 1 });
+          ? new THREE.MeshPhysicalMaterial({ ...(sideTexture ? { map: sideTexture, color: 0xffffff } : { color: props.frame.tone }), roughness: 0.7, metalness: 0, clearcoat: props.frame.pbr.clearcoat * 0.45, clearcoatRoughness: Math.max(0.72, props.frame.pbr.clearcoatRoughness) })
+          : new THREE.MeshStandardMaterial({ ...(sideTexture ? { map: sideTexture, color: 0xffffff } : { color: props.frame.tone }), roughness: 0.7, metalness: props.frame.material === "铝合金" ? 0.24 : 0.015 });
+        const geometry = new THREE.ExtrudeGeometry(railShape(side, outerWidth, outerHeight, frameInnerWidth, frameInnerHeight), { depth, bevelEnabled: false, curveSegments: 1 });
         geometry.translate(0, 0, -depth);
         normalizePlanarUv(geometry);
         geometry.computeVertexNormals();
@@ -401,7 +405,7 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
             ? [...props.frame.pbr.profilePoints].sort((a, b) => a.insetRatio - b.insetRatio)
             : [{ insetRatio: 0, heightMm: props.frame.pbr.profileReliefMm * 0.35 }, { insetRatio: 0.14, heightMm: props.frame.pbr.profileReliefMm }, { insetRatio: 0.82, heightMm: props.frame.pbr.profileReliefMm }, { insetRatio: 1, heightMm: 0 }];
           const profileGeometry = profileRailGeometry(side, outerWidth, outerHeight, railWidth, profilePoints);
-          const profileMaterial = new THREE.MeshPhysicalMaterial({ map: texture, bumpMap: heightTexture, bumpScale: props.frame.pbr.bumpScale, color: 0xffffff, roughness: 0.48, metalness: 0, clearcoat: props.frame.pbr.clearcoat + 0.04, clearcoatRoughness: 0.58, side: THREE.DoubleSide });
+          const profileMaterial = new THREE.MeshPhysicalMaterial({ map: texture, bumpMap: heightTexture, bumpScale: props.frame.pbr.bumpScale, color: 0xffffff, roughness: 0.64, metalness: 0, clearcoat: Math.min(0.3, props.frame.pbr.clearcoat * 0.55 + 0.02), clearcoatRoughness: 0.72, side: THREE.DoubleSide });
           const profileMesh = new THREE.Mesh(profileGeometry, profileMaterial);
           frameGroup.add(profileMesh);
           disposables.push(profileGeometry, profileMaterial);
@@ -410,8 +414,8 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
 
       const ow = outerWidth / 2;
       const oh = outerHeight / 2;
-      const iw = artworkWidth / 2;
-      const ih = artworkHeight / 2;
+      const iw = frameInnerWidth / 2;
+      const ih = frameInnerHeight / 2;
       const miterGeometry = new THREE.BufferGeometry();
       miterGeometry.setAttribute("position", new THREE.BufferAttribute(new Float32Array([
         -ow, oh, 0.002, -iw, ih, 0.002, ow, oh, 0.002, iw, ih, 0.002,
@@ -423,16 +427,17 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
       frameGroup.add(miterLines);
       disposables.push(miterGeometry, miterMaterial);
 
-      let openingWidth = artworkWidth;
-      let openingHeight = artworkHeight;
+      let openingWidth = frameInnerWidth;
+      let openingHeight = frameInnerHeight;
       let matFront = -0.012;
       const matFaceMaterials: THREE.MeshStandardMaterial[] = [];
       if (props.matEnabled) {
         props.matLayers.forEach((layer, index) => {
           const material = getMatMaterial(layer.materialId);
-          const reveal = Math.max(0.015, layer.widthMm / 100);
-          const nextWidth = Math.max(0.25, openingWidth - reveal * 2);
-          const nextHeight = Math.max(0.25, openingHeight - reveal * 2);
+          const topBottomReveal = Math.max(0.015, layer.topBottomMm / 100);
+          const leftRightReveal = Math.max(0.015, layer.leftRightMm / 100);
+          const nextWidth = Math.max(0.25, openingWidth - leftRightReveal * 2);
+          const nextHeight = Math.max(0.25, openingHeight - topBottomReveal * 2);
           const thickness = Math.max(0.015, material.thicknessMm / 100);
           const geometry = new THREE.ExtrudeGeometry(rectangleRing(openingWidth, openingHeight, nextWidth, nextHeight), { depth: thickness, bevelEnabled: true, bevelSize: 0.008, bevelThickness: 0.006, bevelSegments: 1 });
           geometry.translate(0, 0, matFront - thickness);
@@ -461,7 +466,7 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
       frameGroup.add(artwork);
       disposables.push(artworkMaterial, artworkGeometry);
 
-      const glassGeometry = new THREE.PlaneGeometry(artworkWidth * 0.995, artworkHeight * 0.995);
+      const glassGeometry = new THREE.PlaneGeometry(frameInnerWidth * 0.995, frameInnerHeight * 0.995);
       const glassMaterial = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: 0.12, roughness: 0.04, metalness: 0, transmission: 0.78, thickness: 0.035, depthWrite: false });
       const glass = new THREE.Mesh(glassGeometry, glassMaterial);
       glass.position.z = 0.026;

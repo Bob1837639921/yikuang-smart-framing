@@ -1,15 +1,13 @@
 import { useState } from "react";
 import BrandMark from "./BrandMark";
 
-type SiteHeaderProps = { onEnterTryOn: () => void };
-
 const links = [
   { href: "#story", label: "装裱故事" },
   { href: "#materials", label: "框料美学" },
   { href: "#studio", label: "关于我们" },
 ];
 
-export default function SiteHeader({ onEnterTryOn }: SiteHeaderProps) {
+export default function SiteHeader() {
   const [open, setOpen] = useState(false);
   const closeMenu = () => setOpen(false);
 
@@ -23,7 +21,6 @@ export default function SiteHeader({ onEnterTryOn }: SiteHeaderProps) {
       <nav className={open ? "home-nav is-open" : "home-nav"} aria-label="主导航">
         <a className="home-nav-active" href="#top" onClick={closeMenu}>首页</a>
         {links.map((link) => <a key={link.href} href={link.href} onClick={closeMenu}>{link.label}</a>)}
-        <button className="home-header-cta" type="button" onClick={() => { closeMenu(); onEnterTryOn(); }}>进入试装 <span aria-hidden="true">→</span></button>
       </nav>
     </header>
   );

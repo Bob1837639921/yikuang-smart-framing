@@ -1,48 +1,47 @@
 # Design QA
 
-- Source visual truth paths:
-  - `C:\Users\zephyr\AppData\Local\Temp\codex-clipboard-5bcfba54-2674-448f-94fd-1cab241ccc25.png`
-  - `C:\Users\zephyr\AppData\Local\Temp\codex-clipboard-97bea1c9-9108-4841-a73c-fe3f60749aa0.png`
-- Implementation target: `http://localhost:4173/`
-- Source pixels: 2210 × 218 (header crop) and 642 × 694 (process-rail crop).
-- Intended CSS viewport: current Codex Desktop in-app browser desktop viewport; source density is a direct desktop capture.
-- State: homepage header and framing-story process rail.
-- Implementation screenshot: unavailable. The in-app browser refused localhost capture under its URL security policy after the code change.
+- User issue screenshot: `C:\Users\86159\AppData\Local\Temp\codex-clipboard-973da1f8-8390-4e11-a5fc-d41e360a6d85.png`
+- Desktop implementation: `D:\桌面\work\project\yikuang-smart-framing\tmp\audits\cta-signature\05-poem-final-wide.png`
+- Mobile menu implementation: `D:\桌面\work\project\yikuang-smart-framing\tmp\audits\cta-signature\03-mobile-menu.png`
+- Desktop viewport and pixels: 1618 × 682 CSS px at 1:1 capture density.
+- Mobile viewport and pixels: 390 × 844 CSS px at 1:1 capture density.
+- State: homepage hero after entry animation; mobile navigation open.
 
 ## Full-view comparison evidence
 
-The two source crops were opened and inspected. They show a centered, capped header surface and a narrow vertical seven-step rail. The implementation was changed to a viewport-wide header surface with content aligned to a 1760px composition and a 1600px desktop story region whose seven steps are equal-width horizontal tabs above the linked stage.
+The revised desktop hero removes the duplicate header try-on control and keeps one primary try-on action in the hero. The former low-contrast functional label at the lower right is replaced by a paper-white poetic inscription containing the full store name. The composition, artwork, navigation links, hero copy, and primary conversion path otherwise remain unchanged.
 
 ## Focused region comparison evidence
 
-Focused implementation evidence is unavailable because browser capture was blocked. Static CSS inspection confirms the intended structural changes, but static inspection is not sufficient for visual QA.
+The final full-width capture clearly shows the requested right-side detail: `正好书画社 / 一框纳山河` in two equal five-character vertical columns. The plaque measures about 71 × 110px, uses 14px Noto Serif SC, 700/600 weights, 94% paper opacity, and dark ink/ochre text. The complete detail is readable without depending on the background image for contrast.
 
 ## Findings
 
-- [P1] Browser-rendered implementation evidence is missing.
-  - Location: homepage header and `.home-story-rail`.
-  - Evidence: both reference crops are available, but the revised localhost page could not be captured.
-  - Impact: exact header alignment, seven-column wrapping, typography, and sticky-stage proportions cannot be visually certified.
-  - Fix: refresh the local preview in the user's in-app browser and capture the revised header, story rail, and one active stage for a same-state comparison.
-
-- [P2] Earlier stage visuals were too generic for their copy.
-  - Location: `.home-story-art` stage.
-  - Evidence: the prior implementation only cross-faded three broad images across seven labels.
-  - Impact: measurement, mounting, spacing, and final inspection were not visually legible as distinct operations.
-  - Fix: map raw/material/finished assets to the relevant stages and add operation-specific visual states for measurement, support, spacing, glazing/backing, and final inspection.
+- No actionable P0/P1/P2 findings remain for the duplicate above-fold CTA or right-side inscription.
+- [P3] The inscription is intentionally hidden below 720px because the mobile hero already contains title, copy, CTA, story link, and artwork in a narrow composition.
 
 ## Required fidelity surfaces
 
-- Fonts and typography: source inspected; revised implementation not visually captured.
-- Spacing and layout rhythm: source inspected; CSS now uses a full-width header and equal seven-column rail, but visual confirmation is blocked.
-- Colors and visual tokens: unchanged from the existing cream, ink, and gold system; visual confirmation is blocked.
-- Image quality and asset fidelity: no image assets were changed in this iteration.
-- Copy and content: seven existing process labels and linked stage content are preserved.
+- Fonts and typography: the inscription now uses the established serif family at 14px with deliberate two-column vertical rhythm; the hero title and remaining CTA are unchanged.
+- Spacing and layout rhythm: removing the header CTA gives navigation even spacing. The inscription stays aligned to the wide hero composition and does not overlap the frame or scroll cue.
+- Colors and visual tokens: paper, ink, and ochre remain within the existing palette, with sufficient opaque backing to stay readable across the split image/background boundary.
+- Image quality and asset fidelity: no image, crop, overlay, or logo changes.
+- Copy and content: the inscription is now `正好书画社，一框纳山河`; the full brand name is present and the poetic line directly references framing.
+
+## Interaction and runtime checks
+
+- Visible above-fold try-on action count: one.
+- Remaining hero action navigates to `#try-on`: passed.
+- Desktop and mobile horizontal overflow: none.
+- Mobile navigation contains no duplicate try-on action: passed.
+- Browser console errors: none.
+- Production build and protected runtime integrity check: passed.
 
 ## Comparison history
 
-- Iteration 1: identified capped header width and narrow vertical process rail from the user-provided screenshots.
-- Fixes made: full-bleed header; 1760px content alignment; 1600px story section; seven equal-width horizontal desktop steps; horizontal scrolling at narrow breakpoints.
-- Post-fix visual evidence: blocked by the in-app browser URL policy.
+1. Earlier findings: [P1] the lower-right text was too transparent and crossed two backgrounds; [P2] header and hero repeated the same try-on action in one viewport.
+2. First fix: removed the header CTA and placed both vertical lines on an opaque paper plaque with stronger type.
+3. Content refinement: replaced the functional phrase with the balanced five-character pairing `正好书画社 / 一框纳山河`, increased it to 14px, and retained a complete accessible label.
+4. Post-fix evidence: 1618 × 682 capture shows one hero CTA and a fully readable inscription; 390px capture confirms the decorative plaque is removed and navigation remains uncluttered.
 
-final result: blocked
+final result: passed

@@ -31,10 +31,32 @@ export type MatMaterial = {
 export type MatLayer = {
   id: string;
   materialId: string;
-  widthMm: number;
+  topBottomMm: number;
+  leftRightMm: number;
 };
 
-export type SceneId = "gallery" | "paper" | "ink";
+export const MAX_OUTER_MAT_WIDTH_MM = 200;
+
+export type SceneId = "gallery" | "exhibition" | "study";
+
+/**
+ * Static scene boards use a fixed 1600×900 render surface, while these
+ * dimensions describe the approximate real wall represented by each photo.
+ * The sizes are intentionally data-driven so a scene can be replaced without
+ * baking another scale constant into the preview component.
+ */
+export const STATIC_SCENE_VIEWS = {
+  exhibition: { rotation: { x: -2, y: 0 }, zoom: 0.38, wallWidthCm: 720, wallHeightCm: 420 },
+  study: { rotation: { x: -1, y: 0 }, zoom: 0.32, wallWidthCm: 420, wallHeightCm: 260 },
+} as const;
+
+export const sceneOptions: Array<{ id: SceneId; label: string; description: string; interactive: boolean; wallWidthCm?: number; wallHeightCm?: number }> = [
+  { id: "gallery", label: "展墙", description: "可拖动查看真实 3D", interactive: true },
+  { id: "exhibition", label: "艺廊", description: "约 720 × 420 cm 墙面，静态陈列", interactive: false, wallWidthCm: STATIC_SCENE_VIEWS.exhibition.wallWidthCm, wallHeightCm: STATIC_SCENE_VIEWS.exhibition.wallHeightCm },
+  { id: "study", label: "藏家书房", description: "约 420 × 260 cm 主墙，静态陈列", interactive: false, wallWidthCm: STATIC_SCENE_VIEWS.study.wallWidthCm, wallHeightCm: STATIC_SCENE_VIEWS.study.wallHeightCm },
+];
+
+export const STATIC_SCENE_CANVAS = { width: 1600, height: 900 } as const;
 
 export const frameMaterials: FrameMaterial[] = [
   { id: "oak", name: "原木时光", group: "原木", material: "原木", tone: "#a96e32", edge: "#d5a660", image: "/assets/tryon/oak-corner.jpg", textures: { top: "/assets/tryon/oak-rail-top.webp", right: "/assets/tryon/oak-rail-right.webp", bottom: "/assets/tryon/oak-rail-bottom.webp", left: "/assets/tryon/oak-rail-left.webp" }, pbr: { heightTextures: { top: "/assets/tryon/oak-rail-top-height.webp", right: "/assets/tryon/oak-rail-right-height.webp", bottom: "/assets/tryon/oak-rail-bottom-height.webp", left: "/assets/tryon/oak-rail-left-height.webp" }, bumpScale: 0.055, clearcoat: 0.12, clearcoatRoughness: 0.68, profileReliefMm: 1.6, profilePoints: [{ insetRatio: 0, heightMm: 0 }, { insetRatio: 0.08, heightMm: 0.9 }, { insetRatio: 0.18, heightMm: 1.6 }, { insetRatio: 0.7, heightMm: 1.6 }, { insetRatio: 0.82, heightMm: 1.05 }, { insetRatio: 0.94, heightMm: 0.35 }, { insetRatio: 1, heightMm: 0 }] }, pricePerMeter: 168, widthMm: 52, depthMm: 24 },
@@ -53,8 +75,8 @@ export const matMaterials: MatMaterial[] = [
 ];
 
 export const defaultMatLayers: MatLayer[] = [
-  { id: "layer-1", materialId: "ivory", widthMm: 32 },
-  { id: "layer-2", materialId: "oat", widthMm: 5 },
+  { id: "layer-1", materialId: "ivory", topBottomMm: 32, leftRightMm: 32 },
+  { id: "layer-2", materialId: "oat", topBottomMm: 5, leftRightMm: 5 },
 ];
 
 export function calculateQuote(widthCm: number, heightCm: number, frame: FrameMaterial) {

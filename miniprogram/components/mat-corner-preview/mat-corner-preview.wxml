@@ -1,6 +1,6 @@
 <view class="mat-corner-preview {{pulse ? 'corner-pulse' : ''}}" bindtap="handleCycle">
   <view wx:for="{{layers}}" wx:key="id" class="mat-corner-layer {{activeIndex === index ? 'active' : ''}}" style="{{item.cornerStyle}}"></view>
-  <view class="mat-corner-art" style="inset:{{artInset}}px"></view>
+  <view class="mat-corner-art" style="{{artStyle}}"></view>
   <view class="mat-corner-active-ring" style="{{activeRingStyle}}"></view>
   <view wx:for="{{layers}}" wx:key="id" class="mat-corner-hit-zone" style="{{item.cornerHitStyle}}" data-index="{{index}}" catchtap="handleLayerTap"></view>
 </view>

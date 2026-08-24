@@ -2,7 +2,7 @@ Component({
   properties: {
     layers: { type: Array, value: [] },
     activeIndex: { type: Number, value: 0 },
-    artInset: { type: Number, value: 0 },
+    artStyle: { type: String, value: 'inset:0px' },
     activeRingStyle: { type: String, value: '' },
     pulse: { type: Boolean, value: false }
   },
