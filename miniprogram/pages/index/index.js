@@ -7,11 +7,11 @@ const samples = [
 ]
 
 const defaultFrames = [
-  { id: 'oak', name: '原木时光', tone: '#ba7a35', edge: '#e1b66b', price: 168, pricePerMeter: 168, materialGroup: '原木', materialLabel: '原木', assets: { catalog: '/assets/frame-catalog/oak-corner.jpg', swatch: '/assets/frame-catalog/oak-corner.jpg' }, geometry: { profileType: '平直', widthMm: 52, depthMm: 24, innerLipMm: 8, bevelMm: 2, cornerJoin: 'miter' } },
+  { id: 'oak', name: '原木时光', tone: '#ba7a35', edge: '#e1b66b', price: 168, pricePerMeter: 168, materialGroup: '原木', materialLabel: '原木', lineCategory: '实木线条', lineSubcategory: '常规实木', assets: { catalog: '/assets/frame-catalog/oak-corner.jpg', swatch: '/assets/frame-catalog/oak-corner.jpg' }, geometry: { profileType: '平直', widthMm: 52, depthMm: 24, innerLipMm: 8, bevelMm: 2, cornerJoin: 'miter' } },
   { id: 'black', name: '曜石黑铝', tone: '#24231f', edge: '#65635d', price: 198, pricePerMeter: 198, materialGroup: '极简', materialLabel: '铝合金', assets: { catalog: '/assets/frame-catalog/black-corner.jpg', swatch: '/assets/frame-catalog/black-corner.jpg' }, geometry: { profileType: '平直', widthMm: 48, depthMm: 22, innerLipMm: 7, bevelMm: 1, cornerJoin: 'miter' } },
-  { id: 'cream', name: '奶油白漆', tone: '#eee9dc', edge: '#fffdf6', price: 188, pricePerMeter: 188, materialGroup: '极简', materialLabel: '实木漆面', assets: { catalog: '/assets/frame-catalog/cream-corner.jpg', swatch: '/assets/frame-catalog/cream-corner.jpg' }, geometry: { profileType: '平直', widthMm: 50, depthMm: 23, innerLipMm: 8, bevelMm: 2, cornerJoin: 'miter' } },
-  { id: 'yellow', name: '限定亮黄', tone: '#f6c945', edge: '#ffe985', price: 218, pricePerMeter: 218, materialGroup: '个性色', materialLabel: '实木漆面', assets: { catalog: '/assets/frame-catalog/yellow-corner.jpg', swatch: '/assets/frame-catalog/yellow-corner.jpg' }, geometry: { profileType: '平直', widthMm: 50, depthMm: 23, innerLipMm: 8, bevelMm: 2, cornerJoin: 'miter' } },
-  { id: 'walnut', name: '胡桃深木', tone: '#633a24', edge: '#9f6b42', price: 228, pricePerMeter: 228, materialGroup: '原木', materialLabel: '原木', assets: { catalog: '/assets/frame-catalog/walnut-corner.jpg', swatch: '/assets/frame-catalog/walnut-corner.jpg' }, geometry: { profileType: '平直', widthMm: 55, depthMm: 27, innerLipMm: 9, bevelMm: 2, cornerJoin: 'miter' } },
+  { id: 'cream', name: '奶油白漆', tone: '#eee9dc', edge: '#fffdf6', price: 188, pricePerMeter: 188, materialGroup: '极简', materialLabel: '实木漆面', lineCategory: '实木线条', lineSubcategory: '常规实木', assets: { catalog: '/assets/frame-catalog/cream-corner.jpg', swatch: '/assets/frame-catalog/cream-corner.jpg' }, geometry: { profileType: '平直', widthMm: 50, depthMm: 23, innerLipMm: 8, bevelMm: 2, cornerJoin: 'miter' } },
+  { id: 'yellow', name: '限定亮黄', tone: '#f6c945', edge: '#ffe985', price: 218, pricePerMeter: 218, materialGroup: '个性色', materialLabel: '实木漆面', lineCategory: '实木线条', lineSubcategory: '常规实木', assets: { catalog: '/assets/frame-catalog/yellow-corner.jpg', swatch: '/assets/frame-catalog/yellow-corner.jpg' }, geometry: { profileType: '平直', widthMm: 50, depthMm: 23, innerLipMm: 8, bevelMm: 2, cornerJoin: 'miter' } },
+  { id: 'walnut', name: '胡桃深木', tone: '#633a24', edge: '#9f6b42', price: 228, pricePerMeter: 228, materialGroup: '原木', materialLabel: '原木', lineCategory: '实木线条', lineSubcategory: '常规实木', assets: { catalog: '/assets/frame-catalog/walnut-corner.jpg', swatch: '/assets/frame-catalog/walnut-corner.jpg' }, geometry: { profileType: '平直', widthMm: 55, depthMm: 27, innerLipMm: 9, bevelMm: 2, cornerJoin: 'miter' } },
   { id: 'silver', name: '银灰细框', tone: '#b8bab8', edge: '#e7e8e4', price: 208, pricePerMeter: 208, materialGroup: '极简', materialLabel: '铝合金', assets: { catalog: '/assets/frame-catalog/silver-corner.jpg', swatch: '/assets/frame-catalog/silver-corner.jpg' }, geometry: { profileType: '平直', widthMm: 35, depthMm: 20, innerLipMm: 6, bevelMm: 1, cornerJoin: 'miter' } },
   {
     id: 'demo-walnut-gold',
@@ -23,6 +23,8 @@ const defaultFrames = [
     pricePerMeter: 268,
     materialGroup: '个性色',
     materialLabel: '雕花实木',
+    lineCategory: '实木线条',
+    lineSubcategory: '常规实木',
     shadow: 'rgba(89,45,12,.3)',
     source: 'admin-upload',
     status: 'published',
@@ -49,12 +51,18 @@ const ADMIN_UUID_STORAGE_KEY = 'oneframe_admin_uuid'
 // Prototype-only allowlist. Production validation must happen on the server.
 const ADMIN_UUID_ALLOWLIST = ['oneframe-admin-demo']
 const materialTypes = ['木纹', '石膏', '石材', '金属', '复合材质']
+const lineCategories = ['实木线条', '石膏线条', '塑料线条']
+const lineSubcategories = {
+  实木线条: ['常规实木', '红木'],
+  石膏线条: ['常规石膏', '油画线条'],
+  塑料线条: ['常规塑料']
+}
 const profileTypes = ['平直', '阶梯', '欧式曲线', '雕花']
 const defaultMats = [
-  { id: 'mat-ivory', name: '暖白棉纹', color: '#fffaf0', texture: '', thicknessMm: 3, defaultWidthMm: 24, source: 'demo' },
-  { id: 'mat-oat', name: '燕麦细纹', color: '#f4ead1', texture: '', thicknessMm: 3, defaultWidthMm: 24, source: 'demo' },
-  { id: 'mat-sage', name: '雾绿麻纹', color: '#d8e7db', texture: '', thicknessMm: 3, defaultWidthMm: 28, source: 'demo' },
-  { id: 'mat-charcoal', name: '炭黑绒面', color: '#22211e', texture: '', thicknessMm: 3, defaultWidthMm: 24, source: 'demo' }
+  { id: 'mat-ivory', name: '暖白棉纹', color: '#fffaf0', edgeColor: '#d1cdc5', texture: '', thicknessMm: 3, defaultTopBottomMm: 24, defaultLeftRightMm: 24, source: 'demo' },
+  { id: 'mat-oat', name: '燕麦细纹', color: '#f4ead1', edgeColor: '#c8c0ac', texture: '', thicknessMm: 3, defaultTopBottomMm: 24, defaultLeftRightMm: 24, source: 'demo' },
+  { id: 'mat-sage', name: '雾绿麻纹', color: '#d8e7db', edgeColor: '#b1bdb4', texture: '', thicknessMm: 3, defaultTopBottomMm: 28, defaultLeftRightMm: 28, source: 'demo' },
+  { id: 'mat-charcoal', name: '炭黑绒面', color: '#22211e', edgeColor: '#1c1b19', texture: '', thicknessMm: 3, defaultTopBottomMm: 24, defaultLeftRightMm: 24, source: 'demo' }
 ]
 const MAX_OUTER_MAT_WIDTH_MM = 200
 
@@ -73,10 +81,13 @@ const emptyAdminDraft = {
   name: '',
   pricePerMeter: '168',
   image: '',
+  coverImage: '',
   frontImage: '',
   profileImage: '',
   sectionImage: '',
   surfaceType: '木纹',
+  lineCategory: '实木线条',
+  lineSubcategory: '常规实木',
   profileType: '平直',
   widthMm: '40',
   depthMm: '24',
@@ -85,7 +96,21 @@ const emptyAdminDraft = {
   bevelMm: '2'
 }
 
-const emptyMatDraft = { name: '', color: '#fffaf0', textureImage: '', thicknessMm: '3', defaultWidthMm: '24' }
+const emptyMatDraft = { name: '', color: '#fffaf0', textureImage: '', thicknessMm: '3', defaultTopBottomMm: '24', defaultLeftRightMm: '24' }
+
+function deriveMatEdgeColor(color) {
+  const matched = String(color || '').match(/^#([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i)
+  if (!matched) return '#c8c0b2'
+  const channel = (value) => Math.max(0, Math.min(255, Math.round(parseInt(value, 16) * .82))).toString(16).padStart(2, '0')
+  return `#${channel(matched[1])}${channel(matched[2])}${channel(matched[3])}`
+}
+
+function generateMaterialSku(kind, now = Date.now()) {
+  const date = new Date(now)
+  const datePart = `${String(date.getFullYear()).slice(-2)}${String(date.getMonth() + 1).padStart(2, '0')}${String(date.getDate()).padStart(2, '0')}`
+  const serialPart = Math.max(0, Math.floor(now)).toString(36).toUpperCase().slice(-4).padStart(4, '0')
+  return `${kind === 'frame' ? 'ZH-FR' : 'ZH-MAT'}-${datePart}-${serialPart}`
+}
 
 function makeMatTextureStyle(mat) {
   const color = mat && mat.color ? mat.color : '#fffaf0'
@@ -195,12 +220,20 @@ function normalizeFrame(frame) {
     else if (/铝|白|极简/.test(`${frame && frame.name || ''}${materialLabel}`)) materialGroup = '极简'
     else materialGroup = '原木'
   }
+  const lineCategory = frame && frame.lineCategory
+    ? frame.lineCategory
+    : (/石膏/.test(materialLabel) ? '石膏线条' : (/塑|PS|PVC/.test(materialLabel) ? '塑料线条' : (/木/.test(materialLabel) ? '实木线条' : '')))
+  const lineSubcategory = frame && frame.lineSubcategory
+    ? frame.lineSubcategory
+    : (/油画/.test(materialLabel) ? '油画线条' : (/红木/.test(materialLabel) ? '红木' : (lineCategory === '石膏线条' ? '常规石膏' : (lineCategory === '塑料线条' ? '常规塑料' : (lineCategory === '实木线条' ? '常规实木' : '')))))
   return {
     ...frame,
     price: pricePerMeter,
     pricePerMeter,
     materialGroup,
     materialLabel,
+    lineCategory,
+    lineSubcategory,
     assets: {
       ...assets,
       catalog: assets.catalog || assets.corner || assets.cover || assets.swatch || assets.front || '',
@@ -213,9 +246,9 @@ function normalizeFrame(frame) {
   }
 }
 
-function filterFrames(frames, filter) {
-  if (!filter || filter === '推荐') return frames
-  return frames.filter((item) => item.materialGroup === filter)
+function filterFrames(frames, filter, subfilter) {
+  if (!filter || filter === '全部' || filter === '推荐') return frames
+  return frames.filter((item) => item.lineCategory === filter && (!subfilter || subfilter === '全部' || item.lineSubcategory === subfilter))
 }
 
 function clamp(value, min, max) {
@@ -517,11 +550,19 @@ Page({
     samples,
     frames: defaultFrames,
     visibleFrames: defaultFrames,
-    frameFilters: ['推荐', '原木', '极简', '个性色'],
-    materialFilter: '推荐',
+    frameFilters: ['全部', ...lineCategories],
+    frameSubfilters: [],
+    materialFilter: '全部',
+    materialSubfilter: '全部',
     mats: defaultMats,
     selectedMat: defaultMats[0],
     materialTypes,
+    lineCategories,
+    adminLineCategoryIndex: 0,
+    adminLineCategoryLabel: lineCategories[0],
+    adminLineSubcategories: lineSubcategories[lineCategories[0]],
+    adminLineSubcategoryIndex: 0,
+    adminLineSubcategoryLabel: lineSubcategories[lineCategories[0]][0],
     profileTypes,
     adminMaterialTypeIndex: 0,
     adminMaterialTypeLabel: materialTypes[0],
@@ -608,16 +649,17 @@ Page({
       const base = savedMatsById.get(item.id)
       // Demo materials are bundled records; keep their current 3mm baseline
       // when an older local prototype snapshot still contains 1.4–1.8mm.
+      const legacyDefault = Number(item.defaultWidthMm) || Number(base && base.defaultTopBottomMm) || 24
       const next = base && item.source === 'demo'
-        ? { ...item, thicknessMm: base.thicknessMm }
-        : item
+        ? { ...item, thicknessMm: base.thicknessMm, edgeColor: item.edgeColor || deriveMatEdgeColor(item.color), defaultTopBottomMm: Number(item.defaultTopBottomMm) || legacyDefault, defaultLeftRightMm: Number(item.defaultLeftRightMm) || legacyDefault }
+        : { ...item, edgeColor: item.edgeColor || deriveMatEdgeColor(item.color), defaultTopBottomMm: Number(item.defaultTopBottomMm) || legacyDefault, defaultLeftRightMm: Number(item.defaultLeftRightMm) || legacyDefault }
       savedMatsById.set(item.id, next)
     })
     const nextMats = Array.from(savedMatsById.values())
     this.setData({
       topInset: Math.max(54, capsuleBottom + 8),
       frames: nextFrames,
-      visibleFrames: filterFrames(nextFrames, this.data.materialFilter),
+      visibleFrames: filterFrames(nextFrames, this.data.materialFilter, this.data.materialSubfilter),
       mats: nextMats,
       selectedMat: nextMats[0] || defaultMats[0],
       matColor: (nextMats[0] || defaultMats[0]).color,
@@ -761,8 +803,24 @@ Page({
     const maxInsetY = innerHeight * 0.42
     const artInsetX = clamp(leftRightBorderMm / 10 * scale + innerLipPx, 0, maxInsetX)
     const artInsetY = clamp(topBottomBorderMm / 10 * scale + innerLipPx, 0, maxInsetY)
-    const artQuad = quad(Math.max(12, innerWidth - artInsetX * 2), Math.max(12, innerHeight - artInsetY * 2), frontZ + 1)
+    const artWidth = Math.max(12, innerWidth - artInsetX * 2)
+    const artHeight = Math.max(12, innerHeight - artInsetY * 2)
+    const artQuad = quad(artWidth, artHeight, frontZ + 1)
     if (!drawCanvasImageQuad(ctx, artImage, artQuad)) fillCanvasQuad(ctx, artQuad, '#efe5ca')
+    if (this.data.mat) {
+      const cutEdgePx = Math.max(1.4, Math.min(5, (Number(matMaterial.thicknessMm) || 3) * scale * 0.08))
+      const cutOuter = quad(artWidth + cutEdgePx * 2, artHeight + cutEdgePx * 2, frontZ + 1.18)
+      const cutEdges = [
+        [cutOuter[0], cutOuter[1], artQuad[1], artQuad[0]],
+        [cutOuter[1], cutOuter[2], artQuad[2], artQuad[1]],
+        [cutOuter[2], cutOuter[3], artQuad[3], artQuad[2]],
+        [cutOuter[3], cutOuter[0], artQuad[0], artQuad[3]]
+      ]
+      cutEdges.forEach((points, index) => {
+        const edgeColor = matMaterial.edgeColor || deriveMatEdgeColor(matMaterial.color)
+        fillCanvasQuad(ctx, points, index < 2 ? matMaterial.color || '#f7f2e7' : edgeColor)
+      })
+    }
 
     const rails = [
       [front[0], front[1], inner[1], inner[0]],
@@ -1128,8 +1186,13 @@ Page({
   savePlan() { this.go('confirm') },
   submitPlan() { this.setData({ done: true }) },
   setMaterialFilter(event) {
-    const materialFilter = event.currentTarget.dataset.filter || '推荐'
-    this.setData({ materialFilter, visibleFrames: filterFrames(this.data.frames, materialFilter) })
+    const materialFilter = event.currentTarget.dataset.filter || '全部'
+    const frameSubfilters = materialFilter === '全部' ? [] : ['全部', ...(lineSubcategories[materialFilter] || [])]
+    this.setData({ materialFilter, materialSubfilter: '全部', frameSubfilters, visibleFrames: filterFrames(this.data.frames, materialFilter, '全部') })
+  },
+  setMaterialSubfilter(event) {
+    const materialSubfilter = event.currentTarget.dataset.filter || '全部'
+    this.setData({ materialSubfilter, visibleFrames: filterFrames(this.data.frames, this.data.materialFilter, materialSubfilter) })
   },
   selectMaterial(event) {
     const frame = this.data.frames.find((item) => item.id === event.currentTarget.dataset.id)
@@ -1162,21 +1225,46 @@ Page({
   onAdminInnerLipInput(event) { this.setData({ 'adminDraft.innerLipMm': event.detail.value }) },
   onAdminBevelInput(event) { this.setData({ 'adminDraft.bevelMm': event.detail.value }) },
   onAdminMatNameInput(event) { this.setData({ 'adminMatDraft.name': event.detail.value }) },
-  onAdminMatColorInput(event) { this.setData({ 'adminMatDraft.color': event.detail.value }) },
   onAdminMatThicknessInput(event) { this.setData({ 'adminMatDraft.thicknessMm': event.detail.value }) },
-  onAdminMatWidthInput(event) { this.setData({ 'adminMatDraft.defaultWidthMm': event.detail.value }) },
+  onAdminMatTopBottomInput(event) { this.setData({ 'adminMatDraft.defaultTopBottomMm': event.detail.value }) },
+  onAdminMatLeftRightInput(event) { this.setData({ 'adminMatDraft.defaultLeftRightMm': event.detail.value }) },
   chooseMatTexture() {
     wx.chooseMedia({ count: 1, mediaType: ['image'], sourceType: ['album', 'camera'], success: (res) => {
       const path = res.tempFiles && res.tempFiles[0] && res.tempFiles[0].tempFilePath
       if (!path) return
-      if (!wx.saveFile) return this.setData({ 'adminMatDraft.textureImage': path })
-      wx.saveFile({ tempFilePath: path, success: (saved) => this.setData({ 'adminMatDraft.textureImage': saved.savedFilePath || path }), fail: () => this.setData({ 'adminMatDraft.textureImage': path }) })
+      const applyPath = (nextPath) => this.setData({ 'adminMatDraft.textureImage': nextPath }, () => this.detectMatColor(nextPath))
+      if (!wx.saveFile) return applyPath(path)
+      wx.saveFile({ tempFilePath: path, success: (saved) => applyPath(saved.savedFilePath || path), fail: () => applyPath(path) })
     } })
+  },
+  detectMatColor(path) {
+    if (!wx.createOffscreenCanvas) return
+    try {
+      const canvas = wx.createOffscreenCanvas({ type: '2d', width: 32, height: 32 })
+      const context = canvas.getContext('2d')
+      const image = canvas.createImage()
+      image.onload = () => {
+        context.drawImage(image, 0, 0, 32, 32)
+        const pixels = context.getImageData(0, 0, 32, 32).data
+        let r = 0; let g = 0; let b = 0; let count = 0
+        for (let index = 0; index < pixels.length; index += 4) {
+          if (pixels[index + 3] < 128) continue
+          r += pixels[index]; g += pixels[index + 1]; b += pixels[index + 2]; count += 1
+        }
+        const channel = (value) => Math.max(0, Math.min(255, Math.round(value / Math.max(1, count)))).toString(16).padStart(2, '0')
+        this.setData({ 'adminMatDraft.color': `#${channel(r)}${channel(g)}${channel(b)}` })
+      }
+      image.src = path
+    } catch (error) {
+      console.warn('卡纸基础色自动识别不可用，保留默认色', error)
+    }
   },
   saveMatMaterial() {
     const draft = this.data.adminMatDraft || emptyMatDraft
-    if (!draft.name || !draft.textureImage) return this.setData({ adminMatNotice: '请填写卡纸名称并上传一张正面纹理图' })
-    const material = { id: `mat-${Date.now()}`, name: draft.name.trim(), color: draft.color || '#fffaf0', texture: draft.textureImage, thicknessMm: Number(draft.thicknessMm) || 3, defaultWidthMm: Number(draft.defaultWidthMm) || 24, source: 'admin-upload', status: 'published' }
+    if (!draft.name || !draft.textureImage) return this.setData({ adminMatNotice: '请填写卡纸名称，并上传一张正面纹理图' })
+    const color = draft.color || '#fffaf0'
+    const now = Date.now()
+    const material = { id: `mat-${now}`, sku: generateMaterialSku('mat', now), name: draft.name.trim(), color, edgeColor: deriveMatEdgeColor(color), texture: draft.textureImage, thicknessMm: Number(draft.thicknessMm) || 3, defaultTopBottomMm: Number(draft.defaultTopBottomMm) || 24, defaultLeftRightMm: Number(draft.defaultLeftRightMm) || 24, source: 'admin-upload', status: 'published' }
     const mats = [...this.data.mats, material]
     wx.setStorageSync(MAT_STORAGE_KEY, mats)
     this.setData({ mats, adminMatDraft: { ...emptyMatDraft }, adminMatNotice: `“${material.name}”已保存并发布到卡纸列表` }, () => {
@@ -1187,6 +1275,17 @@ Page({
   onAdminMaterialTypeChange(event) {
     const index = Number(event.detail.value) || 0
     this.setData({ adminMaterialTypeIndex: index, adminMaterialTypeLabel: materialTypes[index], 'adminDraft.surfaceType': materialTypes[index] })
+  },
+  onAdminLineCategoryChange(event) {
+    const index = Number(event.detail.value) || 0
+    const category = lineCategories[index]
+    const subcategories = lineSubcategories[category]
+    this.setData({ adminLineCategoryIndex: index, adminLineCategoryLabel: category, adminLineSubcategories: subcategories, adminLineSubcategoryIndex: 0, adminLineSubcategoryLabel: subcategories[0], 'adminDraft.lineCategory': category, 'adminDraft.lineSubcategory': subcategories[0] })
+  },
+  onAdminLineSubcategoryChange(event) {
+    const index = Number(event.detail.value) || 0
+    const subcategory = this.data.adminLineSubcategories[index]
+    this.setData({ adminLineSubcategoryIndex: index, adminLineSubcategoryLabel: subcategory, 'adminDraft.lineSubcategory': subcategory })
   },
   onAdminProfileTypeChange(event) {
     const index = Number(event.detail.value) || 0
@@ -1208,16 +1307,16 @@ Page({
 
   saveAdminImage(tempFilePath, kind = 'frontImage') {
     if (!wx.saveFile) {
-      this.setData({ [`adminDraft.${kind}`]: tempFilePath, ...(kind === 'frontImage' ? { 'adminDraft.image': tempFilePath } : {}) })
+      this.setData({ [`adminDraft.${kind}`]: tempFilePath })
       return
     }
     wx.saveFile({
       tempFilePath,
       success: (res) => {
         const savedFilePath = res.savedFilePath || tempFilePath
-        this.setData({ [`adminDraft.${kind}`]: savedFilePath, ...(kind === 'frontImage' ? { 'adminDraft.image': savedFilePath } : {}) })
+        this.setData({ [`adminDraft.${kind}`]: savedFilePath })
       },
-      fail: () => this.setData({ [`adminDraft.${kind}`]: tempFilePath, ...(kind === 'frontImage' ? { 'adminDraft.image': tempFilePath } : {}) })
+      fail: () => this.setData({ [`adminDraft.${kind}`]: tempFilePath })
     })
   },
 
@@ -1229,8 +1328,8 @@ Page({
     }
     const draft = this.data.adminDraft || emptyAdminDraft
     const pricePerMeter = Number(draft.pricePerMeter)
-    if (!draft.name || !draft.frontImage || !draft.profileImage || !draft.sectionImage || !Number(draft.widthMm) || !Number(draft.depthMm) || !Number(draft.sideWidthMm) || !Number.isFinite(pricePerMeter) || pricePerMeter <= 0) {
-      this.setData({ adminError: '请填写名称、框料单价（元/米）、框宽、框深、侧面显示宽度，并上传正面纹理、侧面纹理和截面轮廓图' })
+    if (!draft.name || !draft.coverImage || !draft.frontImage || !draft.profileImage || !draft.sectionImage || !Number(draft.widthMm) || !Number(draft.depthMm) || !Number(draft.sideWidthMm) || !Number.isFinite(pricePerMeter) || pricePerMeter <= 0) {
+      this.setData({ adminError: '请填写名称、框料单价（元/米）、框宽、框深、侧面显示宽度，并上传封面展示图、正面纹理、侧面纹理和截面轮廓图' })
       return
     }
     this.setData({ adminError: '', adminNotice: '正在读取图片并整理 3D 参数…', adminGenerating: true, adminProgress: 16, adminResult: null })
@@ -1241,21 +1340,23 @@ Page({
       const cachedMaterial = this.data.frames.find((item) => item.model3d && item.model3d.cacheKey === modelKey)
       const material = {
       id: `admin-${now}`,
-      sku: `CUSTOM-${now}`,
+      sku: generateMaterialSku('frame', now),
       name: draft.name.trim(),
       price: pricePerMeter,
       pricePerMeter,
       materialGroup: /木/.test(draft.surfaceType) ? '原木' : (/金属|铝/.test(draft.surfaceType) ? '极简' : '个性色'),
       materialLabel: draft.surfaceType,
+      lineCategory: draft.lineCategory,
+      lineSubcategory: draft.lineSubcategory,
       shadow: 'rgba(89,45,12,.28)',
       source: 'admin-upload',
       status: 'published',
       version: 1,
       updatedAt: new Date().toISOString(),
       assets: {
-        cover: draft.frontImage,
-        catalog: draft.frontImage,
-        swatch: draft.frontImage,
+        cover: draft.coverImage,
+        catalog: draft.coverImage,
+        swatch: draft.coverImage,
         texture: draft.frontImage,
         front: draft.frontImage,
         profile: draft.profileImage,
@@ -1297,7 +1398,7 @@ Page({
       wx.setStorageSync(MATERIAL_STORAGE_KEY, nextFrames)
       this.setData({
         frames: nextFrames,
-        visibleFrames: filterFrames(nextFrames, this.data.materialFilter),
+        visibleFrames: filterFrames(nextFrames, this.data.materialFilter, this.data.materialSubfilter),
         frame: material,
         frameTextureStyle: makeFrameTextureStyle(material),
         frameCornerStyle: makeFrameCornerStyle(material),
@@ -1305,6 +1406,11 @@ Page({
         adminDraft: { ...emptyAdminDraft },
         adminMaterialTypeIndex: 0,
         adminMaterialTypeLabel: materialTypes[0],
+        adminLineCategoryIndex: 0,
+        adminLineCategoryLabel: lineCategories[0],
+        adminLineSubcategories: lineSubcategories[lineCategories[0]],
+        adminLineSubcategoryIndex: 0,
+        adminLineSubcategoryLabel: lineSubcategories[lineCategories[0]][0],
         adminProfileTypeIndex: 0,
         adminProfileTypeLabel: profileTypes[0],
         adminError: '',
@@ -1329,7 +1435,7 @@ Page({
     const remainingFrames = nextFrames.length ? nextFrames : defaultFrames.map(normalizeFrame)
     this.setData({
       frames: remainingFrames,
-      visibleFrames: filterFrames(remainingFrames, this.data.materialFilter),
+      visibleFrames: filterFrames(remainingFrames, this.data.materialFilter, this.data.materialSubfilter),
       frame: remainingFrames[0],
       frameTextureStyle: makeFrameTextureStyle(remainingFrames[0]),
       frameCornerStyle: makeFrameCornerStyle(remainingFrames[0]),

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
-import { getMatMaterial, type FrameMaterial, type MatLayer } from "./model";
+import { getMatMaterial, type FrameMaterial, type MatLayer, type MatMaterial } from "./model";
 
 type ThreeFrameStageProps = {
   artworkUrl: string;
@@ -8,6 +8,7 @@ type ThreeFrameStageProps = {
   heightCm: number;
   frame: FrameMaterial;
   matEnabled: boolean;
+  matMaterials: MatMaterial[];
   matLayers: MatLayer[];
   activeLayerIndex: number;
   brightness: number;
@@ -342,7 +343,9 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
     const railUrls = sides.map((side) => props.frame.textures?.[side] || props.frame.image);
     const heightUrls = props.frame.pbr ? sides.map((side) => props.frame.pbr!.heightTextures[side]) : [];
     const sideUrls = props.frame.sideTexture ? [props.frame.sideTexture] : [];
-    const requestedUrls = [...railUrls, ...heightUrls, ...sideUrls, props.artworkUrl];
+    const selectedMats = props.matEnabled ? props.matLayers.map((layer) => getMatMaterial(layer.materialId, props.matMaterials)) : [];
+    const matUrls = selectedMats.map((material) => material.texture).filter((url): url is string => Boolean(url));
+    const requestedUrls = [...railUrls, ...heightUrls, ...sideUrls, ...matUrls, props.artworkUrl];
     const textureLease = textureCacheRef.current.acquire(requestedUrls);
 
     textureLease.ready.then((textures) => {
@@ -433,7 +436,7 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
       const matFaceMaterials: THREE.MeshStandardMaterial[] = [];
       if (props.matEnabled) {
         props.matLayers.forEach((layer, index) => {
-          const material = getMatMaterial(layer.materialId);
+          const material = getMatMaterial(layer.materialId, props.matMaterials);
           const topBottomReveal = Math.max(0.015, layer.topBottomMm / 100);
           const leftRightReveal = Math.max(0.015, layer.leftRightMm / 100);
           const nextWidth = Math.max(0.25, openingWidth - leftRightReveal * 2);
@@ -441,8 +444,15 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
           const thickness = Math.max(0.015, material.thicknessMm / 100);
           const geometry = new THREE.ExtrudeGeometry(rectangleRing(openingWidth, openingHeight, nextWidth, nextHeight), { depth: thickness, bevelEnabled: true, bevelSize: 0.008, bevelThickness: 0.006, bevelSegments: 1 });
           geometry.translate(0, 0, matFront - thickness);
-          const matMaterial = new THREE.MeshStandardMaterial({ color: material.color, roughness: 0.92, metalness: 0, emissive: index === activeLayerRef.current ? 0x140e02 : 0x000000 });
-          const edgeMaterial = new THREE.MeshStandardMaterial({ color: material.color, roughness: 1 });
+          const faceTexture = material.texture ? textureAt(material.texture) : undefined;
+          if (faceTexture) {
+            faceTexture.colorSpace = THREE.SRGBColorSpace;
+            faceTexture.wrapS = THREE.RepeatWrapping;
+            faceTexture.wrapT = THREE.RepeatWrapping;
+            faceTexture.repeat.set(Math.max(1, openingWidth * 1.8), Math.max(1, openingHeight * 1.8));
+          }
+          const matMaterial = new THREE.MeshStandardMaterial({ ...(faceTexture ? { map: faceTexture, color: 0xffffff } : { color: material.color }), roughness: 0.92, metalness: 0, emissive: index === activeLayerRef.current ? 0x140e02 : 0x000000 });
+          const edgeMaterial = new THREE.MeshStandardMaterial({ color: material.edgeColor || material.color, roughness: 1 });
           const matMesh = new THREE.Mesh(geometry, [matMaterial, edgeMaterial]);
           frameGroup.add(matMesh);
           matFaceMaterials.push(matMaterial);
@@ -507,7 +517,7 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
       cancelled = true;
       if (!adopted) textureLease.dispose();
     };
-  }, [props.artworkUrl, props.frame, props.heightCm, props.matEnabled, props.matLayers, props.widthCm]);
+  }, [props.artworkUrl, props.frame, props.heightCm, props.matEnabled, props.matLayers, props.matMaterials, props.widthCm]);
 
   return <>{stageError && <div className="try-stage-error" role="status">{stageError}</div>}<canvas ref={canvasRef} className="try-stage-canvas" aria-label="真实三维装裱预览" /></>;
 }

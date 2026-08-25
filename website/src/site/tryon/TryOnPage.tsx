@@ -1,18 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
 import BrandMark from "../BrandMark";
 import { goHome, goToMaterialAdmin } from "../navigation";
-import { getPublishedWebsiteFrames } from "../material-admin/model";
+import { getPublishedWebsiteFrames, getPublishedWebsiteMats } from "../material-admin/model";
 import ArtworkPanel from "./ArtworkPanel";
+import { processArtwork, type RepairLevel, type RepairStatus } from "./dewrinkle";
 import FramePreview from "./FramePreview";
 import FramingControls, { type ControlTab } from "./FramingControls";
-import { calculateQuote, defaultMatLayers, frameMaterials, sceneOptions, type MatLayer, type SceneId } from "./model";
+import { calculateQuote, defaultMatLayers, frameMaterials, matMaterials, sceneOptions, type MatLayer, type SceneId } from "./model";
 import "./tryon.css";
 
 const SAMPLE_ARTWORK = "/assets/tryon/sample-ink.jpg";
+const SAMPLE_WRINKLED_ARTWORK = "/assets/tryon/sample-ink-wrinkled-demo.png";
 
 export default function TryOnPage() {
   const [availableFrames, setAvailableFrames] = useState(frameMaterials);
+  const [availableMats, setAvailableMats] = useState(matMaterials);
   const [artworkUrl, setArtworkUrl] = useState(SAMPLE_ARTWORK);
+  const [originalArtworkUrl, setOriginalArtworkUrl] = useState(SAMPLE_ARTWORK);
+  const [artworkSource, setArtworkSource] = useState<Blob | string>(SAMPLE_ARTWORK);
   const [artworkName, setArtworkName] = useState("山间新雨");
   const [widthCm, setWidthCm] = useState(42);
   const [heightCm, setHeightCm] = useState(56);
@@ -24,15 +29,47 @@ export default function TryOnPage() {
   const [scene, setScene] = useState<SceneId>("gallery");
   const [brightness, setBrightness] = useState(100);
   const [zoom, setZoom] = useState(1);
+  const [repairLevel, setRepairLevel] = useState<RepairLevel>("original");
+  const [repairStatus, setRepairStatus] = useState<RepairStatus>("ready");
+  const [repairError, setRepairError] = useState("");
   const [notice, setNotice] = useState("");
   const quote = useMemo(() => calculateQuote(widthCm, heightCm, frame), [frame, heightCm, widthCm]);
 
-  useEffect(() => () => { if (artworkUrl.startsWith("blob:")) URL.revokeObjectURL(artworkUrl); }, [artworkUrl]);
+  useEffect(() => () => { if (originalArtworkUrl.startsWith("blob:")) URL.revokeObjectURL(originalArtworkUrl); }, [originalArtworkUrl]);
+  useEffect(() => () => { if (artworkUrl.startsWith("blob:") && artworkUrl !== originalArtworkUrl) URL.revokeObjectURL(artworkUrl); }, [artworkUrl, originalArtworkUrl]);
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+    setRepairError("");
+    if (repairLevel === "original") {
+      setArtworkUrl(originalArtworkUrl);
+      setRepairStatus("ready");
+      return () => controller.abort();
+    }
+    setRepairStatus("processing");
+    const timer = window.setTimeout(() => {
+      void processArtwork(artworkSource, repairLevel, controller.signal).then((blob) => {
+        if (!active) return;
+        setArtworkUrl(URL.createObjectURL(blob));
+        setRepairStatus("ready");
+      }).catch((error: unknown) => {
+        if (!active || (error instanceof DOMException && error.name === "AbortError")) return;
+        setRepairStatus("error");
+        setRepairError(error instanceof Error ? error.message : "图片整理失败");
+      });
+    }, 160);
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+      controller.abort();
+    };
+  }, [artworkSource, originalArtworkUrl, repairLevel]);
   useEffect(() => {
     let active = true;
-    void getPublishedWebsiteFrames().then((frames) => {
+    void Promise.all([getPublishedWebsiteFrames(), getPublishedWebsiteMats()]).then(([frames, mats]) => {
       if (!active) return;
       setAvailableFrames(frames);
+      setAvailableMats(mats);
       if (frames[0]) setFrame(frames[0]);
     });
     return () => { active = false; };
@@ -40,8 +77,21 @@ export default function TryOnPage() {
 
   const changeArtwork = (file: File) => {
     const nextUrl = URL.createObjectURL(file);
-    setArtworkUrl((current) => { if (current.startsWith("blob:")) URL.revokeObjectURL(current); return nextUrl; });
+    setOriginalArtworkUrl(nextUrl);
+    setArtworkSource(file);
+    setArtworkUrl(nextUrl);
+    // Keep a newly uploaded work untouched until the user explicitly chooses
+    // a repair level; an unwrinkled original should never be altered by default.
+    setRepairLevel("original");
     setArtworkName(file.name.replace(/\.[^.]+$/, "") || "我的作品");
+  };
+
+  const loadWrinkleDemo = () => {
+    setOriginalArtworkUrl(SAMPLE_WRINKLED_ARTWORK);
+    setArtworkSource(SAMPLE_WRINKLED_ARTWORK);
+    setArtworkUrl(SAMPLE_WRINKLED_ARTWORK);
+    setArtworkName("皱褶演示样本");
+    setRepairLevel("original");
   };
 
   const showNotice = (message: string) => {
@@ -49,7 +99,7 @@ export default function TryOnPage() {
     window.setTimeout(() => setNotice(""), 2200);
   };
 
-  const plan = { artworkName, widthCm, heightCm, frame: frame.name, framePricePerMeter: frame.pricePerMeter, matEnabled, matLayers, quote: quote.total };
+  const plan = { artworkName, widthCm, heightCm, frame: frame.name, framePricePerMeter: frame.pricePerMeter, matEnabled, matLayers, repairLevel, quote: quote.total };
   const savePlan = () => { localStorage.setItem("zhenghao-framing-plan", JSON.stringify(plan)); showNotice("方案已保存在当前浏览器"); };
   const exportPlan = () => {
     const blob = new Blob([JSON.stringify(plan, null, 2)], { type: "application/json" });
@@ -63,11 +113,11 @@ export default function TryOnPage() {
 
   return (
     <div className="try-page">
-      <header className="try-header"><button type="button" className="try-brand" onClick={() => goHome("top")}><BrandMark /><span><strong>正好书画社</strong><small>一框智能装裱</small></span></button><div className="try-header-center"><span>网页试装空间</span><small>所有调整均为实时预览</small></div><div className="try-header-actions"><button type="button" onClick={goToMaterialAdmin}>框料后台</button><button type="button" onClick={exportPlan}>导出方案</button><button type="button" className="is-primary" onClick={savePlan}>保存方案</button></div></header>
+      <header className="try-header"><button type="button" className="try-brand" onClick={() => goHome("top")}><BrandMark /><span><strong>正好书画社</strong><small>一框智能装裱</small></span></button><div className="try-header-center"><span>网页试装空间</span><small>所有调整均为实时预览</small></div><div className="try-header-actions"><button type="button" onClick={goToMaterialAdmin}>后台</button><button type="button" onClick={exportPlan}>导出方案</button><button type="button" className="is-primary" onClick={savePlan}>保存方案</button></div></header>
       <main className="try-workspace">
-        <ArtworkPanel artworkUrl={artworkUrl} artworkName={artworkName} widthCm={widthCm} heightCm={heightCm} onArtworkChange={changeArtwork} onDimensionChange={(dimension, value) => { const safeValue = Math.max(1, Math.min(500, value)); if (dimension === "width") setWidthCm(safeValue); else setHeightCm(safeValue); }} />
-        <div className="try-center"><div className="try-center-toolbar"><div><span>方案 01</span><strong>{artworkName}</strong></div><div className="try-scene-shortcuts" aria-label="快速切换空间">{sceneOptions.map((option) => <button key={option.id} className={scene === option.id ? "is-active" : ""} type="button" onClick={() => setScene(option.id)}>{option.label}</button>)}</div></div><FramePreview artworkUrl={artworkUrl} widthCm={widthCm} heightCm={heightCm} frame={frame} matEnabled={matEnabled} matLayers={matLayers} activeLayerIndex={activeLayerIndex} scene={scene} brightness={brightness} zoom={zoom} onZoomChange={setZoom} /><div className="try-quote-bar"><div><span>当前方案</span><strong>{frame.name} · {matEnabled ? `${matLayers.length} 层卡纸` : "无卡纸"}</strong></div><div><span>框料用量</span><strong>{quote.railMeters} 米</strong></div><div><span>玻璃与背板</span><strong>¥{quote.glazingAndBacking}</strong></div><div className="try-quote-total"><span>预计参考价</span><strong>¥{quote.total}</strong></div><button type="button" onClick={savePlan}>保存这套搭配</button></div></div>
-        <FramingControls tab={tab} onTabChange={setTab} frame={frame} frameMaterials={availableFrames} onFrameChange={(next) => { setFrame(next); setZoom(1); }} matEnabled={matEnabled} onMatEnabledChange={setMatEnabled} matLayers={matLayers} activeLayerIndex={activeLayerIndex} onActiveLayerChange={setActiveLayerIndex} onAddLayer={() => { if (matLayers.length >= 3) return; const revealMm = matLayers.length === 1 ? 5 : 2; const next = [...matLayers, { id: `layer-${Date.now()}`, materialId: matLayers.length === 1 ? "oat" : "sage", topBottomMm: revealMm, leftRightMm: revealMm }]; setMatLayers(next); setActiveLayerIndex(next.length - 1); setMatEnabled(true); }} onRemoveLayer={() => { if (matLayers.length <= 1) return; const next = matLayers.filter((_, index) => index !== activeLayerIndex); setMatLayers(next); setActiveLayerIndex(Math.max(0, activeLayerIndex - 1)); }} onLayerChange={(layer) => setMatLayers((layers) => layers.map((item, index) => index === activeLayerIndex ? layer : item))} scene={scene} onSceneChange={setScene} brightness={brightness} onBrightnessChange={setBrightness} />
+        <ArtworkPanel artworkUrl={artworkUrl} originalArtworkUrl={originalArtworkUrl} artworkName={artworkName} repairLevel={repairLevel} repairStatus={repairStatus} repairError={repairError} onArtworkChange={changeArtwork} onDemoArtworkChange={loadWrinkleDemo} onRepairLevelChange={setRepairLevel} />
+        <div className="try-center"><div className="try-center-toolbar"><div><span>方案 01</span><strong>{artworkName}</strong></div><div className="try-scene-shortcuts" aria-label="快速切换空间">{sceneOptions.map((option) => <button key={option.id} className={scene === option.id ? "is-active" : ""} type="button" onClick={() => setScene(option.id)}>{option.label}</button>)}</div></div><FramePreview artworkUrl={artworkUrl} widthCm={widthCm} heightCm={heightCm} frame={frame} matEnabled={matEnabled} matMaterials={availableMats} matLayers={matLayers} activeLayerIndex={activeLayerIndex} scene={scene} brightness={brightness} zoom={zoom} onZoomChange={setZoom} /><div className="try-quote-bar"><div><span>当前方案</span><strong>{frame.name} · {matEnabled ? `${matLayers.length} 层卡纸` : "无卡纸"}</strong></div><div><span>框料用量</span><strong>{quote.railMeters} 米</strong></div><div><span>玻璃与背板</span><strong>¥{quote.glazingAndBacking}</strong></div><div className="try-quote-total"><span>预计参考价</span><strong>¥{quote.total}</strong></div><button type="button" onClick={savePlan}>保存这套搭配</button></div></div>
+        <FramingControls tab={tab} onTabChange={setTab} frame={frame} widthCm={widthCm} heightCm={heightCm} onDimensionChange={(dimension, value) => { const safeValue = Math.max(1, Math.min(500, value)); if (dimension === "width") setWidthCm(safeValue); else setHeightCm(safeValue); }} frameMaterials={availableFrames} onFrameChange={(next) => { setFrame(next); setZoom(1); }} matEnabled={matEnabled} matMaterials={availableMats} onMatEnabledChange={setMatEnabled} matLayers={matLayers} activeLayerIndex={activeLayerIndex} onActiveLayerChange={setActiveLayerIndex} onAddLayer={() => { if (matLayers.length >= 3) return; const revealMm = matLayers.length === 1 ? 5 : 2; const nextMaterial = availableMats[Math.min(matLayers.length, availableMats.length - 1)] ?? availableMats[0]; const next = [...matLayers, { id: `layer-${Date.now()}`, materialId: nextMaterial?.id ?? "ivory", topBottomMm: revealMm, leftRightMm: revealMm }]; setMatLayers(next); setActiveLayerIndex(next.length - 1); setMatEnabled(true); }} onRemoveLayer={() => { if (matLayers.length <= 1) return; const next = matLayers.filter((_, index) => index !== activeLayerIndex); setMatLayers(next); setActiveLayerIndex(Math.max(0, activeLayerIndex - 1)); }} onLayerChange={(layer) => setMatLayers((layers) => layers.map((item, index) => index === activeLayerIndex ? layer : item))} scene={scene} onSceneChange={setScene} brightness={brightness} onBrightnessChange={setBrightness} />
       </main>
       {notice && <div className="try-toast" role="status">{notice}</div>}
     </div>

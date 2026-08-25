@@ -1,6 +1,6 @@
 import { lazy, Suspense, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
 import { getDraggedRotation, getDragDegreesPerPixel, INITIAL_PREVIEW_ROTATION } from "./interaction";
-import { STATIC_SCENE_CANVAS, STATIC_SCENE_VIEWS, type FrameMaterial, type MatLayer, type SceneId } from "./model";
+import { STATIC_SCENE_CANVAS, STATIC_SCENE_VIEWS, type FrameMaterial, type MatLayer, type MatMaterial, type SceneId } from "./model";
 
 const ThreeFrameStage = lazy(() => import("./ThreeFrameStage"));
 
@@ -10,6 +10,7 @@ type FramePreviewProps = {
   heightCm: number;
   frame: FrameMaterial;
   matEnabled: boolean;
+  matMaterials: MatMaterial[];
   matLayers: MatLayer[];
   activeLayerIndex: number;
   scene: SceneId;
@@ -22,7 +23,7 @@ type DragState =
   | { mode: "rotate"; pointerId: number; x: number; y: number; rx: number; ry: number; degreesPerPixel: number }
   | { mode: "move"; pointerId: number; x: number; y: number; offsetX: number; offsetY: number; limitX: number; limitY: number };
 
-export default function FramePreview({ artworkUrl, widthCm, heightCm, frame, matEnabled, matLayers, activeLayerIndex, scene, brightness, zoom, onZoomChange }: FramePreviewProps) {
+export default function FramePreview({ artworkUrl, widthCm, heightCm, frame, matEnabled, matMaterials, matLayers, activeLayerIndex, scene, brightness, zoom, onZoomChange }: FramePreviewProps) {
   const [rotation, setRotation] = useState(INITIAL_PREVIEW_ROTATION);
   const [isDragging, setIsDragging] = useState(false);
   const [staticOffset, setStaticOffset] = useState({ x: 0, y: 0 });
@@ -116,7 +117,7 @@ export default function FramePreview({ artworkUrl, widthCm, heightCm, frame, mat
       >
         <Suspense fallback={<div className="try-stage-loading" role="status">正在构建真实三维画框…</div>}>
           <div className={`try-frame-layer${isInteractive ? "" : " is-static"}`} style={isInteractive ? undefined : { transform: `translate3d(${staticOffset.x}px, ${staticOffset.y}px, 0)` }}>
-            <ThreeFrameStage artworkUrl={artworkUrl} widthCm={widthCm} heightCm={heightCm} frame={frame} matEnabled={matEnabled} matLayers={matLayers} activeLayerIndex={activeLayerIndex} brightness={brightness} rotation={renderedRotation} zoom={renderedZoom} />
+            <ThreeFrameStage artworkUrl={artworkUrl} widthCm={widthCm} heightCm={heightCm} frame={frame} matEnabled={matEnabled} matMaterials={matMaterials} matLayers={matLayers} activeLayerIndex={activeLayerIndex} brightness={brightness} rotation={renderedRotation} zoom={renderedZoom} />
           </div>
         </Suspense>
       </div>

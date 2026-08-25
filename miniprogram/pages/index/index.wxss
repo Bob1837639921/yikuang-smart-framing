@@ -432,6 +432,7 @@ button[disabled]{transition:none}
 .material-library-intro>button{flex:0 0 auto;height:30px;min-height:30px;margin:0 0 1px;padding:0 2px;border:0;background:transparent;color:#8a7b64;font-size:10px;line-height:30px}
 .material-library-intro>button:active{color:#d99c0b;transform:scale(.96)}
 .material-filter-scroll{width:100%;height:42px;min-height:42px;margin-bottom:12px;white-space:nowrap;overflow-y:hidden}
+.material-subfilter-scroll{height:36px;min-height:36px;margin-top:-8px}.material-subfilter-scroll .material-filters{height:36px;border-bottom:0}.material-subfilter-scroll .material-filters button{height:27px;min-height:27px;padding:0 13px;background:#fff8e7;font-size:11px;line-height:27px}.material-subfilter-scroll .material-filters button.active{background:#f7c746}
 .material-filters{display:flex;align-items:center;gap:12px;width:max-content;min-width:100%;height:42px;padding:0 18px 6px;box-sizing:border-box;border-bottom:1px solid #eee3cb}
 .material-filters button{display:flex;align-items:center;justify-content:center;flex:0 0 auto;height:32px;min-height:32px;margin:0;padding:0 16px;border:0;border-radius:16px;background:transparent;color:#554738;font-size:12px;line-height:32px;transition:transform .2s cubic-bezier(.2,.85,.25,1),background-color .2s ease,box-shadow .2s ease}
 .material-filters button.active{background:#f7c746;color:#392b17;font-weight:900;box-shadow:0 3px 0 #e6ad19;animation:wx-chip-pop .34s cubic-bezier(.2,.85,.25,1)}

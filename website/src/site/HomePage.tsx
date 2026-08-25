@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { useEffect, useRef, useState } from "react";
 import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
+import InkCursorTrail from "./InkCursorTrail";
 import { goToTryOn } from "./navigation";
 import "./homepage.css";
 
@@ -118,6 +119,7 @@ export default function HomePage() {
   return (
     <div className="home-page" id="top">
       <SiteHeader />
+      <InkCursorTrail />
 
       <main>
         <section className="home-hero" ref={heroRef} onPointerMove={handlePointerMove} onPointerDown={handleWaterPointerDown} aria-labelledby="hero-title">
@@ -183,8 +185,12 @@ export default function HomePage() {
         </section>
 
         <section className="home-materials home-section" id="materials" aria-labelledby="materials-title">
-          <div className="home-material-image-wrap home-reveal"><img src="/assets/home-material-macro.webp" alt="胡桃木画框、金色内线与米白卡纸的材质细节" width="1400" height="1749" loading="lazy" decoding="async" /><span className="home-image-index">02 / 04</span></div>
-          <div className="home-material-copy home-reveal"><p className="home-kicker"><span />框料与纸的美学</p><h2 id="materials-title">材质不是背景，<br /><em>它决定作品如何发光。</em></h2><p className="home-body-copy">我们相信，好的装裱不应该抢走作品的目光。它更像一束被调好的光，让木纹、纸张和画面之间，保持一段正好的距离。</p><a className="home-outline-link" href="#studio">看我们的装裱故事 <span aria-hidden="true">↗</span></a><div className="home-material-notes" aria-label="材质细节"><span>天然木纹</span><span>手工卡纸</span><span>柔和玻璃</span></div></div>
+          <figure className="home-material-image-wrap home-reveal">
+            <img src="/assets/home-work-calligraphy-cutout.png" alt="正好书画社完成装裱的福禄寿禧书法横幅，陈列于暖灰展墙" width="1851" height="563" loading="lazy" decoding="async" />
+            <span className="home-image-index">CASE 01</span>
+            <figcaption className="home-work-caption"><span>实景案例</span><strong>福禄寿禧</strong><small>书法横幅 · 黑檀色窄框 · 米白卡纸</small></figcaption>
+          </figure>
+          <div className="home-material-copy home-reveal"><p className="home-kicker"><span />正好作品陈列</p><h2 id="materials-title">一幅好字，<br /><em>值得被好好看见。</em></h2><p className="home-body-copy">不把杂乱的拍摄环境带进展示，只保留真实作品、框与卡纸。每一件完成装裱的作品，都以克制的光线和清楚的细节重新被看见。</p><a className="home-outline-link" href="#experience">用我的作品试装 <span aria-hidden="true">↗</span></a><div className="home-material-notes" aria-label="作品装裱信息"><span>书法横幅</span><span>实木窄框</span><span>米白卡纸</span></div></div>
         </section>
 
         <section className="home-experience home-section" id="experience" aria-labelledby="experience-title">

@@ -3,7 +3,7 @@ import BrandMark from "./BrandMark";
 
 const links = [
   { href: "#story", label: "装裱故事" },
-  { href: "#materials", label: "框料美学" },
+  { href: "#materials", label: "作品案例" },
   { href: "#studio", label: "关于我们" },
 ];
 
