@@ -1,47 +1,45 @@
-# Design QA
+# Design QA — 官网作品展览长廊
 
-- User issue screenshot: `C:\Users\86159\AppData\Local\Temp\codex-clipboard-973da1f8-8390-4e11-a5fc-d41e360a6d85.png`
-- Desktop implementation: `D:\桌面\work\project\yikuang-smart-framing\tmp\audits\cta-signature\05-poem-final-wide.png`
-- Mobile menu implementation: `D:\桌面\work\project\yikuang-smart-framing\tmp\audits\cta-signature\03-mobile-menu.png`
-- Desktop viewport and pixels: 1618 × 682 CSS px at 1:1 capture density.
-- Mobile viewport and pixels: 390 × 844 CSS px at 1:1 capture density.
-- State: homepage hero after entry animation; mobile navigation open.
+- final result: passed
+- reference source: `C:/Users/86159/AppData/Local/Temp/codex-clipboard-e12bcec8-403b-40cd-a338-df3ae5386bb1.png`
+- implementation: `website/src/site/HomePage.tsx`, `website/src/site/homepage.css`, `website/public/assets/home-gallery-hall-v1.png`, `website/public/assets/cases/cutouts/`
+- implementation screenshot: `.codex-design-qa/home-exhibition-cutouts.png`
+- comparison screenshot: `.codex-design-qa/home-exhibition-comparison.png`
+- primary viewport: 1440 × 900
+- responsive viewport: 390 × 844
+- verified state: default case 06 / 07, “山河入画”
 
-## Full-view comparison evidence
+## Visual comparison
 
-The revised desktop hero removes the duplicate header try-on control and keeps one primary try-on action in the hero. The former low-contrast functional label at the lower right is replaced by a paper-white poetic inscription containing the full store name. The composition, artwork, navigation links, hero copy, and primary conversion path otherwise remain unchanged.
+- Central work is presented as a real framed object on one continuous warm exhibition wall.
+- The wall now belongs to a complete gallery interior with track lighting, side-room depth, walnut skirting and a limestone floor.
+- Source-photo wall rectangles are removed with seven tightly extracted 32-bit RGBA PNG frame assets; their transparent safety margin is preserved, while frame, mat, artwork, reflection and physical proportions remain intact.
+- The showcase references only the verified `cases/cutouts/` assets. The earlier `gallery-ready/` RGB exports are not used because their checkerboard preview was baked into the pixels, not an alpha channel.
+- Work 05 uses a rounded-silhouette alpha cleanup so the pale wall residue at the four outer corners is transparent; the original glazing reflection and interior mat remain intact. Work 06 uses the owner-supplied transparent cutout, cropped to its alpha bounds and displayed with a restrained `0.22deg` gallery tilt.
+- Glass reflections remain visible as part of the photographed finished object; only the surrounding wall/background is transparent.
+- Each work has an independent leveling correction, preventing slightly tilted source photos from hanging crooked in the gallery.
+- The mountain long-scroll now uses the owner-supplied transparent cutout (2.7421 aspect ratio after trimming its transparent canvas) and a restrained 0.22deg tilt so the slight photographed skew remains visible without looking accidental.
+- CSS adds restrained animated wall-light breathing, glass shimmer, contact shadows and drag parallax on top of the photographic hall backdrop.
+- All seven selected gallery works now use the approved prepared cutouts from `website/public/assets/cases/cutouts/`; baked checkerboard margins are cropped outside the physical frame while original glass reflections remain intact.
+- Track-light pools are aligned to the wall, with separate near-contact and longer falloff shadows so each frame reads as mounted rather than pasted over the hall image.
+- Adjacent works are partially visible and recessed at different vertical positions, creating corridor depth instead of a card carousel.
+- Title, media type and framing specification sit beneath the selected work; the count and controls remain on the right wall.
+- Exhibition labels, captions, count, navigation controls and index use a strengthened readable type scale; wide and portrait captions receive independent vertical placement so text no longer collides with the frame or skirting.
+- The restrained three-item floor index mirrors the reference hierarchy without auto-advance.
 
-## Focused region comparison evidence
+## Interaction and accessibility
 
-The final full-width capture clearly shows the requested right-side detail: `正好书画社 / 一框纳山河` in two equal five-character vertical columns. The plaque measures about 71 × 110px, uses 14px Noto Serif SC, 700/600 weights, 94% paper opacity, and dark ink/ochre text. The complete detail is readable without depending on the background image for contrast.
+- Previous/next buttons switch works and preserve the active count/title.
+- Pointer drag switches works after the horizontal threshold; controls are excluded from drag capture.
+- Real buttons and tabs retain keyboard semantics and accessible labels.
+- Portrait, landscape and wide works use separate physical display widths.
+- Mobile layout was checked at 390 × 844 and remains readable without horizontal overflow.
+- Reduced-motion behavior remains governed by the existing homepage media query.
+- The pointer ink trail clears and pauses inside the exhibition corridor, so decorative strokes cannot cross finished works.
 
-## Findings
+## Runtime checks
 
-- No actionable P0/P1/P2 findings remain for the duplicate above-fold CTA or right-side inscription.
-- [P3] The inscription is intentionally hidden below 720px because the mobile hero already contains title, copy, CTA, story link, and artwork in a narrow composition.
-
-## Required fidelity surfaces
-
-- Fonts and typography: the inscription now uses the established serif family at 14px with deliberate two-column vertical rhythm; the hero title and remaining CTA are unchanged.
-- Spacing and layout rhythm: removing the header CTA gives navigation even spacing. The inscription stays aligned to the wide hero composition and does not overlap the frame or scroll cue.
-- Colors and visual tokens: paper, ink, and ochre remain within the existing palette, with sufficient opaque backing to stay readable across the split image/background boundary.
-- Image quality and asset fidelity: no image, crop, overlay, or logo changes.
-- Copy and content: the inscription is now `正好书画社，一框纳山河`; the full brand name is present and the poetic line directly references framing.
-
-## Interaction and runtime checks
-
-- Visible above-fold try-on action count: one.
-- Remaining hero action navigates to `#try-on`: passed.
-- Desktop and mobile horizontal overflow: none.
-- Mobile navigation contains no duplicate try-on action: passed.
-- Browser console errors: none.
-- Production build and protected runtime integrity check: passed.
-
-## Comparison history
-
-1. Earlier findings: [P1] the lower-right text was too transparent and crossed two backgrounds; [P2] header and hero repeated the same try-on action in one viewport.
-2. First fix: removed the header CTA and placed both vertical lines on an opaque paper plaque with stronger type.
-3. Content refinement: replaced the functional phrase with the balanced five-character pairing `正好书画社 / 一框纳山河`, increased it to 14px, and retained a complete accessible label.
-4. Post-fix evidence: 1618 × 682 capture shows one hero CTA and a fully readable inscription; 390px capture confirms the decorative plaque is removed and navigation remains uncluttered.
-
-final result: passed
+- Browser console warnings/errors: none.
+- All seven work states were visually checked together in `.codex-design-qa/gallery-all-states.png`.
+- `npm run check:runtime`: passed.
+- `npm run build`: passed (existing Three.js chunk-size advisory only).

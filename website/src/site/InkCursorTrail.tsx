@@ -68,8 +68,23 @@ export default function InkCursorTrail() {
       if (!animationFrame) animationFrame = window.requestAnimationFrame(render);
     };
 
+    const clearStroke = () => {
+      dabs.length = 0;
+      lastPoint = null;
+      if (animationFrame) {
+        window.cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+      }
+      context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    };
+
     const addStroke = (event: PointerEvent) => {
       if (event.pointerType && event.pointerType !== "mouse" && event.pointerType !== "pen") return;
+      const hoveredElement = document.elementFromPoint(event.clientX, event.clientY);
+      if (hoveredElement?.closest(".home-gallery-corridor")) {
+        clearStroke();
+        return;
+      }
       const now = performance.now();
       if (!lastPoint) {
         lastPoint = { x: event.clientX, y: event.clientY, time: now };

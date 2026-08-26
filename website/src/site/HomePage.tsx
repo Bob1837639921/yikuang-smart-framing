@@ -28,20 +28,67 @@ const storyVisuals = [
 
 const workCases = [
   {
-    image: "/assets/home-work-case-01.jpg",
+    image: "/assets/cases/cutouts/work-01-fu-lu-shou-xi.png?v=6",
     alt: "正好书画社完成装裱的福禄寿禧书法横幅，悬挂于暖灰展墙",
     title: "福禄寿禧",
     type: "书法横幅",
     treatment: "黑檀色窄框 · 米白卡纸",
     copy: "用收敛的深色边界托住横向题字，让字势保持舒展，也让长幅作品更容易进入日常空间。",
+    frameCrop: { ratio: 3.0998, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "wide" },
   },
   {
-    image: "/assets/home-work-case-02.jpg",
+    image: "/assets/cases/cutouts/work-02-seal-script.png?v=6",
     alt: "正好书画社完成装裱的篆书作品，采用红木圆弧框与米白卡纸",
     title: "篆书作品",
     type: "篆书方幅",
     treatment: "红木圆弧框 · 米白卡纸",
     copy: "温润的红木圆弧与留白更宽的卡纸，缓和篆书的结构密度，让近看细节与远观秩序同时成立。",
+    frameCrop: { ratio: 1.4538, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "landscape" },
+  },
+  {
+    image: "/assets/cases/cutouts/work-03-fan.png?v=6",
+    alt: "正好书画社完成装裱的扇面山水作品，采用深红木框与白卡纸",
+    title: "扇面雅集",
+    type: "扇面山水",
+    treatment: "深红木框 · 白卡纸",
+    copy: "以扇面的弧线收住庭院山水，深红木框压住画面的静气，让留白与线稿在墙面上慢慢展开。",
+    frameCrop: { ratio: 1.8113, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "landscape" },
+  },
+  {
+    image: "/assets/cases/cutouts/work-04-gold-seal.png?v=6",
+    alt: "正好书画社完成装裱的金笺篆书方幅，采用深色细框与圆角悬浮卡纸",
+    title: "金笺篆意",
+    type: "篆书方幅",
+    treatment: "深色细框 · 圆角悬浮卡纸",
+    copy: "以克制的深色细框围合金笺，圆角悬浮卡纸让作品与背景留出呼吸，也托住篆书厚重的结构。",
+    frameCrop: { ratio: 0.9907, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "portrait" },
+  },
+  {
+    image: "/assets/cases/cutouts/work-05-self-strength-clean.png?v=7",
+    alt: "正好书画社完成装裱的自强不息书法横幅，采用深红木框与米白卡纸",
+    title: "自强不息",
+    type: "书法横幅",
+    treatment: "深红木框 · 米白卡纸",
+    copy: "横幅以宽阔留白舒展字势，温润红木收住墨色重量，让日常空间里仍保有端正而有力的气息。",
+    frameCrop: { ratio: 3.1831, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "wide" },
+  },
+  {
+    image: "/assets/cases/cutouts/work-06-mountain-user.png?v=7",
+    alt: "正好书画社完成装裱的水墨山水长卷，采用浅木框与白色卡纸",
+    title: "山河入画",
+    type: "水墨长卷",
+    treatment: "浅木窄框 · 白色卡纸",
+    copy: "浅木色退到画面之外，长幅卡纸延伸山势的节奏，使细密线条与大片墨色都能从容展开。",
+    frameCrop: { ratio: 2.7421, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0.22deg", size: "wide" },
+  },
+  {
+    image: "/assets/cases/cutouts/work-07-horses.png?v=6",
+    alt: "正好书画社完成装裱的八骏图刺绣横幅，采用棕木框与暖白卡纸",
+    title: "八骏腾风",
+    type: "刺绣横幅",
+    treatment: "棕木细框 · 暖白卡纸",
+    copy: "细窄棕木框顺着奔马的横向动势铺开，暖白卡纸隔开繁密针脚，让速度与层次在远观时依然清楚。",
+    frameCrop: { ratio: 2.648, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "wide" },
   },
 ] as const;
 
@@ -53,9 +100,10 @@ export default function HomePage() {
   const heroRef = useRef<HTMLElement>(null);
   const storyTrackRef = useRef<HTMLDivElement>(null);
   const [activeChapter, setActiveChapter] = useState(0);
-  const [activeWorkCase, setActiveWorkCase] = useState(0);
+  const [activeWorkCase, setActiveWorkCase] = useState(5);
   const [storyProgress, setStoryProgress] = useState(0);
   const [waterRipples, setWaterRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
+  const [workDragX, setWorkDragX] = useState(0);
   const workSwipeStartX = useRef<number | null>(null);
 
   useEffect(() => {
@@ -142,16 +190,22 @@ export default function HomePage() {
   };
 
   const handleWorkPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType === "mouse" || (event.target as HTMLElement).closest("button")) return;
+    if ((event.target as HTMLElement).closest("button, a")) return;
     workSwipeStartX.current = event.clientX;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+
+  const handleWorkPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (workSwipeStartX.current === null) return;
+    setWorkDragX(Math.max(-120, Math.min(120, event.clientX - workSwipeStartX.current)));
   };
 
   const handleWorkPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
     if (workSwipeStartX.current === null) return;
     const distance = event.clientX - workSwipeStartX.current;
     workSwipeStartX.current = null;
-    if (Math.abs(distance) < 44) return;
-    showWorkCase(activeWorkCase + (distance < 0 ? 1 : -1));
+    setWorkDragX(0);
+    if (Math.abs(distance) >= 58) showWorkCase(activeWorkCase + (distance < 0 ? 1 : -1));
   };
 
   return (
@@ -222,29 +276,66 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="home-materials home-section" id="materials" aria-labelledby="materials-title">
-          <div className="home-work-showcase home-reveal">
-            <div className="home-work-media" onPointerDown={handleWorkPointerDown} onPointerUp={handleWorkPointerUp} onPointerCancel={() => { workSwipeStartX.current = null; }}>
-              {workCases.map((work, index) => (
-                <img className={index === activeWorkCase ? "home-work-slide is-active" : "home-work-slide"} src={work.image} alt={index === activeWorkCase ? work.alt : ""} width="1536" height="1024" loading="lazy" decoding="async" aria-hidden={index !== activeWorkCase} key={work.image} />
-              ))}
-              <span className="home-image-index">CASE {String(activeWorkCase + 1).padStart(2, "0")}</span>
-              <div className="home-work-progress" aria-hidden="true"><span style={{ width: `${((activeWorkCase + 1) / workCases.length) * 100}%` }} /></div>
-              <div className="home-work-controls" aria-label="作品切换">
-                <button type="button" onClick={() => showWorkCase(activeWorkCase - 1)} aria-label="查看上一件作品">上一件</button>
-                <span>{String(activeWorkCase + 1).padStart(2, "0")} / {String(workCases.length).padStart(2, "0")}</span>
-                <button type="button" onClick={() => showWorkCase(activeWorkCase + 1)} aria-label="查看下一件作品">下一件</button>
-              </div>
+        <section className="home-materials home-section home-exhibition" id="materials" aria-labelledby="materials-title">
+          <div
+            className={workDragX === 0 ? "home-gallery-corridor" : "home-gallery-corridor is-dragging"}
+            style={{ "--gallery-drag": `${workDragX}px`, "--gallery-parallax": `${workDragX * -0.12}px` } as CSSProperties}
+            onPointerDown={handleWorkPointerDown}
+            onPointerMove={handleWorkPointerMove}
+            onPointerUp={handleWorkPointerUp}
+            onPointerCancel={() => { workSwipeStartX.current = null; setWorkDragX(0); }}
+          >
+            <p className="home-gallery-label"><span />正好作品陈列</p>
+            {([-1, 0, 1] as const).map((offset) => {
+              const index = (activeWorkCase + offset + workCases.length) % workCases.length;
+              const work = workCases[index];
+              return (
+                <figure
+                  className={`home-gallery-work home-gallery-work-${offset === -1 ? "previous" : offset === 1 ? "next" : "active"} home-gallery-size-${work.frameCrop.size}${index === 5 ? " home-gallery-tone-light" : ""}`}
+                  key={work.image}
+                  aria-hidden={offset !== 0}
+                  style={{
+                    "--frame-ratio": work.frameCrop.ratio,
+                    "--frame-image-width": work.frameCrop.imageWidth,
+                    "--frame-image-left": work.frameCrop.imageLeft,
+                    "--frame-image-top": work.frameCrop.imageTop,
+                    "--frame-level": work.frameCrop.level,
+                  } as CSSProperties}
+                >
+                  <div className="home-gallery-frame-crop">
+                    <img src={work.image} alt={offset === 0 ? work.alt : ""} width="1536" height="1024" loading={offset === 0 ? "eager" : "lazy"} decoding="async" draggable="false" />
+                  </div>
+                </figure>
+              );
+            })}
+
+            <div className={`home-gallery-caption home-gallery-caption-${workCases[activeWorkCase].frameCrop.size}`} key={activeWorkCase} aria-live="polite">
+              <h2 id="materials-title">{workCases[activeWorkCase].title}</h2>
+              <span>{workCases[activeWorkCase].type}</span>
+              <i aria-hidden="true" />
+              <small>{workCases[activeWorkCase].treatment}</small>
             </div>
-            <div className="home-work-tabs" role="tablist" aria-label="作品案例目录">
-              {workCases.map((work, index) => (
-                <button className={index === activeWorkCase ? "is-active" : ""} type="button" role="tab" aria-selected={index === activeWorkCase} onClick={() => showWorkCase(index)} key={work.title}>
-                  <span>{String(index + 1).padStart(2, "0")}</span><strong>{work.title}</strong><small>{work.type}</small>
-                </button>
-              ))}
+
+            <aside className="home-gallery-position" aria-label={`当前为第 ${activeWorkCase + 1} 件，共 ${workCases.length} 件`}>
+              <strong>{String(activeWorkCase + 1).padStart(2, "0")}</strong><i aria-hidden="true" /><span>{String(workCases.length).padStart(2, "0")}</span>
+              <div>
+                <button type="button" onClick={() => showWorkCase(activeWorkCase - 1)} aria-label="查看上一件作品">前一件</button>
+                <button type="button" onClick={() => showWorkCase(activeWorkCase + 1)} aria-label="查看下一件作品">后一件</button>
+              </div>
+            </aside>
+
+            <div className="home-gallery-index" role="tablist" aria-label="相邻作品">
+              {([-1, 0, 1] as const).map((offset) => {
+                const index = (activeWorkCase + offset + workCases.length) % workCases.length;
+                const work = workCases[index];
+                return (
+                  <button className={offset === 0 ? "is-active" : ""} type="button" role="tab" aria-selected={offset === 0} onClick={() => showWorkCase(index)} key={`${offset}-${work.title}`}>
+                    <span>{String(index + 1).padStart(2, "0")}</span><strong>{work.title}</strong>
+                  </button>
+                );
+              })}
             </div>
           </div>
-          <div className="home-material-copy home-reveal"><p className="home-kicker"><span />正好作品陈列</p><h2 id="materials-title">一幅好字，<br /><em>值得被好好看见。</em></h2><div className="home-work-detail" key={activeWorkCase} aria-live="polite"><span>{workCases[activeWorkCase].type}</span><h3>{workCases[activeWorkCase].title}</h3><p>{workCases[activeWorkCase].copy}</p><small>{workCases[activeWorkCase].treatment}</small></div><a className="home-outline-link" href="#experience">用我的作品试装 <span aria-hidden="true">↗</span></a></div>
         </section>
 
         <section className="home-experience home-section" id="experience" aria-labelledby="experience-title">

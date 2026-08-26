@@ -5,6 +5,11 @@ playwright-report/
 tmp/
 implementation-*.png
 qa-*.png
+.codex-design-qa/
+website/public/assets/cases/gallery-ready/
+website/public/assets/cases/20260824-*.png
+website/public/assets/cases/cutouts/work-05-self-strength.png
+website/public/assets/cases/cutouts/work-06-mountain.png
 .DS_Store
 Thumbs.db
 *.log
