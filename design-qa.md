@@ -15,10 +15,11 @@
 - The wall now belongs to a complete gallery interior with track lighting, side-room depth, walnut skirting and a limestone floor.
 - Source-photo wall rectangles are removed with seven tightly extracted 32-bit RGBA PNG frame assets; their transparent safety margin is preserved, while frame, mat, artwork, reflection and physical proportions remain intact.
 - The showcase references only the verified `cases/cutouts/` assets. The earlier `gallery-ready/` RGB exports are not used because their checkerboard preview was baked into the pixels, not an alpha channel.
-- Work 05 uses a rounded-silhouette alpha cleanup so the pale wall residue at the four outer corners is transparent; the original glazing reflection and interior mat remain intact. Work 06 uses the owner-supplied transparent cutout, cropped to its alpha bounds and displayed with a restrained `0.22deg` gallery tilt.
+- Work 05 uses a rounded-silhouette alpha cleanup so the pale wall residue at the four outer corners is transparent; the original glazing reflection and interior mat remain intact. Work 06 now loads the owner's exact original RGBA file without pixel-level recropping; CSS positions its transparent canvas and preserves the restrained `0.22deg` gallery tilt.
+- The hall uses a cleaned wall plate with the generated square-like wall texture smoothed only inside the central exhibition plane. Ceiling track, side-room depth, skirting and floor remain unchanged.
 - Glass reflections remain visible as part of the photographed finished object; only the surrounding wall/background is transparent.
 - Each work has an independent leveling correction, preventing slightly tilted source photos from hanging crooked in the gallery.
-- The mountain long-scroll now uses the owner-supplied transparent cutout (2.7421 aspect ratio after trimming its transparent canvas) and a restrained 0.22deg tilt so the slight photographed skew remains visible without looking accidental.
+- The mountain long-scroll keeps the owner-supplied 1448 × 1086 transparent canvas unchanged; CSS derives the visible 2.7421 frame slot from its alpha bounds and adds a restrained 0.22deg tilt so the photographed skew remains intentional.
 - CSS adds restrained animated wall-light breathing, glass shimmer, contact shadows and drag parallax on top of the photographic hall backdrop.
 - All seven selected gallery works now use the approved prepared cutouts from `website/public/assets/cases/cutouts/`; baked checkerboard margins are cropped outside the physical frame while original glass reflections remain intact.
 - Track-light pools are aligned to the wall, with separate near-contact and longer falloff shadows so each frame reads as mounted rather than pasted over the hall image.
