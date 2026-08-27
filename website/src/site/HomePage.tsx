@@ -105,6 +105,8 @@ export default function HomePage() {
   const [waterRipples, setWaterRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
   const [workDragX, setWorkDragX] = useState(0);
   const workSwipeStartX = useRef<number | null>(null);
+  const previousWorkIndex = (activeWorkCase - 1 + workCases.length) % workCases.length;
+  const nextWorkIndex = (activeWorkCase + 1) % workCases.length;
 
   useEffect(() => {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>(".home-reveal"));
@@ -279,7 +281,7 @@ export default function HomePage() {
         <section className="home-materials home-section home-exhibition" id="materials" aria-labelledby="materials-title">
           <div
             className={workDragX === 0 ? "home-gallery-corridor" : "home-gallery-corridor is-dragging"}
-            style={{ "--gallery-drag": `${workDragX}px`, "--gallery-parallax": `${workDragX * -0.12}px` } as CSSProperties}
+            style={{ "--gallery-drag": `${workDragX}px` } as CSSProperties}
             onPointerDown={handleWorkPointerDown}
             onPointerMove={handleWorkPointerMove}
             onPointerUp={handleWorkPointerUp}
@@ -316,11 +318,20 @@ export default function HomePage() {
               <small>{workCases[activeWorkCase].treatment}</small>
             </div>
 
-            <aside className="home-gallery-position" aria-label={`当前为第 ${activeWorkCase + 1} 件，共 ${workCases.length} 件`}>
-              <strong>{String(activeWorkCase + 1).padStart(2, "0")}</strong><i aria-hidden="true" /><span>{String(workCases.length).padStart(2, "0")}</span>
-              <div>
-                <button type="button" onClick={() => showWorkCase(activeWorkCase - 1)} aria-label="查看上一件作品">前一件</button>
-                <button type="button" onClick={() => showWorkCase(activeWorkCase + 1)} aria-label="查看下一件作品">后一件</button>
+            <aside className="home-gallery-position" aria-label={`当前为第 ${activeWorkCase + 1} 件，共 ${workCases.length} 件`} onPointerDown={(event) => event.stopPropagation()}>
+              <div className="home-gallery-position-count">
+                <span>EXHIBIT</span>
+                <strong>{String(activeWorkCase + 1).padStart(2, "0")}</strong>
+                <i aria-hidden="true" />
+                <em>{String(workCases.length).padStart(2, "0")}</em>
+              </div>
+              <div className="home-gallery-position-actions">
+                <button type="button" onClick={() => showWorkCase(previousWorkIndex)} aria-label={`查看上一件作品：${workCases[previousWorkIndex].title}`}>
+                  <span>上一件</span><strong>{workCases[previousWorkIndex].title}</strong>
+                </button>
+                <button type="button" onClick={() => showWorkCase(nextWorkIndex)} aria-label={`查看下一件作品：${workCases[nextWorkIndex].title}`}>
+                  <span>下一件</span><strong>{workCases[nextWorkIndex].title}</strong>
+                </button>
               </div>
             </aside>
 

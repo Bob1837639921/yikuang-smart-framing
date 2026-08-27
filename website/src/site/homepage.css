@@ -148,7 +148,7 @@
 
 .home-materials { padding-bottom: 180px; }
 .home-exhibition { position: relative; z-index: 2; width: 100%; background: var(--home-paper); }
-.home-gallery-corridor { position: relative; height: clamp(660px, 62vw, 900px); overflow: hidden; border-top: 1px solid rgba(27, 29, 27, 0.08); border-bottom: 1px solid rgba(27, 29, 27, 0.12); background: #d8d2c8 url("/assets/home-gallery-hall-clean-v2.png") calc(50% + var(--gallery-parallax)) center / cover no-repeat; box-shadow: inset 0 34px 76px rgba(255, 253, 248, 0.13), inset 0 -34px 72px rgba(75, 66, 52, 0.06); cursor: grab; isolation: isolate; touch-action: pan-y; transition: background-position 260ms ease-out; user-select: none; }
+.home-gallery-corridor { position: relative; height: clamp(660px, 62vw, 900px); overflow: hidden; border-top: 1px solid rgba(27, 29, 27, 0.08); border-bottom: 1px solid rgba(27, 29, 27, 0.12); background: #d8d2c8 url("/assets/home-gallery-hall-clean-v2.png") center / cover no-repeat; box-shadow: inset 0 34px 76px rgba(255, 253, 248, 0.13), inset 0 -34px 72px rgba(75, 66, 52, 0.06); cursor: grab; isolation: isolate; touch-action: pan-y; user-select: none; }
 .home-gallery-corridor.is-dragging { transition: none; }
 .home-gallery-corridor::before { position: absolute; z-index: 0; inset: 0; background: radial-gradient(ellipse 38% 62% at 50% 20%, rgba(255, 244, 209, 0.34) 0%, rgba(255, 237, 193, 0.17) 38%, transparent 72%), radial-gradient(ellipse 24% 48% at 20% 17%, rgba(255, 246, 218, 0.2), transparent 70%), radial-gradient(ellipse 24% 48% at 81% 18%, rgba(255, 241, 205, 0.19), transparent 70%); content: ""; mix-blend-mode: screen; opacity: 0.76; pointer-events: none; animation: home-gallery-light-breathe 8s ease-in-out infinite alternate; }
 .home-gallery-corridor::after { position: absolute; z-index: 0; inset: 0; background: linear-gradient(180deg, rgba(50, 37, 23, 0.08), transparent 22%, transparent 72%, rgba(49, 36, 23, 0.13)), linear-gradient(90deg, rgba(44, 32, 21, 0.14), transparent 18%, transparent 82%, rgba(44, 32, 21, 0.15)); box-shadow: inset 0 72px 110px rgba(46, 32, 19, 0.06), inset 0 -34px 64px rgba(57, 40, 23, 0.1); content: ""; opacity: 0.78; pointer-events: none; }
@@ -185,12 +185,18 @@
 .home-gallery-caption span { color: rgba(27, 29, 27, 0.76); font-size: 14px; font-weight: 500; letter-spacing: 0.15em; }
 .home-gallery-caption i { width: 28px; height: 1px; margin: 2px 0; background: var(--home-gold); }
 .home-gallery-caption small { color: rgba(27, 29, 27, 0.8); font-size: 14px; font-weight: 500; letter-spacing: 0.1em; }
-.home-gallery-position { position: absolute; z-index: 8; top: 20%; right: 3.2%; display: grid; justify-items: center; padding: 15px 12px 12px; border: 1px solid rgba(27, 29, 27, 0.1); background: rgba(244, 240, 232, 0.72); box-shadow: 0 10px 28px rgba(48, 38, 27, 0.06); color: var(--home-gold); backdrop-filter: blur(8px); }
-.home-gallery-position strong, .home-gallery-position > span { font-size: 15px; font-weight: 700; letter-spacing: 0.12em; }
-.home-gallery-position i { display: block; width: 1px; height: 36px; margin: 10px 0; background: rgba(201, 150, 35, 0.56); }
-.home-gallery-position > div { display: grid; gap: 5px; margin-top: 42px; }
-.home-gallery-position button { width: 72px; min-height: 42px; border: 0; border-bottom: 1px solid rgba(27, 29, 27, 0.22); background: transparent; color: rgba(27, 29, 27, 0.86); cursor: pointer; font-size: 13px; font-weight: 600; letter-spacing: 0.1em; transition: color 180ms ease, border-color 180ms ease, transform 180ms ease; }
-.home-gallery-position button:hover { border-color: var(--home-gold); color: var(--home-ink); transform: translateX(3px); }
+.home-gallery-position { position: absolute; z-index: 8; top: 16%; right: 2.2%; width: 190px; border: 1px solid rgba(27, 29, 27, 0.13); background: rgba(244, 240, 232, 0.86); box-shadow: 0 18px 46px rgba(48, 38, 27, 0.14), inset 3px 0 0 rgba(201, 150, 35, 0.75); color: var(--home-ink); backdrop-filter: blur(14px); }
+.home-gallery-position-count { display: grid; grid-template-columns: 1fr auto 30px auto; align-items: center; gap: 8px; padding: 14px 16px 13px; border-bottom: 1px solid rgba(27, 29, 27, 0.12); }
+.home-gallery-position-count > span { color: rgba(27, 29, 27, 0.5); font-size: 9px; font-weight: 700; letter-spacing: 0.16em; }
+.home-gallery-position-count strong, .home-gallery-position-count em { font-size: 14px; font-style: normal; font-weight: 750; letter-spacing: 0.12em; }
+.home-gallery-position-count strong { color: var(--home-gold); }
+.home-gallery-position-count i { width: 100%; height: 1px; background: rgba(201, 150, 35, 0.5); }
+.home-gallery-position-actions { display: grid; }
+.home-gallery-position button { display: grid; gap: 3px; width: 100%; min-height: 64px; padding: 11px 16px; border: 0; border-bottom: 1px solid rgba(27, 29, 27, 0.11); background: transparent; color: rgba(27, 29, 27, 0.86); cursor: pointer; text-align: left; transition: color 180ms ease, background 180ms ease, padding-left 180ms ease; }
+.home-gallery-position button:last-child { border-bottom: 0; }
+.home-gallery-position button span { color: rgba(27, 29, 27, 0.45); font-size: 10px; font-weight: 650; letter-spacing: 0.14em; }
+.home-gallery-position button strong { overflow: hidden; font-family: var(--home-serif); font-size: 16px; font-weight: 550; letter-spacing: 0.05em; text-overflow: ellipsis; white-space: nowrap; }
+.home-gallery-position button:hover { background: rgba(255, 250, 238, 0.72); color: var(--home-ink); padding-left: 21px; }
 .home-gallery-index { position: absolute; z-index: 8; right: 25%; bottom: 1.2%; left: 25%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid rgba(27, 29, 27, 0.12); }
 .home-gallery-index button { position: relative; display: grid; justify-items: center; gap: 7px; min-width: 0; padding: 12px 8px 14px; border: 0; background: transparent; color: rgba(27, 29, 27, 0.28); cursor: pointer; text-align: center; transition: color 260ms ease, transform 260ms ease; }
 .home-gallery-index button:hover, .home-gallery-index button.is-active { color: var(--home-ink); transform: translateY(-4px); }
@@ -271,7 +277,9 @@
   .home-gallery-work-previous, .home-gallery-work-next { width: 35vw; }
   .home-gallery-work-previous { left: -25%; }
   .home-gallery-work-next { right: -25%; }
-  .home-gallery-position { top: 17%; right: 2%; }
+  .home-gallery-position { top: 14%; right: 14px; width: 168px; }
+  .home-gallery-position-count { grid-template-columns: 1fr auto 20px auto; padding-right: 12px; padding-left: 12px; }
+  .home-gallery-position button { min-height: 58px; padding-right: 12px; padding-left: 12px; }
   .home-gallery-caption { right: 18%; bottom: 11%; left: 18%; }
   .home-gallery-caption-wide { bottom: 16%; }
   .home-gallery-caption-portrait { bottom: 14%; }
@@ -350,11 +358,15 @@
   .home-gallery-caption-wide, .home-gallery-caption-portrait { bottom: 25%; }
   .home-gallery-caption h2 { font-size: 30px; }
   .home-gallery-caption span, .home-gallery-caption small { font-size: 12px; }
-  .home-gallery-position { top: 58px; right: 18px; grid-template-columns: auto 22px auto; align-items: center; }
-  .home-gallery-position i { width: 22px; height: 1px; margin: 0; }
-  .home-gallery-position > div { display: flex; grid-column: 1 / -1; gap: 12px; margin-top: 10px; }
-  .home-gallery-position button { width: auto; min-height: 36px; padding: 0 10px; font-size: 12px; }
-  .home-gallery-index { right: 8px; bottom: 1.4%; left: 8px; padding: 0; }
+  .home-gallery-position { top: 18px; right: 12px; width: 132px; }
+  .home-gallery-position-count { grid-template-columns: 1fr auto 12px auto; gap: 4px; padding: 8px; }
+  .home-gallery-position-count > span { display: none; }
+  .home-gallery-position-actions { grid-template-columns: 1fr 1fr; }
+  .home-gallery-position button { min-height: 40px; padding: 6px 8px; text-align: center; }
+  .home-gallery-position button:first-child { border-right: 1px solid rgba(27, 29, 27, 0.11); }
+  .home-gallery-position button span { font-size: 9px; }
+  .home-gallery-position button strong { display: none; }
+  .home-gallery-index { right: 8px; bottom: 1.2%; left: 8px; padding: 0; }
   .home-gallery-index button { padding: 11px 6px 13px; }
   .home-gallery-index strong { max-width: 100%; font-size: 14px; }
   .home-experience { padding: 86px 0 110px; }
