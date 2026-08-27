@@ -79,7 +79,7 @@ const workCases = [
     type: "水墨长卷",
     treatment: "浅木窄框 · 白色卡纸",
     copy: "浅木色退到画面之外，长幅卡纸延伸山势的节奏，使细密线条与大片墨色都能从容展开。",
-    frameCrop: { ratio: 2.7421, imageWidth: "111.4%", imageLeft: "-5.15%", imageTop: "-66%", level: "0.22deg", size: "wide" },
+    frameCrop: { ratio: 2.7421, imageWidth: "111.4%", imageLeft: "-5.15%", imageTop: "-66%", level: "-0.52deg", size: "wide" },
   },
   {
     image: "/assets/cases/cutouts/work-07-horses.png?v=6",
