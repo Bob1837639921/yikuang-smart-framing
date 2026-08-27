@@ -26,6 +26,16 @@ const storyVisuals = [
   { label: "最终检查", meta: "无尘 · 平整 · 可挂装" },
 ];
 
+const processNotes = [
+  { focus: "纸面、边缘与作品方向", outcome: "确认适合的装裱条件" },
+  { focus: "画芯、开窗与外框余量", outcome: "建立准确尺寸基准" },
+  { focus: "框型、色泽与留白比例", outcome: "确定协调的材料组合" },
+  { focus: "承托边界与画芯受力", outcome: "让作品稳定而平整" },
+  { focus: "画面与玻璃的安全距离", outcome: "形成清晰保护层次" },
+  { focus: "玻璃、背板与挂件结构", outcome: "完成可靠封装" },
+  { focus: "灰尘、平整度与挂装强度", outcome: "达到交付状态" },
+];
+
 const workCases = [
   {
     image: "/assets/cases/cutouts/work-01-fu-lu-shou-xi.png?v=6",
@@ -262,20 +272,36 @@ export default function HomePage() {
                 <div className="home-story-stage" id="story-stage" role="tabpanel" aria-live="polite" style={{ "--story-progress": storyProgress } as CSSProperties}>
                   <div className="home-story-stage-topline"><span>正好书画社 / 01—07</span><span>从原作到正好归处</span></div>
                   <div className={`home-story-stage-scene home-story-chapter-${activeChapter}`}>
-                    <div className="home-story-art" aria-label="装裱层次演示">
-                      <div className="home-story-art-frame">
-                        <span className="home-story-art-atlas" role="img" aria-label={`第 ${activeChapter + 1} 步：${storyVisuals[activeChapter].label}`} />
-                        <span className={`home-story-art-operation home-story-art-operation-${activeChapter}`} aria-hidden="true"><b>{storyVisuals[activeChapter].label}</b><small>{storyVisuals[activeChapter].meta}</small></span>
-                      </div>
-                      <span className="home-story-art-label">{["作品状态", "尺寸 / 开窗", "框型 / 卡纸", "固定 / 承托", "卡纸 / 间隔", "玻璃 / 背板", "检查 / 挂装"][activeChapter]}</span>
+                    <div className="home-story-copy" key={activeChapter}>
+                      <span>{chapters[activeChapter].eyebrow}</span>
+                      <h3>{chapters[activeChapter].title}</h3>
+                      <p>{chapters[activeChapter].copy}</p>
+                      <dl className="home-story-process-notes">
+                        <div><dt>观察重点</dt><dd>{processNotes[activeChapter].focus}</dd></div>
+                        <div><dt>完成标准</dt><dd>{processNotes[activeChapter].outcome}</dd></div>
+                      </dl>
                     </div>
-                    <div className="home-story-copy" key={activeChapter}><span>{chapters[activeChapter].eyebrow}</span><h3>{chapters[activeChapter].title}</h3><p>{chapters[activeChapter].copy}</p><span className="home-story-copy-rule" aria-hidden="true" /></div>
+                    <div className="home-story-workbench" aria-label="装裱工艺工作台">
+                      <figure className="home-story-material-field">
+                        <img src="/assets/home-material-macro.webp" alt="装裱使用的纸张、木框与玻璃材料局部" width="768" height="1152" loading="lazy" decoding="async" />
+                        <figcaption>材料样本 <span>纸 · 木 · 玻璃</span></figcaption>
+                      </figure>
+                      <div className="home-story-art" aria-label="装裱过程记录">
+                        <div className="home-story-art-frame">
+                          <span className="home-story-art-atlas" role="img" aria-label={`第 ${activeChapter + 1} 步：${storyVisuals[activeChapter].label}`} />
+                          <span className={`home-story-art-operation home-story-art-operation-${activeChapter}`} aria-hidden="true"><b>{storyVisuals[activeChapter].label}</b><small>{storyVisuals[activeChapter].meta}</small></span>
+                        </div>
+                        <span className="home-story-art-label">工艺记录 {String(activeChapter + 1).padStart(2, "0")}</span>
+                      </div>
+                      <p className="home-story-workbench-caption"><span>PROCESS NOTE</span>{storyVisuals[activeChapter].meta}</p>
+                    </div>
                   </div>
                   <div className="home-story-stage-footer"><span>SCROLL TO COMPOSE</span><span>{String(activeChapter + 1).padStart(2, "0")} / {String(chapters.length).padStart(2, "0")}</span></div>
                 </div>
               </div>
             </div>
           </div>
+          <div className="home-story-handoff home-reveal"><span>工艺完成</span><p>当结构被妥善收好，作品才真正进入陈列。</p></div>
         </section>
 
         <section className="home-materials home-section home-exhibition" id="materials" aria-labelledby="materials-title">
@@ -287,7 +313,10 @@ export default function HomePage() {
             onPointerUp={handleWorkPointerUp}
             onPointerCancel={() => { workSwipeStartX.current = null; setWorkDragX(0); }}
           >
-            <p className="home-gallery-label"><span />正好作品陈列</p>
+            <p className="home-gallery-label">
+              <span aria-hidden="true" />
+              <b>正好作品陈列<small>ZHENGHAO COLLECTION</small></b>
+            </p>
             {([-1, 0, 1] as const).map((offset) => {
               const index = (activeWorkCase + offset + workCases.length) % workCases.length;
               const work = workCases[index];
