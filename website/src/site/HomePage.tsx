@@ -8,33 +8,29 @@ import "./homepage.css";
 
 const chapters = [
   { eyebrow: "01 / 检查", title: "先确认作品状态", copy: "先看作品的材质、方向与边缘，决定适合的装框方式。" },
-  { eyebrow: "02 / 测量", title: "再量出装框尺寸", copy: "记录画芯与开窗尺寸，给卡纸、玻璃和框体留下准确余量。" },
-  { eyebrow: "03 / 搭配", title: "选框，也选卡纸", copy: "按作品气质、尺寸与陈设空间，确定框型、颜色、卡纸与开窗比例。" },
-  { eyebrow: "04 / 固定", title: "把作品稳稳托住", copy: "使用适合作品材质的固定方式，把画芯连接到承托板，避免滑移与受力。" },
-  { eyebrow: "05 / 隔离", title: "让画面远离玻璃", copy: "用卡纸或间隔条留出安全距离，保护画面，也形成更舒展的观看层次。" },
-  { eyebrow: "06 / 封装", title: "依次装入每一层", copy: "清洁玻璃或亚克力，再装入作品、承托板与背板，封好背面并安装挂件。" },
-  { eyebrow: "07 / 检查", title: "确认无尘，再上墙", copy: "检查灰尘、平整度、结构与挂装强度，让作品安全地回到生活。" },
+  { eyebrow: "02 / 搭配", title: "选框，也选卡纸", copy: "按作品气质、尺寸与陈设空间，确定框型、颜色、卡纸与开窗比例。" },
+  { eyebrow: "03 / 固定", title: "把作品稳稳托住", copy: "使用适合作品材质的固定方式，把画芯连接到承托板，避免滑移与受力。" },
+  { eyebrow: "04 / 封装", title: "依次装入每一层", copy: "清洁玻璃或亚克力，再装入作品、承托板与背板，封好背面并安装挂件。" },
+  { eyebrow: "05 / 检查", title: "确认无尘，再上墙", copy: "检查灰尘、平整度、结构与挂装强度，让作品安全地回到生活。" },
 ];
 
 const storyVisuals = [
   { label: "原作检查", meta: "材质 · 方向 · 边缘" },
-  { label: "尺寸标记", meta: "画芯 420 × 560 mm" },
   { label: "框型 / 卡纸", meta: "木框 · 开窗比例" },
   { label: "承托固定", meta: "画芯连接承托板" },
-  { label: "安全间隔", meta: "玻璃前留出 3 mm" },
   { label: "封装完成", meta: "玻璃 · 背板 · 挂件" },
   { label: "最终检查", meta: "无尘 · 平整 · 可挂装" },
 ];
 
 const processNotes = [
   { focus: "纸面、边缘与作品方向", outcome: "确认适合的装裱条件" },
-  { focus: "画芯、开窗与外框余量", outcome: "建立准确尺寸基准" },
   { focus: "框型、色泽与留白比例", outcome: "确定协调的材料组合" },
   { focus: "承托边界与画芯受力", outcome: "让作品稳定而平整" },
-  { focus: "画面与玻璃的安全距离", outcome: "形成清晰保护层次" },
   { focus: "玻璃、背板与挂件结构", outcome: "完成可靠封装" },
   { focus: "灰尘、平整度与挂装强度", outcome: "达到交付状态" },
 ];
+
+const storyVisualIndexes = [0, 2, 3, 5, 6] as const;
 
 const workCases = [
   {
@@ -111,12 +107,27 @@ export default function HomePage() {
   const storyTrackRef = useRef<HTMLDivElement>(null);
   const [activeChapter, setActiveChapter] = useState(0);
   const [activeWorkCase, setActiveWorkCase] = useState(5);
+  const [galleryFocused, setGalleryFocused] = useState(false);
   const [storyProgress, setStoryProgress] = useState(0);
   const [waterRipples, setWaterRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
-  const [workDragX, setWorkDragX] = useState(0);
-  const workSwipeStartX = useRef<number | null>(null);
   const previousWorkIndex = (activeWorkCase - 1 + workCases.length) % workCases.length;
   const nextWorkIndex = (activeWorkCase + 1) % workCases.length;
+
+  useEffect(() => {
+    document.documentElement.classList.add("home-snap-enabled");
+    return () => document.documentElement.classList.remove("home-snap-enabled");
+  }, []);
+
+  useEffect(() => {
+    if (!galleryFocused) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setGalleryFocused(false);
+      if (event.key === "ArrowLeft") setActiveWorkCase((current) => (current - 1 + workCases.length) % workCases.length);
+      if (event.key === "ArrowRight") setActiveWorkCase((current) => (current + 1) % workCases.length);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [galleryFocused]);
 
   useEffect(() => {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>(".home-reveal"));
@@ -144,7 +155,7 @@ export default function HomePage() {
       const nextProgress = Math.min(Math.max(-rect.top / travel, 0), 1);
       const roundedProgress = Math.round(nextProgress * 1000) / 1000;
       setStoryProgress(roundedProgress);
-      // The seven process stops are evenly distributed through the sticky track;
+      // Process stops are evenly distributed through the sticky track;
       // use the nearest stop so the highlighted tab and scene never disagree.
       setActiveChapter(Math.min(chapters.length - 1, Math.round(nextProgress * (chapters.length - 1))));
     };
@@ -201,25 +212,6 @@ export default function HomePage() {
     setActiveWorkCase((index + workCases.length) % workCases.length);
   };
 
-  const handleWorkPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
-    if ((event.target as HTMLElement).closest("button, a")) return;
-    workSwipeStartX.current = event.clientX;
-    event.currentTarget.setPointerCapture(event.pointerId);
-  };
-
-  const handleWorkPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (workSwipeStartX.current === null) return;
-    setWorkDragX(Math.max(-120, Math.min(120, event.clientX - workSwipeStartX.current)));
-  };
-
-  const handleWorkPointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (workSwipeStartX.current === null) return;
-    const distance = event.clientX - workSwipeStartX.current;
-    workSwipeStartX.current = null;
-    setWorkDragX(0);
-    if (Math.abs(distance) >= 58) showWorkCase(activeWorkCase + (distance < 0 ? 1 : -1));
-  };
-
   return (
     <div className="home-page" id="top">
       <SiteHeader />
@@ -255,10 +247,13 @@ export default function HomePage() {
         <section className="home-story home-section" id="story" aria-labelledby="story-title">
           <div className="home-section-heading home-reveal"><p className="home-kicker"><span />一段从观看开始的故事</p><h2 id="story-title">装裱不是最后一步，<br /><em>是作品的新开始。</em></h2></div>
           <div className="home-story-track" ref={storyTrackRef}>
+            <div className="home-story-snap-points" aria-hidden="true">
+              {chapters.map((chapter) => <span key={chapter.eyebrow} />)}
+            </div>
             <div className="home-story-sticky">
               <div className="home-story-layout home-reveal is-visible">
                 <div className="home-story-rail" role="tablist" aria-label="正好书画社品牌故事">
-                  <div className="home-story-rail-heading"><span>装裱流程</span><small>01—07</small></div>
+                  <div className="home-story-rail-heading"><span>装裱流程</span><small>01—05</small></div>
                   <div className="home-story-rail-line" aria-hidden="true"><span style={{ "--story-progress-line": `${Math.max(storyProgress * 100, 6)}%`, "--story-active-line": `${((activeChapter + 1) / chapters.length) * 100}%` } as CSSProperties} /></div>
                   <div className="home-story-tabs">
                     {chapters.map((chapter, index) => (
@@ -270,8 +265,8 @@ export default function HomePage() {
                   <p className="home-story-scroll-hint"><span aria-hidden="true">↓</span>向下滚动，观看装裱发生</p>
                 </div>
                 <div className="home-story-stage" id="story-stage" role="tabpanel" aria-live="polite" style={{ "--story-progress": storyProgress } as CSSProperties}>
-                  <div className="home-story-stage-topline"><span>正好书画社 / 01—07</span><span>从原作到正好归处</span></div>
-                  <div className={`home-story-stage-scene home-story-chapter-${activeChapter}`}>
+                  <div className="home-story-stage-topline"><span>正好书画社 / 01—05</span><span>从原作到正好归处</span></div>
+                  <div className={`home-story-stage-scene home-story-chapter-${storyVisualIndexes[activeChapter]}`}>
                     <div className="home-story-copy" key={activeChapter}>
                       <span>{chapters[activeChapter].eyebrow}</span>
                       <h3>{chapters[activeChapter].title}</h3>
@@ -289,7 +284,7 @@ export default function HomePage() {
                       <div className="home-story-art" aria-label="装裱过程记录">
                         <div className="home-story-art-frame">
                           <span className="home-story-art-atlas" role="img" aria-label={`第 ${activeChapter + 1} 步：${storyVisuals[activeChapter].label}`} />
-                          <span className={`home-story-art-operation home-story-art-operation-${activeChapter}`} aria-hidden="true"><b>{storyVisuals[activeChapter].label}</b><small>{storyVisuals[activeChapter].meta}</small></span>
+                          <span className={`home-story-art-operation home-story-art-operation-${storyVisualIndexes[activeChapter]}`} aria-hidden="true"><b>{storyVisuals[activeChapter].label}</b><small>{storyVisuals[activeChapter].meta}</small></span>
                         </div>
                         <span className="home-story-art-label">工艺记录 {String(activeChapter + 1).padStart(2, "0")}</span>
                       </div>
@@ -305,76 +300,53 @@ export default function HomePage() {
         </section>
 
         <section className="home-materials home-section home-exhibition" id="materials" aria-labelledby="materials-title">
-          <div
-            className={workDragX === 0 ? "home-gallery-corridor" : "home-gallery-corridor is-dragging"}
-            style={{ "--gallery-drag": `${workDragX}px` } as CSSProperties}
-            onPointerDown={handleWorkPointerDown}
-            onPointerMove={handleWorkPointerMove}
-            onPointerUp={handleWorkPointerUp}
-            onPointerCancel={() => { workSwipeStartX.current = null; setWorkDragX(0); }}
-          >
+          <div className={galleryFocused ? "home-gallery-corridor is-focused" : "home-gallery-corridor"}>
             <p className="home-gallery-label">
               <span aria-hidden="true" />
-              <b>正好作品陈列<small>ZHENGHAO COLLECTION</small></b>
+              <b id="materials-title">正好作品陈列<small>ZHENGHAO COLLECTION</small></b>
             </p>
-            {([-1, 0, 1] as const).map((offset) => {
-              const index = (activeWorkCase + offset + workCases.length) % workCases.length;
-              const work = workCases[index];
-              return (
-                <figure
-                  className={`home-gallery-work home-gallery-work-${offset === -1 ? "previous" : offset === 1 ? "next" : "active"} home-gallery-size-${work.frameCrop.size}${index === 5 ? " home-gallery-tone-light" : ""}`}
-                  key={work.image}
-                  aria-hidden={offset !== 0}
-                  style={{
-                    "--frame-ratio": work.frameCrop.ratio,
-                    "--frame-image-width": work.frameCrop.imageWidth,
-                    "--frame-image-left": work.frameCrop.imageLeft,
-                    "--frame-image-top": work.frameCrop.imageTop,
-                    "--frame-level": work.frameCrop.level,
-                  } as CSSProperties}
-                >
-                  <div className="home-gallery-frame-crop">
-                    <img src={work.image} alt={offset === 0 ? work.alt : ""} width="1536" height="1024" loading={offset === 0 ? "eager" : "lazy"} decoding="async" draggable="false" />
-                  </div>
-                </figure>
-              );
-            })}
+            <p className="home-gallery-instruction"><span>07 件实裱作品</span><strong>{galleryFocused ? "正在近观" : "选择一幅，走近观看"}</strong></p>
 
-            <div className={`home-gallery-caption home-gallery-caption-${workCases[activeWorkCase].frameCrop.size}`} key={activeWorkCase} aria-live="polite">
-              <h2 id="materials-title">{workCases[activeWorkCase].title}</h2>
-              <span>{workCases[activeWorkCase].type}</span>
-              <i aria-hidden="true" />
-              <small>{workCases[activeWorkCase].treatment}</small>
-            </div>
-
-            <aside className="home-gallery-position" aria-label={`当前为第 ${activeWorkCase + 1} 件，共 ${workCases.length} 件`} onPointerDown={(event) => event.stopPropagation()}>
-              <div className="home-gallery-position-count">
-                <span>EXHIBIT</span>
-                <strong>{String(activeWorkCase + 1).padStart(2, "0")}</strong>
-                <i aria-hidden="true" />
-                <em>{String(workCases.length).padStart(2, "0")}</em>
-              </div>
-              <div className="home-gallery-position-actions">
-                <button type="button" onClick={() => showWorkCase(previousWorkIndex)} aria-label={`查看上一件作品：${workCases[previousWorkIndex].title}`}>
-                  <span>上一件</span><strong>{workCases[previousWorkIndex].title}</strong>
-                </button>
-                <button type="button" onClick={() => showWorkCase(nextWorkIndex)} aria-label={`查看下一件作品：${workCases[nextWorkIndex].title}`}>
-                  <span>下一件</span><strong>{workCases[nextWorkIndex].title}</strong>
-                </button>
-              </div>
-            </aside>
-
-            <div className="home-gallery-index" role="tablist" aria-label="相邻作品">
-              {([-1, 0, 1] as const).map((offset) => {
-                const index = (activeWorkCase + offset + workCases.length) % workCases.length;
-                const work = workCases[index];
+            <div className="home-gallery-wall" aria-label="正好书画社作品展墙">
+              {workCases.map((work, index) => {
+                const selected = galleryFocused && activeWorkCase === index;
                 return (
-                  <button className={offset === 0 ? "is-active" : ""} type="button" role="tab" aria-selected={offset === 0} onClick={() => showWorkCase(index)} key={`${offset}-${work.title}`}>
-                    <span>{String(index + 1).padStart(2, "0")}</span><strong>{work.title}</strong>
-                  </button>
+                  <figure
+                    className={`home-gallery-work home-gallery-wall-slot-${index} home-gallery-size-${work.frameCrop.size}${selected ? " is-selected" : ""}${galleryFocused && !selected ? " is-recessed" : ""}`}
+                    key={work.image}
+                    style={{
+                      "--frame-ratio": work.frameCrop.ratio,
+                      "--frame-image-width": work.frameCrop.imageWidth,
+                      "--frame-image-left": work.frameCrop.imageLeft,
+                      "--frame-image-top": work.frameCrop.imageTop,
+                      "--frame-level": work.frameCrop.level,
+                    } as CSSProperties}
+                  >
+                    <button type="button" className="home-gallery-work-button" aria-pressed={selected} aria-label={`近看作品：${work.title}`} onClick={() => { setActiveWorkCase(index); setGalleryFocused(true); }}>
+                      <span className="home-gallery-frame-crop"><img src={work.image} alt={work.alt} width="1536" height="1024" loading={index < 4 ? "eager" : "lazy"} decoding="async" draggable="false" /></span>
+                      <span className="home-gallery-plaque"><small>{String(index + 1).padStart(2, "0")}</small><strong>{work.title}</strong><em>{work.type}</em></span>
+                    </button>
+                  </figure>
                 );
               })}
             </div>
+
+            {galleryFocused && (
+              <>
+                <aside className="home-gallery-focus-copy" aria-live="polite">
+                  <span>{String(activeWorkCase + 1).padStart(2, "0")} / {String(workCases.length).padStart(2, "0")} · {workCases[activeWorkCase].type}</span>
+                  <h2>{workCases[activeWorkCase].title}</h2>
+                  <p>{workCases[activeWorkCase].copy}</p>
+                  <small>{workCases[activeWorkCase].treatment}</small>
+                </aside>
+
+                <div className="home-gallery-focus-actions">
+                  <button type="button" onClick={() => showWorkCase(previousWorkIndex)}>上一件<strong>{workCases[previousWorkIndex].title}</strong></button>
+                  <button type="button" className="home-gallery-return" onClick={() => setGalleryFocused(false)}>返回整面展墙</button>
+                  <button type="button" onClick={() => showWorkCase(nextWorkIndex)}>下一件<strong>{workCases[nextWorkIndex].title}</strong></button>
+                </div>
+              </>
+            )}
           </div>
         </section>
 
