@@ -106,12 +106,13 @@ test("admin preview uses the catalog cover and homepage ink trail renders only o
   assert.match(inkCursorSource, /prefers-reduced-motion: reduce/);
   assert.match(inkCursorSource, /if \(!animationFrame\) animationFrame = window\.requestAnimationFrame/);
   assert.match(inkCursorSource, /if \(dabs\.length\) animationFrame = window\.requestAnimationFrame/);
-  assert.match(homePageSource, /home-work-case-01\.jpg/);
-  assert.match(homePageSource, /home-work-case-02\.jpg/);
+  assert.match(homePageSource, /work-01-fu-lu-shou-xi\.webp/);
+  assert.match(homePageSource, /work-07-horses\.webp/);
   assert.match(homePageSource, /正好作品陈列/);
-  assert.match(homePageSource, /查看上一件作品/);
-  assert.match(homePageSource, /role="tablist" aria-label="作品案例目录"/);
-  assert.doesNotMatch(homePageSource, /home-material-macro\.webp/);
+  assert.match(homePageSource, /home-gallery-scroll-track/);
+  assert.match(homePageSource, /role="dialog" aria-modal="true"/);
+  assert.match(homePageSource, /loading="lazy" decoding="async"/);
+  assert.doesNotMatch(homePageSource, /work-01-fu-lu-shou-xi\.png/);
 });
 
 test("material admin lists only managed records and supports selecting them for editing", () => {

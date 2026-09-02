@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
 import InkCursorTrail from "./InkCursorTrail";
@@ -34,67 +34,74 @@ const storyVisualIndexes = [0, 2, 3, 5, 6] as const;
 
 const workCases = [
   {
-    image: "/assets/cases/cutouts/work-01-fu-lu-shou-xi.png?v=6",
+    image: "/assets/cases/cutouts/work-01-fu-lu-shou-xi.webp",
+    sourceSize: { width: 1280, height: 412 },
     alt: "正好书画社完成装裱的福禄寿禧书法横幅，悬挂于暖灰展墙",
     title: "福禄寿禧",
     type: "书法横幅",
     treatment: "黑檀色窄框 · 米白卡纸",
     copy: "用收敛的深色边界托住横向题字，让字势保持舒展，也让长幅作品更容易进入日常空间。",
-    frameCrop: { ratio: 3.0998, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "wide" },
+    frameCrop: { ratio: 3.0998, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "wide", arrivalX: "-3vw", arrivalRotate: "-2.2deg" },
   },
   {
-    image: "/assets/cases/cutouts/work-02-seal-script.png?v=6",
+    image: "/assets/cases/cutouts/work-02-seal-script.webp",
+    sourceSize: { width: 1179, height: 812 },
     alt: "正好书画社完成装裱的篆书作品，采用红木圆弧框与米白卡纸",
     title: "篆书作品",
     type: "篆书方幅",
     treatment: "红木圆弧框 · 米白卡纸",
     copy: "温润的红木圆弧与留白更宽的卡纸，缓和篆书的结构密度，让近看细节与远观秩序同时成立。",
-    frameCrop: { ratio: 1.4538, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "landscape" },
+    frameCrop: { ratio: 1.4538, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "landscape", arrivalX: "2vw", arrivalRotate: "1.8deg" },
   },
   {
-    image: "/assets/cases/cutouts/work-03-fan.png?v=6",
+    image: "/assets/cases/cutouts/work-03-fan.webp",
+    sourceSize: { width: 1280, height: 706 },
     alt: "正好书画社完成装裱的扇面山水作品，采用深红木框与白卡纸",
     title: "扇面雅集",
     type: "扇面山水",
     treatment: "深红木框 · 白卡纸",
     copy: "以扇面的弧线收住庭院山水，深红木框压住画面的静气，让留白与线稿在墙面上慢慢展开。",
-    frameCrop: { ratio: 1.8113, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "landscape" },
+    frameCrop: { ratio: 1.8113, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "landscape", arrivalX: "-1vw", arrivalRotate: "-1.5deg" },
   },
   {
-    image: "/assets/cases/cutouts/work-04-gold-seal.png?v=6",
+    image: "/assets/cases/cutouts/work-04-gold-seal.webp",
+    sourceSize: { width: 853, height: 862 },
     alt: "正好书画社完成装裱的金笺篆书方幅，采用深色细框与圆角悬浮卡纸",
     title: "金笺篆意",
     type: "篆书方幅",
     treatment: "深色细框 · 圆角悬浮卡纸",
     copy: "以克制的深色细框围合金笺，圆角悬浮卡纸让作品与背景留出呼吸，也托住篆书厚重的结构。",
-    frameCrop: { ratio: 0.9907, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "portrait" },
+    frameCrop: { ratio: 0.9907, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "portrait", arrivalX: "2.5vw", arrivalRotate: "2deg" },
   },
   {
-    image: "/assets/cases/cutouts/work-05-self-strength-clean.png?v=7",
+    image: "/assets/cases/cutouts/work-05-self-strength-clean.webp",
+    sourceSize: { width: 1280, height: 402 },
     alt: "正好书画社完成装裱的自强不息书法横幅，采用深红木框与米白卡纸",
     title: "自强不息",
     type: "书法横幅",
     treatment: "深红木框 · 米白卡纸",
     copy: "横幅以宽阔留白舒展字势，温润红木收住墨色重量，让日常空间里仍保有端正而有力的气息。",
-    frameCrop: { ratio: 3.1831, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "wide" },
+    frameCrop: { ratio: 3.1831, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "wide", arrivalX: "-2vw", arrivalRotate: "-1.8deg" },
   },
   {
-    image: "/assets/cases/cutouts/work-06-mountain-exact.png?v=8",
+    image: "/assets/cases/cutouts/work-06-mountain-exact.webp",
+    sourceSize: { width: 1280, height: 960 },
     alt: "正好书画社完成装裱的水墨山水长卷，采用浅木框与白色卡纸",
     title: "山河入画",
     type: "水墨长卷",
     treatment: "浅木窄框 · 白色卡纸",
     copy: "浅木色退到画面之外，长幅卡纸延伸山势的节奏，使细密线条与大片墨色都能从容展开。",
-    frameCrop: { ratio: 2.7421, imageWidth: "111.4%", imageLeft: "-5.15%", imageTop: "-66%", level: "-0.52deg", size: "wide" },
+    frameCrop: { ratio: 2.7421, imageWidth: "111.4%", imageLeft: "-5.15%", imageTop: "-66%", level: "-0.52deg", size: "wide", arrivalX: "1.5vw", arrivalRotate: "1.4deg" },
   },
   {
-    image: "/assets/cases/cutouts/work-07-horses.png?v=6",
+    image: "/assets/cases/cutouts/work-07-horses.webp",
+    sourceSize: { width: 1280, height: 484 },
     alt: "正好书画社完成装裱的八骏图刺绣横幅，采用棕木框与暖白卡纸",
     title: "八骏腾风",
     type: "刺绣横幅",
     treatment: "棕木细框 · 暖白卡纸",
     copy: "细窄棕木框顺着奔马的横向动势铺开，暖白卡纸隔开繁密针脚，让速度与层次在远观时依然清楚。",
-    frameCrop: { ratio: 2.648, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "wide" },
+    frameCrop: { ratio: 2.648, imageWidth: "100%", imageLeft: "0", imageTop: "0", level: "0deg", size: "wide", arrivalX: "-2vw", arrivalRotate: "-1.6deg" },
   },
 ] as const;
 
@@ -105,9 +112,14 @@ function scrollToId(id: string) {
 export default function HomePage() {
   const heroRef = useRef<HTMLElement>(null);
   const storyTrackRef = useRef<HTMLDivElement>(null);
+  const galleryTrackRef = useRef<HTMLDivElement>(null);
+  const galleryWorkRefs = useRef<Array<HTMLElement | null>>([]);
+  const galleryFocusArtRef = useRef<HTMLElement>(null);
+  const galleryFocusOriginRef = useRef<DOMRect | null>(null);
   const [activeChapter, setActiveChapter] = useState(0);
   const [activeWorkCase, setActiveWorkCase] = useState(5);
   const [galleryFocused, setGalleryFocused] = useState(false);
+  const [mountedWorkCount, setMountedWorkCount] = useState(0);
   const [storyProgress, setStoryProgress] = useState(0);
   const [waterRipples, setWaterRipples] = useState<Array<{ id: number; x: number; y: number }>>([]);
   const previousWorkIndex = (activeWorkCase - 1 + workCases.length) % workCases.length;
@@ -120,14 +132,52 @@ export default function HomePage() {
 
   useEffect(() => {
     if (!galleryFocused) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setGalleryFocused(false);
-      if (event.key === "ArrowLeft") setActiveWorkCase((current) => (current - 1 + workCases.length) % workCases.length);
-      if (event.key === "ArrowRight") setActiveWorkCase((current) => (current + 1) % workCases.length);
+      if (event.key === "ArrowLeft") {
+        setActiveWorkCase((current) => {
+          const next = (current - 1 + workCases.length) % workCases.length;
+          galleryFocusOriginRef.current = galleryWorkRefs.current[next]?.getBoundingClientRect() ?? null;
+          return next;
+        });
+      }
+      if (event.key === "ArrowRight") {
+        setActiveWorkCase((current) => {
+          const next = (current + 1) % workCases.length;
+          galleryFocusOriginRef.current = galleryWorkRefs.current[next]?.getBoundingClientRect() ?? null;
+          return next;
+        });
+      }
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [galleryFocused]);
+
+  useLayoutEffect(() => {
+    const focusArt = galleryFocusArtRef.current;
+    const origin = galleryFocusOriginRef.current;
+    if (!galleryFocused || !focusArt || !origin || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const target = focusArt.getBoundingClientRect();
+    const translateX = origin.left + origin.width / 2 - (target.left + target.width / 2);
+    const translateY = origin.top + origin.height / 2 - (target.top + target.height / 2);
+    const scaleX = Math.max(origin.width / target.width, 0.08);
+    const scaleY = Math.max(origin.height / target.height, 0.08);
+    const animation = focusArt.animate([
+      {
+        opacity: 0.58,
+        transform: `translate3d(calc(-50% + ${translateX}px), ${translateY}px, 0) scale(${scaleX}, ${scaleY})`,
+      },
+      { opacity: 1, transform: "translate3d(-50%, 0, 0) scale(1, 1)" },
+    ], { duration: 680, easing: "cubic-bezier(.25,.46,.45,.94)", fill: "both" });
+
+    return () => animation.cancel();
+  }, [activeWorkCase, galleryFocused]);
 
   useEffect(() => {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>(".home-reveal"));
@@ -173,6 +223,65 @@ export default function HomePage() {
     };
   }, []);
 
+  useEffect(() => {
+    const track = galleryTrackRef.current;
+    if (!track) return;
+
+    const compactView = window.matchMedia("(max-width: 720px)");
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let sequenceTimer: number | undefined;
+    let sequenceStarted = false;
+    const showAllWorks = () => {
+      if (compactView.matches || reducedMotion.matches) {
+        setMountedWorkCount(workCases.length);
+      }
+    };
+    const startMountSequence = () => {
+      if (sequenceStarted) return;
+      sequenceStarted = true;
+      setMountedWorkCount(1);
+      sequenceTimer = window.setInterval(() => {
+        setMountedWorkCount((current) => {
+          const nextCount = Math.min(current + 1, workCases.length);
+          if (nextCount === workCases.length && sequenceTimer) {
+            window.clearInterval(sequenceTimer);
+            sequenceTimer = undefined;
+          }
+          return nextCount;
+        });
+      }, 190);
+    };
+
+    if (compactView.matches || reducedMotion.matches || !("IntersectionObserver" in window)) {
+      setMountedWorkCount(workCases.length);
+      return;
+    }
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        startMountSequence();
+        return;
+      }
+      if (!sequenceStarted) return;
+      sequenceStarted = false;
+      if (sequenceTimer) {
+        window.clearInterval(sequenceTimer);
+        sequenceTimer = undefined;
+      }
+      setMountedWorkCount(0);
+    }, { threshold: 0.72 });
+
+    observer.observe(track);
+    compactView.addEventListener("change", showAllWorks);
+    reducedMotion.addEventListener("change", showAllWorks);
+    return () => {
+      observer.disconnect();
+      compactView.removeEventListener("change", showAllWorks);
+      reducedMotion.removeEventListener("change", showAllWorks);
+      if (sequenceTimer) window.clearInterval(sequenceTimer);
+    };
+  }, []);
+
   const handlePointerMove = (event: React.PointerEvent<HTMLElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const x = ((event.clientX - rect.left) / rect.width) * 100;
@@ -209,7 +318,15 @@ export default function HomePage() {
   };
 
   const showWorkCase = (index: number) => {
-    setActiveWorkCase((index + workCases.length) % workCases.length);
+    const next = (index + workCases.length) % workCases.length;
+    galleryFocusOriginRef.current = galleryWorkRefs.current[next]?.getBoundingClientRect() ?? null;
+    setActiveWorkCase(next);
+  };
+
+  const openWorkCase = (index: number) => {
+    galleryFocusOriginRef.current = galleryWorkRefs.current[index]?.getBoundingClientRect() ?? null;
+    setActiveWorkCase(index);
+    setGalleryFocused(true);
   };
 
   return (
@@ -300,30 +417,38 @@ export default function HomePage() {
         </section>
 
         <section className="home-materials home-section home-exhibition" id="materials" aria-labelledby="materials-title">
+          <div className="home-gallery-scroll-track" ref={galleryTrackRef}>
           <div className={galleryFocused ? "home-gallery-corridor is-focused" : "home-gallery-corridor"}>
             <p className="home-gallery-label">
               <span aria-hidden="true" />
               <b id="materials-title">正好作品陈列<small>ZHENGHAO COLLECTION</small></b>
             </p>
-            <p className="home-gallery-instruction"><span>07 件实裱作品</span><strong>{galleryFocused ? "正在近观" : "选择一幅，走近观看"}</strong></p>
+            <p className="home-gallery-instruction">
+              <span>{String(mountedWorkCount).padStart(2, "0")} / {String(workCases.length).padStart(2, "0")} · 展墙布置</span>
+              <strong>{galleryFocused ? "正在近观" : mountedWorkCount < workCases.length ? "作品正在依次上墙" : "展墙完成，选择一幅近观"}</strong>
+            </p>
 
             <div className="home-gallery-wall" aria-label="正好书画社作品展墙">
               {workCases.map((work, index) => {
-                const selected = galleryFocused && activeWorkCase === index;
+                const mounted = index < mountedWorkCount;
                 return (
                   <figure
-                    className={`home-gallery-work home-gallery-wall-slot-${index} home-gallery-size-${work.frameCrop.size}${selected ? " is-selected" : ""}${galleryFocused && !selected ? " is-recessed" : ""}`}
+                    className={`home-gallery-work home-gallery-wall-slot-${index} home-gallery-size-${work.frameCrop.size}${mounted ? " is-mounted" : ""}`}
                     key={work.image}
+                    ref={(node) => { galleryWorkRefs.current[index] = node; }}
+                    aria-hidden={!mounted}
                     style={{
                       "--frame-ratio": work.frameCrop.ratio,
                       "--frame-image-width": work.frameCrop.imageWidth,
                       "--frame-image-left": work.frameCrop.imageLeft,
                       "--frame-image-top": work.frameCrop.imageTop,
                       "--frame-level": work.frameCrop.level,
+                      "--gallery-arrival-x": work.frameCrop.arrivalX,
+                      "--gallery-arrival-rotate": work.frameCrop.arrivalRotate,
                     } as CSSProperties}
                   >
-                    <button type="button" className="home-gallery-work-button" aria-pressed={selected} aria-label={`近看作品：${work.title}`} onClick={() => { setActiveWorkCase(index); setGalleryFocused(true); }}>
-                      <span className="home-gallery-frame-crop"><img src={work.image} alt={work.alt} width="1536" height="1024" loading={index < 4 ? "eager" : "lazy"} decoding="async" draggable="false" /></span>
+                    <button type="button" className="home-gallery-work-button" disabled={!mounted} aria-label={`近看作品：${work.title}`} onClick={() => openWorkCase(index)}>
+                      <span className="home-gallery-frame-crop"><img src={work.image} alt={work.alt} width={work.sourceSize.width} height={work.sourceSize.height} loading="lazy" decoding="async" draggable="false" /></span>
                       <span className="home-gallery-plaque"><small>{String(index + 1).padStart(2, "0")}</small><strong>{work.title}</strong><em>{work.type}</em></span>
                     </button>
                   </figure>
@@ -332,10 +457,25 @@ export default function HomePage() {
             </div>
 
             {galleryFocused && (
-              <>
-                <aside className="home-gallery-focus-copy" aria-live="polite">
+              <div className="home-gallery-focus-layer" role="dialog" aria-modal="true" aria-labelledby="gallery-focus-title">
+                <button type="button" className="home-gallery-focus-backdrop" aria-label="返回整面展墙" onClick={() => setGalleryFocused(false)} />
+                <figure
+                  key={workCases[activeWorkCase].image}
+                  ref={galleryFocusArtRef}
+                  className={`home-gallery-focus-art home-gallery-size-${workCases[activeWorkCase].frameCrop.size}`}
+                  style={{
+                    "--frame-ratio": workCases[activeWorkCase].frameCrop.ratio,
+                    "--frame-image-width": workCases[activeWorkCase].frameCrop.imageWidth,
+                    "--frame-image-left": workCases[activeWorkCase].frameCrop.imageLeft,
+                    "--frame-image-top": workCases[activeWorkCase].frameCrop.imageTop,
+                    "--frame-level": workCases[activeWorkCase].frameCrop.level,
+                  } as CSSProperties}
+                >
+                  <span className="home-gallery-frame-crop"><img src={workCases[activeWorkCase].image} alt={workCases[activeWorkCase].alt} width={workCases[activeWorkCase].sourceSize.width} height={workCases[activeWorkCase].sourceSize.height} loading="eager" decoding="async" draggable="false" /></span>
+                </figure>
+                <aside className="home-gallery-focus-copy" aria-live="polite" key={`copy-${workCases[activeWorkCase].image}`}>
                   <span>{String(activeWorkCase + 1).padStart(2, "0")} / {String(workCases.length).padStart(2, "0")} · {workCases[activeWorkCase].type}</span>
-                  <h2>{workCases[activeWorkCase].title}</h2>
+                  <h2 id="gallery-focus-title">{workCases[activeWorkCase].title}</h2>
                   <p>{workCases[activeWorkCase].copy}</p>
                   <small>{workCases[activeWorkCase].treatment}</small>
                 </aside>
@@ -345,8 +485,9 @@ export default function HomePage() {
                   <button type="button" className="home-gallery-return" onClick={() => setGalleryFocused(false)}>返回整面展墙</button>
                   <button type="button" onClick={() => showWorkCase(nextWorkIndex)}>下一件<strong>{workCases[nextWorkIndex].title}</strong></button>
                 </div>
-              </>
+              </div>
             )}
+          </div>
           </div>
         </section>
 
