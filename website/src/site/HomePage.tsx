@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
 import InkCursorTrail from "./InkCursorTrail";
@@ -31,6 +31,98 @@ const processNotes = [
 ];
 
 const storyVisualIndexes = [0, 2, 3, 5, 6] as const;
+
+const heroTitleColumns = [
+  { text: "给作品", accent: false },
+  { text: "一个正好的", accent: false },
+  { text: "归处", accent: true },
+] as const;
+
+type HanziStrokeData = {
+  strokes: string[];
+  medians: Array<Array<[number, number]>>;
+};
+
+const hanziStrokeCache = new Map<string, Promise<HanziStrokeData>>();
+
+function loadHanziStrokeData(character: string) {
+  const cached = hanziStrokeCache.get(character);
+  if (cached) return cached;
+
+  const request = fetch(`/assets/hero-strokes/${encodeURIComponent(character)}.json`).then((response) => {
+    if (!response.ok) throw new Error(`Unable to load stroke data for ${character}`);
+    return response.json() as Promise<HanziStrokeData>;
+  });
+  hanziStrokeCache.set(character, request);
+  return request;
+}
+
+function BrushStrokeCharacter({ character, order }: { character: string; order: number }) {
+  const [strokeData, setStrokeData] = useState<HanziStrokeData | null>(null);
+  const [failed, setFailed] = useState(false);
+  const rawId = useId();
+  const idPrefix = `hero-brush-${rawId.replace(/:/g, "")}`;
+
+  useEffect(() => {
+    let active = true;
+    loadHanziStrokeData(character)
+      .then((data) => {
+        if (active) setStrokeData(data);
+      })
+      .catch(() => {
+        if (active) setFailed(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, [character]);
+
+  if (!strokeData || failed) {
+    return <span className={`home-brush-character${failed ? " is-fallback" : " is-loading"}`}>{character}</span>;
+  }
+
+  const characterDelay = 90 + order * 205;
+  const strokeStep = Math.min(28, 190 / Math.max(strokeData.strokes.length, 1));
+
+  return (
+    <span className="home-brush-character">
+      <svg viewBox="0 0 1024 1024" aria-hidden="true" focusable="false">
+        <defs>
+          {strokeData.strokes.map((stroke, strokeIndex) => (
+            <clipPath id={`${idPrefix}-${strokeIndex}`} clipPathUnits="userSpaceOnUse" key={`clip-${strokeIndex}`}>
+              <path d={stroke} />
+            </clipPath>
+          ))}
+        </defs>
+        <g transform="translate(0 900) scale(1 -1)">
+          {strokeData.strokes.map((stroke, strokeIndex) => {
+            const median = strokeData.medians[strokeIndex] ?? [];
+            const medianPath = median.map(([x, y], pointIndex) => `${pointIndex === 0 ? "M" : "L"}${x} ${y}`).join(" ");
+            const strokeDelay = characterDelay + strokeIndex * strokeStep;
+            const strokeDuration = Math.max(62, Math.min(112, median.length * 8));
+            const strokeStyle = {
+              "--stroke-delay": `${strokeDelay}ms`,
+              "--stroke-duration": `${strokeDuration}ms`,
+              "--stroke-finish": `${strokeDelay + strokeDuration - 12}ms`,
+            } as CSSProperties;
+
+            return (
+              <g key={`stroke-${strokeIndex}`} style={strokeStyle}>
+                <path className="home-brush-final-stroke" d={stroke} />
+                <path
+                  className="home-brush-writing-stroke"
+                  clipPath={`url(#${idPrefix}-${strokeIndex})`}
+                  d={medianPath}
+                  pathLength="1"
+                />
+              </g>
+            );
+          })}
+        </g>
+      </svg>
+    </span>
+  );
+}
 
 const workCases = [
   {
@@ -348,7 +440,19 @@ export default function HomePage() {
 
           <div className="home-hero-copy home-reveal is-visible">
             <p className="home-kicker"><span />书画 · 装裱 · 新体验</p>
-            <h1 id="hero-title"><span className="home-title-column">给作品</span><span className="home-title-column">一个正好的</span><span className="home-title-column home-title-accent">归处</span></h1>
+            <h1 id="hero-title" aria-label="给作品一个正好的归处">
+              {heroTitleColumns.map((column, columnIndex) => (
+                <span className={`home-title-column${column.accent ? " home-title-accent" : ""}`} aria-hidden="true" key={column.text}>
+                  {Array.from(column.text).map((character, characterIndex) => (
+                    <BrushStrokeCharacter
+                      character={character}
+                      key={`${column.text}-${characterIndex}`}
+                      order={heroTitleColumns.slice(0, columnIndex).reduce((total, item) => total + item.text.length, 0) + characterIndex}
+                    />
+                  ))}
+                </span>
+              ))}
+            </h1>
             <p className="home-hero-lede">正好书画社，把观看、选择与装裱，变成一段值得慢下来的体验。</p>
             <div className="home-hero-actions">
               <button className="home-button home-button-primary" type="button" onClick={goToTryOn}>进入试装空间 <span aria-hidden="true">→</span></button>
