@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { memo, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import SiteFooter from "./SiteFooter";
 import SiteHeader from "./SiteHeader";
 import InkCursorTrail from "./InkCursorTrail";
@@ -57,7 +57,7 @@ function loadHanziStrokeData(character: string) {
   return request;
 }
 
-function BrushStrokeCharacter({ character, order }: { character: string; order: number }) {
+const BrushStrokeCharacter = memo(function BrushStrokeCharacter({ character, order }: { character: string; order: number }) {
   const [strokeData, setStrokeData] = useState<HanziStrokeData | null>(null);
   const [failed, setFailed] = useState(false);
   const rawId = useId();
@@ -122,7 +122,7 @@ function BrushStrokeCharacter({ character, order }: { character: string; order: 
       </svg>
     </span>
   );
-}
+});
 
 const workCases = [
   {
@@ -374,14 +374,6 @@ export default function HomePage() {
     };
   }, []);
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = ((event.clientX - rect.left) / rect.width) * 100;
-    const y = ((event.clientY - rect.top) / rect.height) * 100;
-    heroRef.current?.style.setProperty("--pointer-x", `${x}%`);
-    heroRef.current?.style.setProperty("--pointer-y", `${y}%`);
-  };
-
   const handleWaterPointerDown = (event: React.PointerEvent<HTMLElement>) => {
     const target = event.target as HTMLElement;
     if (target.closest("button, a")) return;
@@ -427,7 +419,7 @@ export default function HomePage() {
       <InkCursorTrail />
 
       <main>
-        <section className="home-hero" ref={heroRef} onPointerMove={handlePointerMove} onPointerDown={handleWaterPointerDown} aria-labelledby="hero-title">
+        <section className="home-hero" ref={heroRef} onPointerDown={handleWaterPointerDown} aria-labelledby="hero-title">
           <img className="home-hero-image" src="/assets/home-ink-portal.webp" alt="水墨山水作品立于雾气与水面之间的木质画框" width="1900" height="1188" fetchPriority="high" decoding="async" />
           <div className="home-hero-shade" aria-hidden="true" />
           <div className="home-hero-vignette" aria-hidden="true" />

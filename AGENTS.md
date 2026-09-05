@@ -81,6 +81,10 @@ Before making substantial visual changes, use the Product Design plugin's `get-c
 
 ## Website interaction rules
 
+- September 2026 redesign brief: preserve the hero's ordered brush-written “给作品一个正好的归处” entrance and the complete finished-work wall/selection behavior. Redesign exploration targets the other marketing sections, especially craft storytelling, try-on introduction, and studio closing; keep the existing try-on and administration workspaces intact.
+- Large-screen homepage effects must use a fixed pixel budget, not only a DPR cap. The ink trail caches its brush bitmap, coalesces pointer input once per animation frame, clears only the previous stroke bounds, and stops when empty or hidden. Avoid full-screen blend modes and pointer-driven inherited CSS variables on the hero. Keep the title's SVG strokes unfiltered and memoized.
+- Homepage fonts must be served locally with an appropriate license and optional display to avoid remote stylesheet blocking and late font swaps. The subset currently covers homepage/header/footer copy; regenerate the subset when that copy changes, with system fallbacks for other glyphs.
+
 - Keep the website a conventional responsive React site. It may contain marketing interactions such as anchored navigation, responsive menus, and links into the native mini-program, but it must not reproduce native mini-program screens.
 - The website try-on experience is a dedicated, desktop-first framing workspace rather than a phone mock. Keep its route, page components, framing domain model, pricing logic, and responsive controls separated from the marketing homepage; on narrow screens preserve preview-first ordering.
 - The desktop try-on must stay inside one viewport with compact “作品/装裱” headings and independently scrolling side panels. In the mat tab, keep active-layer selection and both directional size controls visible while only the searchable material library scrolls, so choosing a material never forces a scroll back to the width controls.

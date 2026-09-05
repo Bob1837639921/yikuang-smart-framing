@@ -1,4 +1,12 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700;900&display=swap");
+@font-face {
+  font-family: 'Noto Serif SC';
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: optional;
+  src: url(/assets/fonts/home-serif-variable-0.woff2) format('woff2');
+  unicode-range: U+a, U+20-26, U+28-3f, U+41-49, U+4b-50, U+52-5b, U+5d, U+60-7d, U+a9, U+b7, U+2014, U+2192-2193, U+2197-2198, U+3001-3002, U+4e00, U+4e0a-4e0b, U+4e0d-4e0e, U+4e2a, U+4e3b, U+4e4b, U+4e5f, U+4e66, U+4e8b, U+4e8e, U+4e9a, U+4ea4, U+4ecd-4ece, U+4ed8, U+4ee5, U+4eec, U+4ef6, U+4f1a, U+4f20, U+4f38, U+4f4f, U+4f53, U+4f5c, U+4f60, U+4f7f, U+4f8b, U+4f9d, U+4fa7, U+4fdd, U+503c, U+5148, U+514b, U+514d, U+5165, U+5168, U+516b, U+5173, U+518d, U+51b3, U+51c6, U+51fa, U+5217, U+5230, U+5236, U+523a, U+529b, U+52a8, U+52bf, U+534f, U+5355, U+5361, U+5377, U+538b, U+539a, U+539f, U+53bb, U+53d1, U+53d7-53d8, U+53ea, U+53ef-53f0, U+5408, U+540c, U+540e, U+5411, U+5438, U+547c, U+548c, U+54c1, U+5584, U+559c, U+56de, U+56f4, U+56fa, U+56fe, U+5706, U+5728, U+5730, U+578b, U+5899, U+58a8, U+5904, U+5916, U+5927, U+594f, U+5954, U+597d, U+59a5, U+59cb, U+5b50, U+5b57, U+5b83, U+5b89, U+5b8c, U+5b9a, U+5b9e, U+5bb9, U+5bbd, U+5bc6, U+5bdf, U+5bf8, U+5bfc, U+5bff, U+5c01, U+5c18, U+5c3a, U+5c40, U+5c42, U+5c55, U+5c5e, U+5c71, U+5de5, U+5df1, U+5e03, U+5e26, U+5e38, U+5e45, U+5e55, U+5e73, U+5e76, U+5e8f, U+5e94, U+5e97, U+5ea6, U+5ead, U+5ef6, U+5f00, U+5f0f, U+5f20, U+5f27, U+5f3a, U+5f52-5f53, U+5f55, U+5f97, U+6001, U+606f, U+60ac, U+610f, U+6162, U+6210-6211, U+6216, U+6247, U+624d, U+6253, U+6258, U+627e-627f, U+628a, U+62e9, U+6301-6302, U+6309, U+63a2, U+63a5, U+642d, U+6536, U+653e, U+6545, U+655b, U+6574, U+6599, U+65b0, U+65b9, U+65e0, U+65e5, U+65f6, U+6613, U+662f, U+666f, U+667a, U+6696, U+66f4, U+6700, U+6709, U+6728, U+672c, U+6750, U+6761, U+6765, U+677f, U+6784, U+67e5, U+6807, U+6837, U+6846, U+6848, U+68c0, U+68d5, U+695a, U+6a2a, U+6a80, U+6b21-6b22, U+6b63, U+6b65, U+6bb5, U+6bcf, U+6bd4, U+6c14, U+6c34, U+6cb3, U+6cd5, U+6cfd, U+6d01, U+6d3b, U+6d41, U+6d45, U+6d6e, U+6da6, U+6df1, U+6e05, U+6e29, U+6ed1, U+6eda, U+7070, U+70b9, U+7136, U+7247, U+724c, U+72b6, U+73bb, U+7483, U+751f, U+7528, U+753b, U+754c, U+7559, U+767d, U+7684, U+770b, U+771f, U+7740, U+786e, U+793e, U+7984, U+798f, U+79a7, U+79e9, U+79fb, U+7a0b, U+7a33, U+7a3f, U+7a7a, U+7a84, U+7a97, U+7acb, U+7aef, U+7b2c, U+7b3a, U+7bc6, U+7c73, U+7d22, U+7e41, U+7ea2, U+7ea6, U+7eb3, U+7eb8, U+7ebf, U+7ec4, U+7ec6, U+7ec8, U+7ed3, U+7ed9, U+7ee3, U+7ee7, U+7eed, U+7f13, U+7f18, U+7f6e, U+800c, U+80cc, U+80fd, U+811a, U+817e, U+81ea, U+8212, U+822a, U+8272, U+827a, U+8282, U+82af, U+83dc, U+88ab, U+88c5, U+88f1, U+89c1-89c2, U+89d2, U+8ba4, U+8ba9, U+8bb0, U+8bbe, U+8bc6, U+8bd5, U+8c03, U+8d28, U+8fb9, U+8fbe, U+8fc7, U+8fd1, U+8fd4, U+8fd9, U+8fdb-8fdc, U+8fde, U+9000, U+9002, U+9009, U+901f, U+907f, U+90d1, U+90e8, U+90fd, U+914d, U+91c7, U+91cc-91cd, U+91cf, U+91d1, U+9488, U+94fa, U+957f, U+95e8, U+95ed, U+95f4, U+9614, U+9648, U+9662, U+9694, U+96c5-96c6, U+96fe, U+9759, U+9760, U+9762, U+9875, U+987a, U+9884, U+9898, U+989c, U+98ce, U+9996, U+9a6c, U+9a8c, U+9a8f, U+9ed1, U+ff0c, U+ff1a;
+}
+
 
 :root {
   --home-ink: #1b1d1b;
@@ -27,7 +35,7 @@
 .home-page h1, .home-page h2, .home-page h3, .home-page p { margin: 0; }
 .home-page em { color: var(--home-gold); font-style: normal; }
 .home-page :focus-visible { outline: 2px solid var(--home-gold); outline-offset: 4px; }
-.home-ink-cursor { position: fixed; z-index: 19; inset: 0; display: block; width: 100vw; height: 100vh; opacity: 0.82; mix-blend-mode: multiply; pointer-events: none; }
+.home-ink-cursor { position: fixed; z-index: 19; inset: 0; display: block; width: 100vw; height: 100vh; opacity: 0.82; contain: strict; pointer-events: none; }
 
 .home-header { position: absolute; z-index: 20; top: 0; right: 0; left: 0; display: flex; width: 100%; align-items: center; justify-content: space-between; padding: 24px max(40px, calc((100vw - 1760px) / 2)) 22px; color: var(--home-ink); }
 .home-header::before { position: absolute; z-index: -1; top: 0; right: 0; bottom: 0; left: 0; border-bottom: 1px solid rgba(27, 29, 27, 0.1); background: linear-gradient(180deg, rgba(244, 240, 232, 0.72), rgba(244, 240, 232, 0.18)); content: ""; backdrop-filter: blur(12px); }
@@ -72,7 +80,7 @@
 .home-brush-character { position: relative; display: grid; width: 1em; height: 1em; place-items: center; color: var(--home-ink); line-height: 1; }
 .home-brush-character.is-loading { color: transparent; }
 .home-brush-character.is-fallback { font-family: var(--home-serif); font-weight: 600; }
-.home-brush-character svg { display: block; width: 1.03em; height: 1.03em; overflow: visible; color: var(--home-ink); filter: drop-shadow(0 0 0.3px rgba(27, 29, 27, 0.32)); }
+.home-brush-character svg { display: block; width: 1.03em; height: 1.03em; overflow: visible; color: var(--home-ink); contain: layout paint; }
 .home-brush-writing-stroke { fill: none; stroke: currentColor; stroke-dasharray: 1; stroke-dashoffset: 1; stroke-linecap: round; stroke-linejoin: round; stroke-width: 176px; animation: home-brush-stroke var(--stroke-duration) var(--stroke-delay) cubic-bezier(.26,.06,.18,1) forwards; }
 .home-brush-final-stroke { fill: currentColor; opacity: 0; animation: home-brush-stroke-settle 1ms var(--stroke-finish) linear forwards; }
 .home-hero-copy > .home-kicker { opacity: 0; animation: home-hero-fade-in 700ms 60ms cubic-bezier(.2,.8,.2,1) forwards; }

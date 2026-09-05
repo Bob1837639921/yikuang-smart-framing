@@ -11,7 +11,8 @@ type InkDab = {
   opacity: number;
 };
 
-const MAX_DABS = 280;
+const MAX_DABS = 120;
+const MAX_PIXELS = 1_000_000;
 
 export default function InkCursorTrail() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -26,9 +27,25 @@ export default function InkCursorTrail() {
     let lastPoint: { x: number; y: number; time: number } | null = null;
     let animationFrame = 0;
     let pixelRatio = 1;
+    let pendingPointer: PointerEvent | null = null;
+    let dirty: { x: number; y: number; width: number; height: number } | null = null;
+    // Bake the wash once. Drawing a small bitmap avoids rebuilding hundreds of
+    // radial gradients during every frame of a stroke.
+    const stamp = document.createElement("canvas");
+    stamp.width = stamp.height = 64;
+    const brush = stamp.getContext("2d");
+    if (!brush) return;
+    const wash = brush.createRadialGradient(32, 32, 2.56, 32, 32, 32);
+    wash.addColorStop(0, "rgba(22,24,21,1)");
+    wash.addColorStop(0.42, "rgba(28,30,26,.72)");
+    wash.addColorStop(0.78, "rgba(45,46,39,.18)");
+    wash.addColorStop(1, "rgba(45,46,39,0)");
+    brush.fillStyle = wash;
+    brush.fillRect(0, 0, 64, 64);
 
     const resize = () => {
-      pixelRatio = Math.min(window.devicePixelRatio || 1, 1.5);
+      clearStroke();
+      pixelRatio = Math.min(window.devicePixelRatio || 1, 1.25, Math.sqrt(MAX_PIXELS / (window.innerWidth * window.innerHeight)));
       canvas.width = Math.max(1, Math.round(window.innerWidth * pixelRatio));
       canvas.height = Math.max(1, Math.round(window.innerHeight * pixelRatio));
       context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
@@ -36,32 +53,37 @@ export default function InkCursorTrail() {
 
     const render = (now: number) => {
       animationFrame = 0;
-      context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      if (pendingPointer) {
+        const event = pendingPointer;
+        pendingPointer = null;
+        addStroke(event);
+      }
+      if (dirty) context.clearRect(dirty.x, dirty.y, dirty.width, dirty.height);
+      let left = Infinity, top = Infinity, right = -Infinity, bottom = -Infinity;
       for (let index = dabs.length - 1; index >= 0; index -= 1) {
         const dab = dabs[index];
-        const progress = (now - dab.bornAt) / dab.lifetime;
+        const progress = Math.max(0, (now - dab.bornAt) / dab.lifetime);
         if (progress >= 1) {
           dabs.splice(index, 1);
           continue;
         }
         const fade = Math.pow(1 - progress, 1.7);
         const radius = dab.radius * (1 + progress * 0.38);
+        const extent = radius * dab.stretch + 3 / pixelRatio;
+        left = Math.min(left, dab.x - extent);
+        top = Math.min(top, dab.y - extent);
+        right = Math.max(right, dab.x + extent);
+        bottom = Math.max(bottom, dab.y + extent);
         context.save();
         context.translate(dab.x, dab.y);
         context.rotate(dab.angle);
         context.scale(dab.stretch, 1);
-        const wash = context.createRadialGradient(0, 0, radius * 0.08, 0, 0, radius);
-        wash.addColorStop(0, `rgba(22, 24, 21, ${dab.opacity * fade})`);
-        wash.addColorStop(0.42, `rgba(28, 30, 26, ${dab.opacity * 0.72 * fade})`);
-        wash.addColorStop(0.78, `rgba(45, 46, 39, ${dab.opacity * 0.18 * fade})`);
-        wash.addColorStop(1, "rgba(45, 46, 39, 0)");
-        context.fillStyle = wash;
-        context.beginPath();
-        context.arc(0, 0, radius, 0, Math.PI * 2);
-        context.fill();
+        context.globalAlpha = dab.opacity * fade;
+        context.drawImage(stamp, -radius, -radius, radius * 2, radius * 2);
         context.restore();
       }
-      if (dabs.length) animationFrame = window.requestAnimationFrame(render);
+      dirty = left < Infinity ? { x: left, y: top, width: right - left, height: bottom - top } : null;
+      if (dabs.length || pendingPointer) animationFrame = window.requestAnimationFrame(render);
     };
 
     const wakeRenderer = () => {
@@ -70,6 +92,8 @@ export default function InkCursorTrail() {
 
     const clearStroke = () => {
       dabs.length = 0;
+      pendingPointer = null;
+      dirty = null;
       lastPoint = null;
       if (animationFrame) {
         window.cancelAnimationFrame(animationFrame);
@@ -80,7 +104,7 @@ export default function InkCursorTrail() {
 
     const addStroke = (event: PointerEvent) => {
       if (event.pointerType && event.pointerType !== "mouse" && event.pointerType !== "pen") return;
-      const hoveredElement = document.elementFromPoint(event.clientX, event.clientY);
+      const hoveredElement = event.target instanceof Element ? event.target : null;
       if (hoveredElement?.closest(".home-gallery-corridor")) {
         clearStroke();
         return;
@@ -114,20 +138,25 @@ export default function InkCursorTrail() {
       }
       if (dabs.length > MAX_DABS) dabs.splice(0, dabs.length - MAX_DABS);
       lastPoint = { x: event.clientX, y: event.clientY, time: now };
-      wakeRenderer();
     };
 
-    const resetStroke = () => { lastPoint = null; };
+    const queueStroke = (event: PointerEvent) => {
+      pendingPointer = event;
+      wakeRenderer();
+    };
+    const visibilityChange = () => { if (document.hidden) clearStroke(); };
     resize();
     window.addEventListener("resize", resize);
-    window.addEventListener("pointermove", addStroke, { passive: true });
-    window.addEventListener("pointerleave", resetStroke);
-    window.addEventListener("blur", resetStroke);
+    window.addEventListener("pointermove", queueStroke, { passive: true });
+    document.documentElement.addEventListener("pointerleave", clearStroke);
+    window.addEventListener("blur", clearStroke);
+    document.addEventListener("visibilitychange", visibilityChange);
     return () => {
       window.removeEventListener("resize", resize);
-      window.removeEventListener("pointermove", addStroke);
-      window.removeEventListener("pointerleave", resetStroke);
-      window.removeEventListener("blur", resetStroke);
+      window.removeEventListener("pointermove", queueStroke);
+      document.documentElement.removeEventListener("pointerleave", clearStroke);
+      window.removeEventListener("blur", clearStroke);
+      document.removeEventListener("visibilitychange", visibilityChange);
       if (animationFrame) window.cancelAnimationFrame(animationFrame);
     };
   }, []);
