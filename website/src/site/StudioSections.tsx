@@ -31,7 +31,7 @@ export function CraftStory() {
   return (
     <section className="studio-craft" id="story" aria-labelledby="story-title">
       <div className="studio-craft-scene">
-        <img className="studio-craft-image" src="/assets/studio/craft-workshop.webp" alt="深色木质工作台上，手工对齐画框与水墨作品" width="1656" height="950" loading="lazy" decoding="async" draggable="false" />
+        <img className="studio-craft-image" src="/assets/studio/craft-workshop-warm.webp" alt="自然光下的浅色工作台上，手工对齐画框与水墨作品" width="1672" height="941" loading="lazy" decoding="async" draggable="false" />
         <div className="studio-craft-copy">
           <p className="studio-eyebrow">正好书画社 / 装裱手艺</p>
           <h2 id="story-title">把时间，<br />装进框里。</h2>

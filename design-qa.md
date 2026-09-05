@@ -47,3 +47,11 @@ final result: passed
 
 - P3: replace generated atmosphere photographs with commissioned studio photography if available later; the layout already keeps copy and controls separate from image pixels.
 - No remaining actionable P0/P1/P2 findings in the inspected desktop/mobile states.
+
+## Hero-to-craft continuity refinement — 2026-09-05
+
+User feedback supersedes the selected concept's near-black treatment: the first two scenes must feel like one website. Replaced the craft photograph with a warm daylight/linen derivative, changed its copy and process rail to dark ink on warm paper, and reduced the desktop heading cap from 88px to 72px. Hero entrance and gallery code remain unchanged.
+
+Compared the actual hero and updated craft side by side in `output/studio-redesign/hero-craft-continuity.jpg`: both now share warm ivory light, walnut subjects and dark text; the workbench retains its distinct purpose without a black visual break. Desktop capture: `craft-warm-desktop.png`; mobile: `craft-warm-mobile.png`. Mobile text stays on a solid paper surface with the hands/frame photograph below, without overlapping copy. This intentionally departs from the earlier dark reference according to the new feedback.
+
+Runtime integrity and production build passed. Existing large Three.js chunk warning remains. No animation/rendering loop added; photographic asset uses WebP and lazy asynchronous decoding. This scoped visual iteration did not alter process selection or gallery behavior.
