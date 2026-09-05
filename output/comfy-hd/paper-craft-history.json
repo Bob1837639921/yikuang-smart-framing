@@ -1,0 +1,98 @@
+{
+  "prompt": [
+    1,
+    "8a68ead1-43c1-446f-bd6e-d7db7a31432c",
+    {
+      "1": {
+        "class_type": "LoadImage",
+        "inputs": {
+          "image": "zh-paper-craft.png"
+        }
+      },
+      "2": {
+        "class_type": "UpscaleModelLoader",
+        "inputs": {
+          "model_name": "RealESRGAN_x2plus.pth"
+        }
+      },
+      "3": {
+        "class_type": "ImageUpscaleWithModel",
+        "inputs": {
+          "upscale_model": [
+            "2",
+            0
+          ],
+          "image": [
+            "1",
+            0
+          ]
+        }
+      },
+      "4": {
+        "class_type": "SaveImage",
+        "inputs": {
+          "images": [
+            "3",
+            0
+          ],
+          "filename_prefix": "zh-hd/paper-craft"
+        }
+      }
+    },
+    {
+      "create_time": 1788629508351
+    },
+    [
+      "4"
+    ]
+  ],
+  "outputs": {
+    "4": {
+      "images": [
+        {
+          "filename": "paper-craft_00001_.png",
+          "subfolder": "zh-hd",
+          "type": "output"
+        }
+      ]
+    }
+  },
+  "status": {
+    "status_str": "success",
+    "completed": true,
+    "messages": [
+      [
+        "execution_start",
+        {
+          "prompt_id": "8a68ead1-43c1-446f-bd6e-d7db7a31432c",
+          "timestamp": 1788629508352
+        }
+      ],
+      [
+        "execution_cached",
+        {
+          "nodes": [
+            "2"
+          ],
+          "prompt_id": "8a68ead1-43c1-446f-bd6e-d7db7a31432c",
+          "timestamp": 1788629508363
+        }
+      ],
+      [
+        "execution_success",
+        {
+          "prompt_id": "8a68ead1-43c1-446f-bd6e-d7db7a31432c",
+          "timestamp": 1788629510149
+        }
+      ]
+    ]
+  },
+  "meta": {
+    "4": {
+      "node_id": "4",
+      "display_node": "4",
+      "parent_node": null,
+      "real_node_id": "4"
+    }
+  }
+}

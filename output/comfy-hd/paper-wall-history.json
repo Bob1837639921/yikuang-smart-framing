@@ -1,0 +1,98 @@
+{
+  "prompt": [
+    3,
+    "1d7c06aa-e556-496e-8dab-cf572bc24cc2",
+    {
+      "1": {
+        "class_type": "LoadImage",
+        "inputs": {
+          "image": "zh-paper-wall.png"
+        }
+      },
+      "2": {
+        "class_type": "UpscaleModelLoader",
+        "inputs": {
+          "model_name": "RealESRGAN_x2plus.pth"
+        }
+      },
+      "3": {
+        "class_type": "ImageUpscaleWithModel",
+        "inputs": {
+          "upscale_model": [
+            "2",
+            0
+          ],
+          "image": [
+            "1",
+            0
+          ]
+        }
+      },
+      "4": {
+        "class_type": "SaveImage",
+        "inputs": {
+          "images": [
+            "3",
+            0
+          ],
+          "filename_prefix": "zh-hd/paper-wall"
+        }
+      }
+    },
+    {
+      "create_time": 1788629512371
+    },
+    [
+      "4"
+    ]
+  ],
+  "outputs": {
+    "4": {
+      "images": [
+        {
+          "filename": "paper-wall_00001_.png",
+          "subfolder": "zh-hd",
+          "type": "output"
+        }
+      ]
+    }
+  },
+  "status": {
+    "status_str": "success",
+    "completed": true,
+    "messages": [
+      [
+        "execution_start",
+        {
+          "prompt_id": "1d7c06aa-e556-496e-8dab-cf572bc24cc2",
+          "timestamp": 1788629512372
+        }
+      ],
+      [
+        "execution_cached",
+        {
+          "nodes": [
+            "2"
+          ],
+          "prompt_id": "1d7c06aa-e556-496e-8dab-cf572bc24cc2",
+          "timestamp": 1788629512385
+        }
+      ],
+      [
+        "execution_success",
+        {
+          "prompt_id": "1d7c06aa-e556-496e-8dab-cf572bc24cc2",
+          "timestamp": 1788629514125
+        }
+      ]
+    ]
+  },
+  "meta": {
+    "4": {
+      "node_id": "4",
+      "display_node": "4",
+      "parent_node": null,
+      "real_node_id": "4"
+    }
+  }
+}

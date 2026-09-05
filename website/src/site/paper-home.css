@@ -68,7 +68,7 @@
 @media(prefers-reduced-motion:reduce){.paper-process-description{animation:none;}.paper-swatches img,.paper-process button{transition:none;}}
 /* The wall is one fixed photograph; every real case keeps its own alpha and FLIP slot. */
 .home-gallery-scroll-track,.home-gallery-corridor {height:clamp(590px,46vw,860px);}
-.home-gallery-corridor {background:#e6e1d7 url('/assets/studio/paper-wall.webp') center/cover no-repeat;box-shadow:none;border:0;}
+.home-gallery-corridor {background:#e6e1d7 url('/assets/studio/paper-wall-hd.webp') center/cover no-repeat;box-shadow:none;border:0;}
 .home-gallery-corridor::after {display:none;}
 .home-gallery-wall-slot-0 {top:31%;left:5.3%;width:23%;}
 .home-gallery-wall-slot-1 {top:14%;left:31%;width:18%;}

@@ -359,7 +359,7 @@ export default function HomePage() {
 
       <main>
         <section className="home-hero" ref={heroRef} onPointerDown={handleWaterPointerDown} aria-labelledby="hero-title">
-          <img className="home-hero-image" src="/assets/studio/paper-hero.webp" alt="自然日光下，木框与米白卡纸装裱的水墨山水" width="1900" height="1188" fetchPriority="high" decoding="async" />
+          <img className="home-hero-image" src="/assets/studio/paper-hero-hd.webp" alt="自然日光下，木框与米白卡纸装裱的水墨山水" width="1900" height="1188" fetchPriority="high" decoding="async" />
           <div className="home-hero-shade" aria-hidden="true" />
           <div className="home-hero-vignette" aria-hidden="true" />
           <div className="home-water-glimmer" aria-hidden="true" />

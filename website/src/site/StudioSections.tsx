@@ -31,7 +31,7 @@ export function CraftStory() {
   return <section className="paper-craft" id="story" aria-labelledby="story-title">
     <div className="paper-craft-inner">
       <div className="paper-operation" role="tabpanel" id="craft-panel" aria-labelledby={`craft-tab-${active}`} tabIndex={0}>
-        {active === 0 ? <img src="/assets/studio/paper-craft.webp" alt="手工检查水墨作品与卡纸边缘" loading="lazy" decoding="async" /> : <div className="paper-operation-atlas" style={{backgroundPosition: stage.position}} role="img" aria-label={stage.detail} />}
+        {active === 0 ? <img src="/assets/studio/paper-craft-hd.webp" alt="手工检查水墨作品与卡纸边缘" loading="lazy" decoding="async" /> : <div className="paper-operation-atlas" style={{backgroundPosition: stage.position}} role="img" aria-label={stage.detail} />}
       </div>
       <div className="paper-craft-content"><h2 id="story-title">装裱工艺</h2><p className="paper-subtitle">五步匠心，成就一幅好作品</p><div className="paper-process" role="tablist" aria-label="装裱的五道工序" aria-orientation="vertical">
         {stages.map((item,index)=><button ref={node=>{tabRefs.current[index]=node;}} id={`craft-tab-${index}`} key={item.name} role="tab" aria-selected={active===index} aria-controls="craft-panel" tabIndex={active===index?0:-1} onClick={()=>setActive(index)} onKeyDown={event=>selectWithKeyboard(event,index)}><span>{String(index+1).padStart(2,"0")}</span><strong>{item.name}</strong><small>{item.summary}</small></button>)}
@@ -59,7 +59,7 @@ export function StudioTryOn() {
   const samples=["walnut","oak","cream"].map(id=>frameMaterials.find(item=>item.id===id)).filter((item):item is FrameMaterial=>Boolean(item));
   return <section className="paper-tryon" id="experience" aria-labelledby="experience-title">
     <div className="paper-tryon-intro"><h2 id="experience-title">试装体验</h2><p className="paper-subtitle">上传作品，即刻预览装裱效果</p><button className="home-button home-button-dark" onClick={goToTryOn}>上传作品</button><p className="paper-tryon-note">按作品比例预览 · 自由搭配框与卡纸</p></div>
-    <figure className="paper-tryon-art"><img src="/assets/studio/paper-tryon.webp" alt="浅木框与米白卡纸装裱的水墨山水示意" loading="lazy" decoding="async" width="1000" height="1000"/><figcaption>山水入画 · 装裱示意</figcaption></figure>
+    <figure className="paper-tryon-art"><img src="/assets/studio/paper-tryon-hd.webp" alt="浅木框与米白卡纸装裱的水墨山水示意" loading="lazy" decoding="async" width="1000" height="1000"/><figcaption>山水入画 · 装裱示意</figcaption></figure>
     <div className="paper-tryon-options"><h3>可选框材</h3><div className="paper-swatches">{samples.map(material=><button key={material.id} onClick={()=>setInspected(material)} aria-label={`近看框料：${material.name}`}><img src={material.textures.top} alt="" loading="lazy" decoding="async"/><span>{material.name}</span></button>)}</div><h3>装裱形式</h3><p>镜片 / 木框 / 卡纸装裱</p><button className="paper-more" onClick={goToTryOn}>更多搭配方案 →</button></div>
     {inspected&&<MaterialDetail material={inspected} close={()=>setInspected(null)}/>}
   </section>;

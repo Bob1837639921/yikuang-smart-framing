@@ -1,0 +1,96 @@
+{
+  "prompt": [
+    0,
+    "3b3289c2-4ce1-4cd3-980f-c2aa770f99c2",
+    {
+      "1": {
+        "class_type": "LoadImage",
+        "inputs": {
+          "image": "zh-paper-hero.png"
+        }
+      },
+      "2": {
+        "class_type": "UpscaleModelLoader",
+        "inputs": {
+          "model_name": "RealESRGAN_x2plus.pth"
+        }
+      },
+      "3": {
+        "class_type": "ImageUpscaleWithModel",
+        "inputs": {
+          "upscale_model": [
+            "2",
+            0
+          ],
+          "image": [
+            "1",
+            0
+          ]
+        }
+      },
+      "4": {
+        "class_type": "SaveImage",
+        "inputs": {
+          "images": [
+            "3",
+            0
+          ],
+          "filename_prefix": "zh-hd/paper-hero"
+        }
+      }
+    },
+    {
+      "create_time": 1788629504338
+    },
+    [
+      "4"
+    ]
+  ],
+  "outputs": {
+    "4": {
+      "images": [
+        {
+          "filename": "paper-hero_00001_.png",
+          "subfolder": "zh-hd",
+          "type": "output"
+        }
+      ]
+    }
+  },
+  "status": {
+    "status_str": "success",
+    "completed": true,
+    "messages": [
+      [
+        "execution_start",
+        {
+          "prompt_id": "3b3289c2-4ce1-4cd3-980f-c2aa770f99c2",
+          "timestamp": 1788629504339
+        }
+      ],
+      [
+        "execution_cached",
+        {
+          "nodes": [],
+          "prompt_id": "3b3289c2-4ce1-4cd3-980f-c2aa770f99c2",
+          "timestamp": 1788629504350
+        }
+      ],
+      [
+        "execution_success",
+        {
+          "prompt_id": "3b3289c2-4ce1-4cd3-980f-c2aa770f99c2",
+          "timestamp": 1788629506612
+        }
+      ]
+    ]
+  },
+  "meta": {
+    "4": {
+      "node_id": "4",
+      "display_node": "4",
+      "parent_node": null,
+      "real_node_id": "4"
+    }
+  }
+}

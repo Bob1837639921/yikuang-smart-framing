@@ -1,0 +1,1 @@
+Local ComfyUI RealESRGAN_x2plus 2x upscale of the four original generated scene PNGs. Workflow and execution history are alongside the masters. Website derivatives use WebP quality 87. Real customer artwork cutouts were not processed in this batch. Original assets remain available.
