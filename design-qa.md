@@ -1,51 +1,49 @@
-# Design QA — 官网作品依次上墙与轻量聚焦
+# Studio homepage design QA
 
-- source visual truth: `C:/Users/zephyr/.codex/generated_images/01a00afd-1c2f-7cd3-b967-530605918f11/exec-229e44d6-3366-4ef7-b8d2-99b9b1976fc6.png`
-- original product screenshot: `C:/Users/zephyr/AppData/Local/Temp/codex-clipboard-59a7bc5f-b8e7-42d5-8b7b-6fed2a20bcc8.png`
-- intermediate scroll screenshot: `C:/Users/zephyr/AppData/Local/Temp/codex-design-qa/oneframe-gallery-scroll/design-qa-gallery-scroll.png`
-- completed wall screenshot: `C:/Users/zephyr/AppData/Local/Temp/codex-design-qa/oneframe-gallery-scroll/design-qa-gallery-final.png`
-- focused-state screenshot: `C:/Users/zephyr/AppData/Local/Temp/codex-design-qa/oneframe-gallery-scroll/design-qa-gallery-focus.png`
-- normalized side-by-side comparison: `C:/Users/zephyr/AppData/Local/Temp/codex-design-qa/oneframe-gallery-scroll/design-qa-gallery-comparison.png`
-- CSS viewport: 1258 × 988 (captured pixels: 1243 × 976 after browser chrome exclusion)
-- states: four works mounted during the automatic entrance sequence; all seven works mounted; `山河入画` focused
-- final result: passed
+final result: passed
 
-## Full-view comparison evidence
+## Scope and visual truth
 
-- The chosen concept and implementation share the same warm gallery wall, salon-style two-row composition, numbered plaques, and one-work-at-a-time mounting narrative.
-- The implementation intentionally omits persistent ceiling wires from the concept image. Each work instead descends and settles with `transform` and `opacity`, preserving the perceived hanging motion without adding always-painted decoration or layout animation.
-- At the completed state, all seven real works fill the wall without clipping the collection mark, progress copy, skirting, floor, or frame labels.
+- Selected third concept: `output/studio-redesign/selected-reference.png` (916×1717 pixels).
+- Local implementation: `http://127.0.0.1:4173/`.
+- Desktop CSS viewport: 1440×900, DPR 1. Browser captures are 1425×891 usable pixels after browser scrollbar/capture bounds. Mobile: 390×844 CSS viewport.
+- Reference is a generated scrollable concept, not a pixel-exact browser capture. Compare corresponding craft and daylight sections, preserving aspect ratios at 720px comparison width. Responsive desktop sections deliberately occupy one viewport; the source sections are taller relative to their width. No images were distorted to match that ratio.
+- Full regional comparisons: `output/studio-redesign/comparison-craft-final.jpg`, `comparison-tryon-final.jpg`.
+- Focused typography comparison: `output/studio-redesign/comparison-type-final.jpg`.
+- Final screenshots: `craft-desktop-final.png`, `tryon-desktop-final.png`, `closing-desktop.png`, `craft-mobile.png`, `tryon-mobile-final.png`, `material-dialog-desktop.png`, `material-dialog-mobile.png`, `gallery-preserved.png`, all under `output/studio-redesign/`.
 
-## Focused-region comparison evidence
+## Findings and iteration history
 
-- Selecting a work opens a dedicated composited focus layer. The underlying wall stays fixed, so the browser does not recalculate seven `top`/`left`/`width` layouts.
-- `山河入画`, its plaque copy, and previous/return/next controls all remain visible within the desktop viewport.
-- The focused artwork retains its exact image ratio and transparent frame cutout. The backdrop reduces contrast without CSS blur, avoiding the previous expensive full-wall filter pass.
+1. [P1, fixed] Native material dialog closed immediately during Strict Mode's effect replay. Ignore the queued close event when the dialog has already reopened. Retested opening, details, Escape, and navigation into the existing try-on. Dialog remains open and functional.
+2. [P2, fixed] Mobile daylight crop clipped the frame's right rail. Changed the mobile image focal point to the right. `tryon-mobile-final.png` shows the complete framed work and vase, with text in a separate readable block.
+3. [P2, fixed] First desktop comparison had weaker heading hierarchy and undersized process copy. Increased craft heading scale, daylight heading scale, stage names and descriptions. Recaptured and compared the final files above; no clipping or collisions at 1440×900.
+4. [P2, fixed] Returning from the separately mounted try-on to a homepage anchor could leave the visitor at the hero. Mount now resolves known marketing anchors after the DOM exists.
 
 ## Required fidelity surfaces
 
-- Fonts and typography: the existing Chinese serif display system and compact Latin exhibit metadata remain unchanged; progress and plaques are legible at the verified desktop and 390 × 844 mobile viewports.
-- Spacing and layout rhythm: the two-row wall keeps differentiated physical proportions for horizontal, square, fan, portrait, landscape, and long-scroll formats.
-- Colors and visual tokens: the existing warm paper, walnut, ink, and restrained gold palette is preserved.
-- Image quality and loading: the seven transparent source cutouts were transcoded from 7.69 MB of PNG to 0.41 MB of WebP (94.6% reduction), with intrinsic sizes, lazy loading, and asynchronous decoding.
-- Copy and content: all seven existing titles, media types, framing treatments, sequence numbers, and focus descriptions are retained.
+- Typography: locally served Noto Serif SC variable subset, readable body text, two-line serif headings, restrained gold rules. Subset refreshed for the new copy and canonical material names. Hero uses its original ordered SVG strokes.
+- Spacing/layout: large still photography, left-aligned copy, five equal desktop process columns, separate material shelf, compact centered closing. Mobile uses stacked copy/photography and horizontal sample scrolling without document overflow.
+- Colors: near-black walnut craft, warm mineral daylight and cream paper, restrained ochre accents. Photo lighting supplies depth; no new animated blur, blend modes, or continuous effects.
+- Assets: two individually generated photographs follow the selected reference and ship as WebP (82,696 + 67,330 bytes). Source PNGs remain outside public assets. Operation detail uses the existing real process atlas. Material thumbnails read existing canonical catalog records.
+- Copy: selected principal headings retained. Explanatory copy describes actual functions and variable conservation needs. No invented store address, contact channel or appointment completion. Prices in the detail dialog remain per meter.
 
-## Interaction and runtime checks
+## Intentional adaptations
 
-- The gallery is a normal 100svh section with no sticky extension or scroll-progress mapping. Once at least 72% of it is visible, it mounts works 1–7 automatically at 190 ms intervals; leaving and re-entering resets and replays the sequence so navigation never finishes the motion off-screen.
-- Compact/mobile and reduced-motion modes show all works immediately, avoiding a long sticky scroll trap.
-- Clicking a work exposes the focus dialog in approximately 294 ms in the local browser.
-- Previous/next, return, Escape, Left Arrow, and Right Arrow behavior were verified. Opening and previous/next changes measure the selected work's real wall slot and use a 680 ms FLIP-style composited translate/scale animation to advance that exact work into the center; matching copy replays its short entrance.
-- Desktop 1258 × 988 and mobile 390 × 844 were visually inspected; the mobile focus controls remain inside the viewport.
-- Browser console returned no warnings or errors.
-- TypeScript, production website build, Sites checks (4/4), and website memory tests (25/25) passed.
+- The user's original hero and seven-work gallery stay in place; the gallery sits between craft and daylight sections.
+- Added a compact operation photo and explanation so five tabs do something useful and each process stage remains visually specific.
+- Material shelf uses the product's actual six fallback catalog records rather than inventing the mock's wood types; clicking opens real catalog details. It does not pretend the static interior photo changes its frame.
+- Mobile composition stacks instead of shrinking desktop text onto a photo.
 
-## Comparison history
+## Verification
 
-1. First browser pass exposed a P1 clipping defect: `contain: paint` cut off the exhibit plaques below several frames.
-2. Fix: changed work containment to `contain: layout style`, keeping layout isolation while allowing the plaques to render.
-3. Second pass confirmed complete labels at intermediate and final scroll states. Focus opening stayed transform/opacity-only and no actionable P0/P1/P2 finding remained.
+- Runtime integrity and production build passed; no protected runtime hashes changed.
+- Browser tested: process click and arrow-key selection; material opening, price/details, Escape; material CTA reaches the existing working try-on; gallery mounting, work focus, next work and Escape back to wall.
+- Viewport overflow check: at 390 CSS px, document scroll width is 375px (scrollbar excluded); at 3840 CSS px, 3825px. Ink backing store remains 1333×750 at 4K.
+- The 4K capture provider produced a cropped image, so that file was not used for visual acceptance. 4K geometry/pixel budget were inspected; desktop and mobile visual acceptance use valid captures above. No hardware FPS claims.
+- Console review found one historical Vite HMR reload error during creation of the new stylesheet. Final reloads/builds showed no corresponding application failure; no other runtime errors appeared in the inspected log.
+- Reduced-motion rules disable new transitions/animations; a physical reduced-motion browser session was not separately exercised.
 
-## Known repository baseline
+## Follow-up polish
 
-- `npm run check:runtime` still reports the protected website/runtime lock as inconsistent on the freshly pulled `origin/main` baseline. No protected runtime file or lock hash was changed or bypassed for this feature.
+- P3: replace generated atmosphere photographs with commissioned studio photography if available later; the layout already keeps copy and controls separate from image pixels.
+- No remaining actionable P0/P1/P2 findings in the inspected desktop/mobile states.
