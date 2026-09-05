@@ -2,9 +2,10 @@ import { useState } from "react";
 import BrandMark from "./BrandMark";
 
 const links = [
-  { href: "#story", label: "装裱故事" },
+  { href: "#story", label: "装裱工艺" },
+  { href: "#experience", label: "试装体验" },
   { href: "#materials", label: "作品案例" },
-  { href: "#studio", label: "关于我们" },
+  { href: "#contact", label: "关于我们" },
 ];
 
 export default function SiteHeader() {

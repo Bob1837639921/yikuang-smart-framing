@@ -17,8 +17,8 @@ export function CraftStory() {
   const stage = stages[active];
   const selectWithKeyboard = (event: React.KeyboardEvent, index: number) => {
     let next = index;
-    if (event.key === "ArrowRight") next = (index + 1) % stages.length;
-    else if (event.key === "ArrowLeft") next = (index + stages.length - 1) % stages.length;
+    if ((event.key === "ArrowRight" || event.key === "ArrowDown")) next = (index + 1) % stages.length;
+    else if ((event.key === "ArrowLeft" || event.key === "ArrowUp")) next = (index + stages.length - 1) % stages.length;
     else if (event.key === "Home") next = 0;
     else if (event.key === "End") next = stages.length - 1;
     else return;
@@ -28,33 +28,16 @@ export function CraftStory() {
     tabRefs.current[next]?.scrollIntoView({ block: "nearest", inline: "nearest", behavior: "instant" });
   };
 
-  return (
-    <section className="studio-craft" id="story" aria-labelledby="story-title">
-      <div className="studio-craft-scene">
-        <img className="studio-craft-image" src="/assets/studio/craft-workshop-warm.webp" alt="自然光下的浅色工作台上，手工对齐画框与水墨作品" width="1672" height="941" loading="lazy" decoding="async" draggable="false" />
-        <div className="studio-craft-copy">
-          <p className="studio-eyebrow">正好书画社 / 装裱手艺</p>
-          <h2 id="story-title">把时间，<br />装进框里。</h2>
-          <p className="studio-craft-intro">我们认真对待每一件作品。<br />选适合的框与纸，细致打磨每一道工序，<br />让笔墨与质地相成。</p>
-          <div className="studio-process-detail" role="tabpanel" id="craft-panel" aria-labelledby={`craft-tab-${active}`} tabIndex={0}>
-            <span className="studio-process-photo" style={{ backgroundPosition: stage.position }} role="img" aria-label={stage.detail} />
-            <div key={active} className="studio-process-copy">
-              <h3>{stage.title}</h3>
-              <p>{stage.copy}</p>
-            </div>
-          </div>
-        </div>
-        <span className="studio-photo-caption">一件作品 · 一份郑重</span>
+  return <section className="paper-craft" id="story" aria-labelledby="story-title">
+    <div className="paper-craft-inner">
+      <div className="paper-operation" role="tabpanel" id="craft-panel" aria-labelledby={`craft-tab-${active}`} tabIndex={0}>
+        {active === 0 ? <img src="/assets/studio/paper-craft.webp" alt="手工检查水墨作品与卡纸边缘" loading="lazy" decoding="async" /> : <div className="paper-operation-atlas" style={{backgroundPosition: stage.position}} role="img" aria-label={stage.detail} />}
       </div>
-      <div className="studio-process-rail" role="tablist" aria-label="装裱的五道工序">
-        {stages.map((item, index) => (
-          <button ref={(node) => { tabRefs.current[index] = node; }} key={item.name} id={`craft-tab-${index}`} className={index === active ? "is-active" : ""} type="button" role="tab" tabIndex={index === active ? 0 : -1} aria-selected={index === active} aria-controls="craft-panel" onClick={() => setActive(index)} onKeyDown={(event) => selectWithKeyboard(event, index)}>
-            <span>{String(index + 1).padStart(2, "0")}</span><strong>{item.name}</strong><small>{item.summary}</small>
-          </button>
-        ))}
-      </div>
-    </section>
-  );
+      <div className="paper-craft-content"><h2 id="story-title">装裱工艺</h2><p className="paper-subtitle">五步匠心，成就一幅好作品</p><div className="paper-process" role="tablist" aria-label="装裱的五道工序" aria-orientation="vertical">
+        {stages.map((item,index)=><button ref={node=>{tabRefs.current[index]=node;}} id={`craft-tab-${index}`} key={item.name} role="tab" aria-selected={active===index} aria-controls="craft-panel" tabIndex={active===index?0:-1} onClick={()=>setActive(index)} onKeyDown={event=>selectWithKeyboard(event,index)}><span>{String(index+1).padStart(2,"0")}</span><strong>{item.name}</strong><small>{item.summary}</small></button>)}
+      </div><p className="paper-process-description" key={active}>{stage.copy}</p></div>
+    </div>
+  </section>;
 }
 
 function MaterialDetail({ material, close }: { material: FrameMaterial; close: () => void }) {
@@ -72,35 +55,12 @@ function MaterialDetail({ material, close }: { material: FrameMaterial; close: (
 }
 
 export function StudioTryOn() {
-  const [inspected, setInspected] = useState<FrameMaterial | null>(null);
-  // Marketing samples read the same records as the actual try-on catalog.
-  const samples = ["walnut", "oak", "cream", "black", "silver", "yellow"].map((id) => frameMaterials.find((material) => material.id === id)).filter((material): material is FrameMaterial => Boolean(material));
-  return <section className="studio-tryon" id="experience" aria-labelledby="experience-title">
-    <div className="studio-daylight-scene">
-      <img src="/assets/studio/daylight-interior.webp" alt="明亮的暖色墙面前，装裱好的水墨山水立于胡桃木边柜上" width="1738" height="905" loading="lazy" decoding="async" draggable="false" />
-      <div className="studio-daylight-copy">
-        <p className="studio-eyebrow">一框智能装裱 / 在线试装</p>
-        <h2 id="experience-title">先把喜欢的样子，<br />看清楚。</h2>
-        <p>让画面与边框，找到刚好的关系。<br />上传你的作品，试试不同的框型与卡纸，<br />看见它走进生活的样子。</p>
-        <button className="home-button home-button-dark" type="button" onClick={goToTryOn}>上传作品试装</button>
-        <span className="studio-tryon-note">按作品比例预览 · 自由搭配框与卡纸</span>
-      </div>
-    </div>
-    <div className="studio-material-shelf">
-      <div className="studio-material-heading"><h3>从一处细节，<br />找到喜欢。</h3><p>框型 · 木色 · 质地</p><span>点选样本，近看框角</span></div>
-      <div className="studio-material-samples" aria-label="框料样本">
-        {samples.map((material) => <button type="button" key={material.id} onClick={() => setInspected(material)} aria-label={`近看框料：${material.name}`}><img src={material.image} alt="" width="160" height="160" loading="lazy" decoding="async" draggable="false" /><span>{material.name}</span></button>)}
-      </div>
-    </div>
-    {inspected && <MaterialDetail material={inspected} close={() => setInspected(null)} />}
-  </section>;
-}
-
-export function StudioClosing() {
-  return <section className="studio-closing" id="studio" aria-labelledby="studio-title">
-    <p className="studio-eyebrow">关于正好</p>
-    <h2 id="studio-title"><span>正好书画社</span><i aria-hidden="true">·</i>让作品回到生活。</h2>
-    <p>我们关心一幅作品如何被看见，也关心它如何被妥善安放。<br />从一寸留白、一处木纹开始，为值得珍惜的东西，找到正好的归处。</p>
-    <a href="#materials">回到作品展墙</a>
+  const [inspected,setInspected]=useState<FrameMaterial|null>(null);
+  const samples=["walnut","oak","cream"].map(id=>frameMaterials.find(item=>item.id===id)).filter((item):item is FrameMaterial=>Boolean(item));
+  return <section className="paper-tryon" id="experience" aria-labelledby="experience-title">
+    <div className="paper-tryon-intro"><h2 id="experience-title">试装体验</h2><p className="paper-subtitle">上传作品，即刻预览装裱效果</p><button className="home-button home-button-dark" onClick={goToTryOn}>上传作品</button><p className="paper-tryon-note">按作品比例预览 · 自由搭配框与卡纸</p></div>
+    <figure className="paper-tryon-art"><img src="/assets/studio/paper-tryon.webp" alt="浅木框与米白卡纸装裱的水墨山水示意" loading="lazy" decoding="async" width="1000" height="1000"/><figcaption>山水入画 · 装裱示意</figcaption></figure>
+    <div className="paper-tryon-options"><h3>可选框材</h3><div className="paper-swatches">{samples.map(material=><button key={material.id} onClick={()=>setInspected(material)} aria-label={`近看框料：${material.name}`}><img src={material.textures.top} alt="" loading="lazy" decoding="async"/><span>{material.name}</span></button>)}</div><h3>装裱形式</h3><p>镜片 / 木框 / 卡纸装裱</p><button className="paper-more" onClick={goToTryOn}>更多搭配方案 →</button></div>
+    {inspected&&<MaterialDetail material={inspected} close={()=>setInspected(null)}/>}
   </section>;
 }
