@@ -299,18 +299,18 @@ export default function HomePage() {
     }
 
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
+      if (entry.intersectionRatio >= 0.3) {
         startMountSequence();
         return;
       }
-      if (!sequenceStarted) return;
+      if (entry.isIntersecting || !sequenceStarted) return;
       sequenceStarted = false;
       if (sequenceTimer) {
         window.clearInterval(sequenceTimer);
         sequenceTimer = undefined;
       }
       setMountedWorkCount(0);
-    }, { threshold: 0.72 });
+    }, { threshold: [0, 0.3] });
 
     observer.observe(track);
     compactView.addEventListener("change", showAllWorks);

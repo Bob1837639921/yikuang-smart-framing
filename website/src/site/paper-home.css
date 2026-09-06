@@ -93,3 +93,8 @@
 .home-gallery-wall-slot-0 {top:20%;left:3%;width:43%;}.home-gallery-wall-slot-1 {top:18%;left:54%;width:34%;}.home-gallery-wall-slot-2 {top:40%;left:4%;width:39%;}.home-gallery-wall-slot-3 {top:38%;left:55%;width:27%;}.home-gallery-wall-slot-4 {top:60%;left:3%;width:43%;}.home-gallery-wall-slot-5 {top:59%;left:51%;width:46%;}.home-gallery-wall-slot-6 {top:79%;left:17%;width:60%;}
 }
 @media(min-width:721px){.home-hero-copy h1{font-size:clamp(76px,8.4vw,140px);}.home-hero-copy{padding-top:45px;}}
+/* Editorial sections keep their natural height; scrolling should not lock between two scenes. */
+@media(min-width:721px){
+ .home-snap-enabled {scroll-snap-type:y proximity;}
+ .home-snap-enabled .home-hero,.home-snap-enabled .home-exhibition,.paper-craft,.paper-tryon {scroll-snap-stop:normal;}
+}
