@@ -19,8 +19,8 @@
 .paper-craft {background:#f7f6f2;scroll-snap-align:start;scroll-snap-stop:always;}
 .paper-craft-inner {max-width:1888px;margin:auto;display:grid;grid-template-columns:1fr 1fr;min-height:620px;}
 .paper-operation {position:relative;min-width:0;min-height:620px;overflow:hidden;}
-.paper-operation>img,.paper-operation-atlas {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-.paper-operation-atlas {background-image:url('/assets/home-framing-process-atlas.webp');background-size:400% 200%;}
+.paper-operation>img {position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;}
+.paper-operation-image {animation:paper-operation-image-in 260ms cubic-bezier(.2,.7,.3,1) both;}
 .paper-craft-content {padding:64px clamp(32px,4vw,80px);align-self:center;}
 .paper-craft h2,.paper-tryon h2 {font:500 clamp(28px,2.6vw,44px)/1.5 var(--home-serif);}
 .paper-subtitle {font:400 15px/2 var(--home-serif);color:#66655e;margin-top:8px!important;}
@@ -68,6 +68,7 @@
 .paper-more {padding:12px 0 0;border:0;border-top:1px solid rgba(76,67,53,.12);background:none;margin-top:28px;cursor:pointer;font-size:14px;transition:color 160ms ease,transform 180ms ease;}
 .paper-more:hover {color:#9e4037;transform:translateX(3px);}
 @keyframes paper-frame-material-in {from{opacity:.45;}to{opacity:1;}}
+@keyframes paper-operation-image-in {from{opacity:.55;transform:scale(1.012);}to{opacity:1;transform:scale(1);}}
 .home-footer {width:calc(100% - 128px);max-width:1740px;grid-template-columns:1.4fr repeat(4,1fr);align-items:start;gap:40px;padding:55px 0 24px;border-top:1px solid #e6e3dc;}
 .paper-footer-column {display:grid;gap:13px;font-size:13px;color:#76746d;}
 .paper-footer-column h3 {font:500 16px/1.5 var(--home-serif);color:#30322e;margin-bottom:8px;}
@@ -84,7 +85,7 @@
 .paper-craft-inner{grid-template-columns:1fr;}.paper-operation{min-height:360px;order:1;}.paper-craft-content{padding:38px 24px 24px;}.paper-process{margin-top:22px;}.paper-process-description{min-height:0;}.paper-process button{grid-template-columns:26px 54px 1fr;}
 .paper-tryon{width:calc(100% - 32px);margin:20px auto;padding:36px 22px;grid-template-columns:1fr;gap:30px;}.paper-tryon-intro{max-width:none;}.paper-tryon-intro>.home-button{margin-top:26px;}.paper-tryon-art{max-width:420px;width:100%;margin:auto;padding:18px 14px 14px;}.paper-tryon-options{grid-column:auto;display:block;padding:26px 20px;border-top:2px solid rgba(182,74,63,.55);border-left:0;}.paper-tryon-options h3:nth-of-type(2){margin-top:28px;padding:22px 0 0;border-top:1px solid rgba(76,67,53,.12);border-left:0;}.paper-swatches{margin:18px 0 0;max-width:none;}.paper-more{margin-top:24px;padding:12px 0 0;border-top:1px solid rgba(76,67,53,.12);border-left:0;}.home-footer{width:calc(100% - 48px);grid-template-columns:1fr 1fr;}.home-footer-meta{font-size:10px;gap:20px;}
 }
-@media(prefers-reduced-motion:reduce){.paper-process-description,.paper-frame-rails{animation:none;}.paper-swatches button,.paper-swatches img,.paper-process button{transition:none;}}
+@media(prefers-reduced-motion:reduce){.paper-process-description,.paper-operation-image,.paper-frame-rails{animation:none;}.paper-swatches button,.paper-swatches img,.paper-process button{transition:none;}}
 /* The wall is one fixed photograph; every real case keeps its own alpha and FLIP slot. */
 .home-gallery-scroll-track,.home-gallery-corridor {height:clamp(590px,46vw,860px);}
 .home-gallery-corridor {background:#e6e1d7 url('/assets/studio/paper-wall-hd.webp') center/cover no-repeat;box-shadow:none;border:0;}

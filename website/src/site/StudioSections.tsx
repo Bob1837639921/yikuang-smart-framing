@@ -4,11 +4,11 @@ import { goToTryOn } from "./navigation";
 import "./studio-home.css";
 
 const stages = [
-  { name: "检查", summary: "作品状态与细节检查", title: "先读懂，再动手。", copy: "看纸面、边缘与作品的状态，确认尺寸与保存需求。每一件作品，都有适合它的装裱方式。", position: "0% 0%", detail: "原作检查 · 纸面与边缘" },
-  { name: "搭配", summary: "挑选合适的框型与纸材", title: "让边界，衬出画意。", copy: "从框的木色、线条到卡纸的留白，顺着作品的气质去选择，也照顾它将要进入的空间。", position: "66.6667% 0%", detail: "材料搭配 · 木色与留白" },
-  { name: "固定", summary: "适合作品的承托与固定", title: "把作品，稳稳托住。", copy: "根据作品材质选择固定与承托方式，照顾边缘和受力，让画面平整，也为日后的维护留有余地。", position: "100% 0%", detail: "承托固定 · 边缘与受力" },
-  { name: "封装", summary: "面板、背板与挂件装配", title: "细心，藏在每一层。", copy: "清洁面板，检查作品与面板之间的间隔，再完成背板与挂件装配。具体结构随作品需要调整。", position: "33.3333% 100%", detail: "结构封装 · 面板与背板" },
-  { name: "上墙", summary: "检查完成，回到日常", title: "让喜欢，留在日常。", copy: "检查灰尘、平整度和挂装结构。把最后一处细节收好，让作品从工作台走向你的生活。", position: "100% 100%", detail: "完成检查 · 陈列与挂装" },
+  { name: "检查", summary: "纸面、边缘与稳定性", title: "先读懂，再动手。", copy: "先看纸面起伏、边缘与颜料状态，再记录作品尺寸和保存需求。状态不同，后续的承托、间隔与面板选择也会不同。", image: "/assets/studio/craft-stage-01-inspection-v2.webp", detail: "装裱师在自然侧光下检查水墨作品的纸面、边缘与稳定性" },
+  { name: "搭配", summary: "框型、卡纸与留白比例", title: "让边界，衬出画意。", copy: "把框线样角与卡纸窗口放在原作周围比较，确认木色、线型、开窗和留白比例，同时预留容纳作品、卡纸、面板与背板的结构深度。", image: "/assets/studio/craft-stage-02-selection-v2.webp", detail: "装裱师围绕水墨作品比较框线样角、卡纸窗口与留白比例" },
+  { name: "托画", summary: "覆托纸、上板与阴干", title: "先托住纸性，再安放画意。", copy: "在画心背面覆上托纸，用棕刷逐步排实；待纸层略收后，将托好的画心四边上板绷平，静置阴干。完全干透后，才进入下板、裁整与装框。", image: "/assets/studio/craft-stage-03-mounting-v2.webp", detail: "年轻装裱师为画心覆托纸，后方已有一幅作品四边上板阴干" },
+  { name: "封装", summary: "面板、背板与挂件装配", title: "细心，藏在每一层。", copy: "清洁面板并让它与作品保持安全间隔，再依次装入卡纸、作品、背板和固定件，完成背部密封与承重合适的挂装结构。", image: "/assets/studio/craft-stage-04-assembly-v2.webp", detail: "装裱师为画框安装背板、固定件与挂装五金" },
+  { name: "上墙", summary: "复检结构与陈列环境", title: "让喜欢，留在日常。", copy: "最后复检灰尘、平整度、框角与挂件承重，校准水平，并避开直射阳光、潮湿和温差剧烈的位置，让作品安全回到日常。", image: "/assets/studio/craft-stage-05-hanging-v2.webp", detail: "装裱师用水平尺复检并悬挂完成装裱的水墨作品" },
 ];
 
 export function CraftStory() {
@@ -31,7 +31,7 @@ export function CraftStory() {
   return <section className="paper-craft" id="story" aria-labelledby="story-title">
     <div className="paper-craft-inner">
       <div className="paper-operation" role="tabpanel" id="craft-panel" aria-labelledby={`craft-tab-${active}`} tabIndex={0}>
-        {active === 0 ? <img src="/assets/studio/paper-craft-hd.webp" alt="手工检查水墨作品与卡纸边缘" loading="lazy" decoding="async" /> : <div className="paper-operation-atlas" style={{backgroundPosition: stage.position}} role="img" aria-label={stage.detail} />}
+        <img className="paper-operation-image" key={stage.image} src={stage.image} alt={stage.detail} loading="lazy" decoding="async" width="1536" height="1024" />
       </div>
       <div className="paper-craft-content"><h2 id="story-title">装裱工艺</h2><p className="paper-subtitle">五步匠心，成就一幅好作品</p><div className="paper-process" role="tablist" aria-label="装裱的五道工序" aria-orientation="vertical">
         {stages.map((item,index)=><button ref={node=>{tabRefs.current[index]=node;}} id={`craft-tab-${index}`} key={item.name} role="tab" aria-selected={active===index} aria-controls="craft-panel" tabIndex={active===index?0:-1} onClick={()=>setActive(index)} onKeyDown={event=>selectWithKeyboard(event,index)}><span>{String(index+1).padStart(2,"0")}</span><strong>{item.name}</strong><small>{item.summary}</small></button>)}
