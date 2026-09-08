@@ -59,42 +59,26 @@ const BrushStrokeCharacter = memo(function BrushStrokeCharacter({ character, ord
 
   const characterDelay = 90 + order * 205;
   const strokeStep = Math.min(28, 190 / Math.max(strokeData.strokes.length, 1));
+  const characterFinish = characterDelay + 330;
 
   return (
     <span className="home-brush-character">
       <svg viewBox="0 0 1024 1024" aria-hidden="true" focusable="false">
         <defs>
-          {strokeData.strokes.map((stroke, strokeIndex) => (
-            <clipPath id={`${idPrefix}-${strokeIndex}`} clipPathUnits="userSpaceOnUse" key={`clip-${strokeIndex}`}>
-              <path d={stroke} />
-            </clipPath>
-          ))}
+          <mask id={`${idPrefix}-ink`} maskUnits="userSpaceOnUse" x="0" y="0" width="1024" height="1024">
+            <rect width="1024" height="1024" fill="black" />
+            <g transform="translate(0 900) scale(1 -1)">
+              {strokeData.medians.map((median, strokeIndex) => {
+                const medianPath = median.map(([x, y], pointIndex) => `${pointIndex === 0 ? "M" : "L"}${x} ${y}`).join(" ");
+                const strokeDelay = characterDelay + strokeIndex * strokeStep;
+                const strokeDuration = Math.max(62, Math.min(112, median.length * 8));
+                return <path className="home-brush-reveal-stroke" d={medianPath} pathLength="1" key={`reveal-${strokeIndex}`} style={{ "--stroke-delay": `${strokeDelay}ms`, "--stroke-duration": `${strokeDuration}ms` } as CSSProperties} />;
+              })}
+            </g>
+            <rect className="home-brush-reveal-complete" width="1024" height="1024" fill="white" style={{ "--character-finish": `${characterFinish}ms` } as CSSProperties} />
+          </mask>
         </defs>
-        <g transform="translate(0 900) scale(1 -1)">
-          {strokeData.strokes.map((stroke, strokeIndex) => {
-            const median = strokeData.medians[strokeIndex] ?? [];
-            const medianPath = median.map(([x, y], pointIndex) => `${pointIndex === 0 ? "M" : "L"}${x} ${y}`).join(" ");
-            const strokeDelay = characterDelay + strokeIndex * strokeStep;
-            const strokeDuration = Math.max(62, Math.min(112, median.length * 8));
-            const strokeStyle = {
-              "--stroke-delay": `${strokeDelay}ms`,
-              "--stroke-duration": `${strokeDuration}ms`,
-              "--stroke-finish": `${strokeDelay + strokeDuration - 12}ms`,
-            } as CSSProperties;
-
-            return (
-              <g key={`stroke-${strokeIndex}`} style={strokeStyle}>
-                <path className="home-brush-final-stroke" d={stroke} />
-                <path
-                  className="home-brush-writing-stroke"
-                  clipPath={`url(#${idPrefix}-${strokeIndex})`}
-                  d={medianPath}
-                  pathLength="1"
-                />
-              </g>
-            );
-          })}
-        </g>
+        <text className="home-brush-svg-glyph" x="512" y="835" textAnchor="middle" mask={`url(#${idPrefix}-ink)`}>{character}</text>
       </svg>
     </span>
   );
@@ -272,10 +256,23 @@ export default function HomePage() {
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let sequenceTimer: number | undefined;
     let sequenceStarted = false;
-    const showAllWorks = () => {
-      if (compactView.matches || reducedMotion.matches) {
-        setMountedWorkCount(workCases.length);
+    let lastScrollY = window.scrollY;
+    let scrollDirection: "up" | "down" | "idle" = "idle";
+    let hasObservedInitialPosition = false;
+    const handleScrollDirection = () => {
+      const nextScrollY = window.scrollY;
+      if (Math.abs(nextScrollY - lastScrollY) > 2) {
+        scrollDirection = nextScrollY > lastScrollY ? "down" : "up";
       }
+      lastScrollY = nextScrollY;
+    };
+    const showAllWorks = () => {
+      sequenceStarted = true;
+      if (sequenceTimer) {
+        window.clearInterval(sequenceTimer);
+        sequenceTimer = undefined;
+      }
+      setMountedWorkCount(workCases.length);
     };
     const startMountSequence = () => {
       if (sequenceStarted) return;
@@ -299,24 +296,25 @@ export default function HomePage() {
     }
 
     const observer = new IntersectionObserver(([entry]) => {
-      if (entry.intersectionRatio >= 0.3) {
+      const visibleOnPageLoad = !hasObservedInitialPosition && entry.intersectionRatio >= 0.3;
+      hasObservedInitialPosition = true;
+      if (entry.intersectionRatio < 0.3 || sequenceStarted) return;
+
+      if (visibleOnPageLoad || scrollDirection === "down") {
         startMountSequence();
-        return;
+      } else {
+        // Entering the wall from below must not replay the mounting animation.
+        showAllWorks();
       }
-      if (entry.isIntersecting || !sequenceStarted) return;
-      sequenceStarted = false;
-      if (sequenceTimer) {
-        window.clearInterval(sequenceTimer);
-        sequenceTimer = undefined;
-      }
-      setMountedWorkCount(0);
     }, { threshold: [0, 0.3] });
 
     observer.observe(track);
+    window.addEventListener("scroll", handleScrollDirection, { passive: true });
     compactView.addEventListener("change", showAllWorks);
     reducedMotion.addEventListener("change", showAllWorks);
     return () => {
       observer.disconnect();
+      window.removeEventListener("scroll", handleScrollDirection);
       compactView.removeEventListener("change", showAllWorks);
       reducedMotion.removeEventListener("change", showAllWorks);
       if (sequenceTimer) window.clearInterval(sequenceTimer);
@@ -359,7 +357,7 @@ export default function HomePage() {
 
       <main>
         <section className="home-hero" ref={heroRef} onPointerDown={handleWaterPointerDown} aria-labelledby="hero-title">
-          <img className="home-hero-image" src="/assets/studio/paper-hero-hd.webp" alt="自然日光下，木框与米白卡纸装裱的水墨山水" width="1900" height="1188" fetchPriority="high" decoding="async" />
+          <img className="home-hero-image" src="/assets/studio/paper-hero-foreground-leaves-v1.png" alt="自然日光与少量前景叶片映衬下，木框与米白卡纸装裱的水墨山水" width="1536" height="1024" fetchPriority="high" decoding="async" />
           <div className="home-hero-shade" aria-hidden="true" />
           <div className="home-hero-vignette" aria-hidden="true" />
           <div className="home-water-glimmer" aria-hidden="true" />

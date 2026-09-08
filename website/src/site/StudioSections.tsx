@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { frameMaterials, type FrameMaterial } from "./tryon/model";
 import { goToTryOn } from "./navigation";
 import "./studio-home.css";
@@ -40,27 +40,24 @@ export function CraftStory() {
   </section>;
 }
 
-function MaterialDetail({ material, close }: { material: FrameMaterial; close: () => void }) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    dialog?.showModal();
-    return () => dialog?.close();
-  }, []);
-  return <dialog ref={dialogRef} className="studio-material-dialog" aria-labelledby="material-detail-title" onClose={() => { if (!dialogRef.current?.open) close(); }} onClick={(event) => { if (event.target === event.currentTarget) close(); }}>
-    <button type="button" className="studio-dialog-close" onClick={close} autoFocus>关闭</button>
-    <img src={material.image} alt={`${material.name}框角近景`} width="600" height="600" draggable="false" />
-    <div className="studio-dialog-copy"><p className="studio-eyebrow">框料近看</p><h2 id="material-detail-title">{material.name}</h2><p>{material.material} · 框宽 {material.widthMm} mm · 深度 {material.depthMm} mm</p><strong>¥{material.pricePerMeter}/米</strong><p>感受木色、线条与表面的细节。进入试装空间，搭配你自己的作品。</p><button type="button" className="home-button home-button-dark" onClick={goToTryOn}>进入试装空间</button></div>
-  </dialog>;
-}
-
 export function StudioTryOn() {
-  const [inspected,setInspected]=useState<FrameMaterial|null>(null);
   const samples=["walnut","oak","cream"].map(id=>frameMaterials.find(item=>item.id===id)).filter((item):item is FrameMaterial=>Boolean(item));
+  const [selectedId,setSelectedId]=useState("oak");
+  const selected=samples.find(material=>material.id===selectedId)??samples[0];
   return <section className="paper-tryon" id="experience" aria-labelledby="experience-title">
-    <div className="paper-tryon-intro"><h2 id="experience-title">试装体验</h2><p className="paper-subtitle">上传作品，即刻预览装裱效果</p><button className="home-button home-button-dark" onClick={goToTryOn}>上传作品</button><p className="paper-tryon-note">按作品比例预览 · 自由搭配框与卡纸</p></div>
-    <figure className="paper-tryon-art"><img src="/assets/studio/paper-tryon-hd.webp" alt="浅木框与米白卡纸装裱的水墨山水示意" loading="lazy" decoding="async" width="1000" height="1000"/><figcaption>山水入画 · 装裱示意</figcaption></figure>
-    <div className="paper-tryon-options"><h3>可选框材</h3><div className="paper-swatches">{samples.map(material=><button key={material.id} onClick={()=>setInspected(material)} aria-label={`近看框料：${material.name}`}><img src={material.textures.top} alt="" loading="lazy" decoding="async"/><span>{material.name}</span></button>)}</div><h3>装裱形式</h3><p>镜片 / 木框 / 卡纸装裱</p><button className="paper-more" onClick={goToTryOn}>更多搭配方案 →</button></div>
-    {inspected&&<MaterialDetail material={inspected} close={()=>setInspected(null)}/>}
+    <div className="paper-tryon-intro"><p className="paper-tryon-kicker">ZHENGHAO / TRY-ON</p><h2 id="experience-title">试装体验</h2><p className="paper-subtitle">上传作品，即刻预览装裱效果</p><button className="home-button home-button-dark" onClick={goToTryOn}>上传作品</button><p className="paper-tryon-note">按作品比例预览 · 自由搭配框与卡纸</p></div>
+    <figure className="paper-tryon-art">
+      <div className="paper-frame-preview">
+        <img src="/assets/studio/paper-tryon-hd.webp" alt={`使用${selected.name}与米白卡纸装裱的水墨山水示意`} loading="lazy" decoding="async" width="1000" height="1000" draggable="false"/>
+        <div className="paper-frame-rails" key={selected.id} aria-hidden="true">
+          <img className="paper-frame-rail is-top" src={selected.textures.top} alt=""/>
+          <img className="paper-frame-rail is-right" src={selected.textures.right} alt=""/>
+          <img className="paper-frame-rail is-bottom" src={selected.textures.bottom} alt=""/>
+          <img className="paper-frame-rail is-left" src={selected.textures.left} alt=""/>
+        </div>
+      </div>
+      <figcaption aria-live="polite">山水入画 · {selected.name}</figcaption>
+    </figure>
+    <div className="paper-tryon-options"><h3>可选框材</h3><div className="paper-swatches" role="group" aria-label="切换画框材质">{samples.map(material=><button className={selected.id===material.id?"is-selected":""} key={material.id} onClick={()=>setSelectedId(material.id)} aria-pressed={selected.id===material.id} aria-label={`切换为${material.name}画框`}><img src={material.textures.top} alt="" loading="lazy" decoding="async"/><span>{material.name}</span></button>)}</div><h3>装裱形式</h3><p>镜片 / 木框 / 卡纸装裱</p><button className="paper-more" onClick={goToTryOn}>更多搭配方案 →</button></div>
   </section>;
 }
