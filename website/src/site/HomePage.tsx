@@ -5,7 +5,7 @@ import SiteHeader from "./SiteHeader";
 import InkCursorTrail from "./InkCursorTrail";
 import { goToTryOn } from "./navigation";
 import "./homepage.css";
-import { CraftStory, StudioTryOn } from "./StudioSections";
+import { CraftStory, StoreVisit, StudioTryOn } from "./StudioSections";
 import "./paper-home.css";
 
 const heroTitleColumns = [
@@ -472,6 +472,7 @@ export default function HomePage() {
         </section>
 
         <StudioTryOn />
+        <StoreVisit />
 
       </main>
 

@@ -61,3 +61,42 @@ export function StudioTryOn() {
     <div className="paper-tryon-options"><h3>可选框材</h3><div className="paper-swatches" role="group" aria-label="切换画框材质">{samples.map(material=><button className={selected.id===material.id?"is-selected":""} key={material.id} onClick={()=>setSelectedId(material.id)} aria-pressed={selected.id===material.id} aria-label={`切换为${material.name}画框`}><img src={material.textures.top} alt="" loading="lazy" decoding="async"/><span>{material.name}</span></button>)}</div><h3>装裱形式</h3><p>镜片 / 木框 / 卡纸装裱</p><button className="paper-more" onClick={goToTryOn}>更多搭配方案 →</button></div>
   </section>;
 }
+
+const STORE_ADDRESS = "杭州市萧山区文化路158号";
+const STORE_MAP_URL = `https://uri.amap.com/search?keyword=${encodeURIComponent(STORE_ADDRESS)}&city=${encodeURIComponent("杭州市")}&view=map&src=zhenghao-shuhuashe&callnative=1`;
+
+export function StoreVisit() {
+  const [copied, setCopied] = useState(false);
+  const copyAddress = async () => {
+    try {
+      await navigator.clipboard.writeText(STORE_ADDRESS);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return <section className="paper-visit" id="visit" aria-labelledby="visit-title">
+    <div className="paper-visit-inner">
+      <header className="paper-visit-heading">
+        <div><p className="paper-visit-kicker">ZHENGHAO / VISIT</p><h2 id="visit-title">带上作品，来店里慢慢看。</h2></div>
+        <strong aria-hidden="true">杭州 <i>/</i> 萧山<small>扎根萧山近三十年</small></strong>
+        <p>现场比较框料、卡纸与留白比例，也可以和装裱师当面聊聊作品状态与陈列空间。</p>
+      </header>
+      <div className="paper-visit-route">
+        <div className="paper-visit-address"><span>门店地址</span><strong>{STORE_ADDRESS}</strong></div>
+        <div><span>营业时间</span><strong>09:00—18:00</strong></div>
+        <div><span>预约电话</span><a href="tel:13588255891">135 8825 5891</a></div>
+        <div className="paper-visit-actions">
+          <button type="button" onClick={copyAddress}>{copied ? "地址已复制" : "复制地址"}</button>
+          <a href={STORE_MAP_URL} target="_blank" rel="noreferrer">地图导航</a>
+        </div>
+      </div>
+      <figure className="paper-visit-scene">
+        <img src="/assets/studio/daylight-interior.webp" alt="自然日光中的正好书画社装裱陈列空间" loading="lazy" decoding="async" width="1738" height="977" draggable="false"/>
+        <figcaption><span>到店前建议预约</span><strong>选框 · 看纸 · 现场沟通</strong></figcaption>
+      </figure>
+    </div>
+  </section>;
+}
