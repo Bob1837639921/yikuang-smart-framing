@@ -42,8 +42,9 @@ const BrushStrokeCharacter = memo(function BrushStrokeCharacter({ character, ord
 
   useEffect(() => {
     let active = true;
-    loadHanziStrokeData(character)
-      .then((data) => {
+    const fontReady = document.fonts?.load('400 1em "Zhenghao Brush"', character) ?? Promise.resolve();
+    Promise.all([loadHanziStrokeData(character), fontReady])
+      .then(([data]) => {
         if (active) setStrokeData(data);
       })
       .catch(() => {
@@ -358,7 +359,7 @@ export default function HomePage() {
 
       <main>
         <section className="home-hero" ref={heroRef} onPointerDown={handleWaterPointerDown} aria-labelledby="hero-title">
-          <img className="home-hero-image" src="/assets/studio/paper-hero-foreground-leaves-v1.png" alt="自然日光与少量前景叶片映衬下，木框与米白卡纸装裱的水墨山水" width="1536" height="1024" fetchPriority="high" decoding="async" />
+          <img className="home-hero-image" src="/assets/studio/paper-hero-foreground-leaves-v1.webp" alt="自然日光与少量前景叶片映衬下，木框与米白卡纸装裱的水墨山水" width="1536" height="1024" fetchPriority="high" decoding="async" />
           <div className="home-hero-shade" aria-hidden="true" />
           <div className="home-hero-vignette" aria-hidden="true" />
           <div className="home-water-glimmer" aria-hidden="true" />
