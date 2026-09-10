@@ -1,6 +1,6 @@
 export type PreviewRotation = { x: number; y: number };
 
-export const INITIAL_PREVIEW_ROTATION: PreviewRotation = { x: -3, y: -10 };
+export const INITIAL_PREVIEW_ROTATION: PreviewRotation = { x: 0, y: 0 };
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
@@ -16,4 +16,12 @@ export function getDraggedRotation(start: PreviewRotation, dx: number, dy: numbe
     x: clamp(start.x + dy * degreesPerPixel, -22, 18),
     y: clamp(start.y + dx * degreesPerPixel, -38, 38),
   };
+}
+
+export function getCameraFitDistance(width: number, height: number, depth: number, verticalFovDegrees: number, aspect: number) {
+  const verticalTangent = Math.tan((verticalFovDegrees * Math.PI / 180) / 2);
+  const safeAspect = Math.max(0.1, aspect);
+  const distanceForHeight = height / (2 * verticalTangent);
+  const distanceForWidth = width / (2 * verticalTangent * safeAspect);
+  return Math.max(distanceForWidth, distanceForHeight) * 1.08 + depth * 0.75;
 }

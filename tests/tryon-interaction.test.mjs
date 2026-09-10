@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { getDraggedRotation, getDragDegreesPerPixel, INITIAL_PREVIEW_ROTATION } from "../website/src/site/tryon/interaction.ts";
+import { getCameraFitDistance, getDraggedRotation, getDragDegreesPerPixel, INITIAL_PREVIEW_ROTATION } from "../website/src/site/tryon/interaction.ts";
 import { defaultMatLayers, MAX_OUTER_MAT_WIDTH_MM } from "../website/src/site/tryon/model.ts";
+
+test("the initial and reset preview angle is a true front view", () => {
+  assert.deepEqual(INITIAL_PREVIEW_ROTATION, { x: 0, y: 0 });
+});
 
 test("horizontal and vertical drags share the same normalized angular sensitivity", () => {
   const sensitivity = getDragDegreesPerPixel(679, 654);
@@ -25,6 +29,14 @@ test("pitch and yaw stop before the frame flips over", () => {
   const sensitivity = getDragDegreesPerPixel(320, 320);
   assert.deepEqual(getDraggedRotation(INITIAL_PREVIEW_ROTATION, 10_000, 10_000, sensitivity), { x: 18, y: 38 });
   assert.deepEqual(getDraggedRotation(INITIAL_PREVIEW_ROTATION, -10_000, -10_000, sensitivity), { x: -22, y: -38 });
+});
+
+test("camera fitting uses the viewport aspect for wide and tall artwork", () => {
+  const wideInWideViewport = getCameraFitDistance(50, 6, 0.3, 28, 1.8);
+  const wideInSquareViewport = getCameraFitDistance(50, 6, 0.3, 28, 1);
+  const tallInWideViewport = getCameraFitDistance(6, 50, 0.3, 28, 1.8);
+  assert.ok(wideInWideViewport < wideInSquareViewport);
+  assert.ok(tallInWideViewport > wideInWideViewport);
 });
 
 test("mat layers keep independent symmetric dimensions and allow oversized outer borders", () => {

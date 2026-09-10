@@ -276,7 +276,7 @@ async function readStoredRecords(): Promise<StoredManagedFrameRecord[]> {
 
 async function writeStoredRecord(record: StoredManagedFrameRecord) {
   if (typeof indexedDB === "undefined") {
-    memoryFallback = [record, ...memoryFallback.filter((item) => item.id !== record.id)].slice(0, 8);
+    memoryFallback = [record, ...memoryFallback.filter((item) => item.id !== record.id)];
     return;
   }
   const database = await openMaterialDatabase();
@@ -308,7 +308,7 @@ async function readStoredMatRecords(): Promise<StoredManagedMatRecord[]> {
 
 async function writeStoredMatRecord(record: StoredManagedMatRecord) {
   if (typeof indexedDB === "undefined") {
-    matMemoryFallback = [record, ...matMemoryFallback.filter((item) => item.id !== record.id)].slice(0, 24);
+    matMemoryFallback = [record, ...matMemoryFallback.filter((item) => item.id !== record.id)];
     return;
   }
   const database = await openMaterialDatabase();
@@ -329,7 +329,7 @@ export async function readManagedMaterials(): Promise<ManagedFrameRecord[]> {
   try {
     localStorage.removeItem(LEGACY_STORAGE_KEY);
     const stored = await readStoredRecords();
-    cachedRecords = stored.map(hydrateRecord).filter(isRecord).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 8);
+    cachedRecords = stored.map(hydrateRecord).filter(isRecord).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
     return cachedRecords;
   } catch {
     cachedRecords = [];
@@ -341,7 +341,7 @@ export async function saveManagedMaterial(record: ManagedFrameRecord) {
   const stored = toStoredRecord(record);
   await writeStoredRecord(stored);
   const current = await readManagedMaterials();
-  cachedRecords = [hydrateRecord(stored), ...current.filter((item) => item.id !== record.id)].slice(0, 8);
+  cachedRecords = [hydrateRecord(stored), ...current.filter((item) => item.id !== record.id)];
   return cachedRecords;
 }
 
@@ -368,7 +368,7 @@ export async function readManagedMats(): Promise<ManagedMatRecord[]> {
   if (cachedMatRecords) return cachedMatRecords;
   try {
     const stored = await readStoredMatRecords();
-    cachedMatRecords = stored.map(hydrateMatRecord).filter((item) => Boolean(item.id && item.name && item.sources.frontTexture)).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)).slice(0, 24);
+    cachedMatRecords = stored.map(hydrateMatRecord).filter((item) => Boolean(item.id && item.name && item.sources.frontTexture)).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
     return cachedMatRecords;
   } catch {
     cachedMatRecords = [];
@@ -380,7 +380,7 @@ export async function saveManagedMat(record: ManagedMatRecord) {
   const stored = toStoredMatRecord(record);
   await writeStoredMatRecord(stored);
   const current = await readManagedMats();
-  cachedMatRecords = [hydrateMatRecord(stored), ...current.filter((item) => item.id !== record.id)].slice(0, 24);
+  cachedMatRecords = [hydrateMatRecord(stored), ...current.filter((item) => item.id !== record.id)];
   return cachedMatRecords;
 }
 
@@ -427,6 +427,10 @@ export function toWebsiteFrame(record: ManagedFrameRecord): FrameMaterial {
     pricePerMeter: record.pricePerMeter,
     widthMm: record.geometry.widthMm,
     depthMm: record.geometry.depthMm,
+    sideWidthMm: record.geometry.sideWidthMm,
+    innerLipMm: record.geometry.innerLipMm,
+    bevelMm: record.geometry.bevelMm,
+    profileType: record.geometry.profileType,
   };
 }
 

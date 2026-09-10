@@ -4,9 +4,10 @@ import test from "node:test";
 import { calculateColorMatchGains } from "../website/src/site/material-admin/texture-color.ts";
 import { generateMaterialSku } from "../website/src/site/material-admin/material-sku.ts";
 import { normalizeDimensionInput } from "../website/src/site/tryon/dimension-input.ts";
+import { dimensionsForAspect } from "../website/src/site/tryon/artwork-upload.ts";
 import { dewrinklePixels } from "../website/src/site/tryon/dewrinkle-core.ts";
 import { fuzzyFilter, fuzzyMatchScore } from "../website/src/site/tryon/fuzzy-search.ts";
-import { frameLineCategories, frameLineSubcategories } from "../website/src/site/tryon/model.ts";
+import { calculateQuote, frameLineCategories, frameLineSubcategories, frameMaterials } from "../website/src/site/tryon/model.ts";
 
 const stageSource = await readFile(new URL("../website/src/site/tryon/ThreeFrameStage.tsx", import.meta.url), "utf8");
 const previewSource = await readFile(new URL("../website/src/site/tryon/FramePreview.tsx", import.meta.url), "utf8");
@@ -18,6 +19,7 @@ const repairCoreSource = await readFile(new URL("../website/src/site/tryon/dewri
 const repairWorkerSource = await readFile(new URL("../website/src/site/tryon/dewrinkle.worker.ts", import.meta.url), "utf8");
 const tryonPageSource = await readFile(new URL("../website/src/site/tryon/TryOnPage.tsx", import.meta.url), "utf8");
 const artworkPanelSource = await readFile(new URL("../website/src/site/tryon/ArtworkPanel.tsx", import.meta.url), "utf8");
+const artworkUploadSource = await readFile(new URL("../website/src/site/tryon/artwork-upload.ts", import.meta.url), "utf8");
 const materialAdminSource = await readFile(new URL("../website/src/site/material-admin/MaterialAdminPage.tsx", import.meta.url), "utf8");
 const inkCursorSource = await readFile(new URL("../website/src/site/InkCursorTrail.tsx", import.meta.url), "utf8");
 const homePageSource = await readFile(new URL("../website/src/site/HomePage.tsx", import.meta.url), "utf8");
@@ -44,6 +46,9 @@ test("mat borders expand the frame while preserving the entered artwork opening"
   assert.match(stageSource, /frameInnerHeight = artworkHeight \+ totalTopBottomReveal \* 2/);
   assert.match(stageSource, /let openingWidth = frameInnerWidth/);
   assert.match(stageSource, /let openingHeight = frameInnerHeight/);
+  assert.match(stageSource, /new THREE\.PlaneGeometry\(openingWidth \+ artworkOverlap \* 2, openingHeight \+ artworkOverlap \* 2\)/);
+  assert.doesNotMatch(stageSource, /openingWidth \* 1\.04/);
+  assert.match(stageSource, /applyCover\(artworkTexture, openingWidth \/ openingHeight\)/);
 });
 
 test("frame lighting keeps dark materials from washing out to silver", () => {
@@ -69,6 +74,8 @@ test("only the gallery space exposes live rotation controls", () => {
 test("large generated material assets stay out of localStorage", () => {
   assert.match(storageSource, /indexedDB\.open/);
   assert.doesNotMatch(storageSource, /localStorage\.setItem\(MATERIAL_STORAGE_KEY/);
+  assert.doesNotMatch(storageSource, /cachedRecords = .*\.slice\(0, 8\)/);
+  assert.doesNotMatch(storageSource, /cachedMatRecords = .*\.slice\(0, 24\)/);
 });
 
 test("mat administration needs one face texture and derives its edge color locally", () => {
@@ -102,10 +109,10 @@ test("admin preview uses the catalog cover and homepage ink trail renders only o
   assert.match(materialAdminSource, /cover\.url \? "material-cover-preview" : "material-cover-preview is-empty"/);
   assert.match(materialAdminSource, /src=\{cover\.url\}/);
   assert.match(materialAdminSource, /上传封面后显示/);
-  assert.match(inkCursorSource, /const MAX_DABS = 280/);
+  assert.match(inkCursorSource, /const MAX_DABS = 90/);
   assert.match(inkCursorSource, /prefers-reduced-motion: reduce/);
   assert.match(inkCursorSource, /if \(!animationFrame\) animationFrame = window\.requestAnimationFrame/);
-  assert.match(inkCursorSource, /if \(dabs\.length\) animationFrame = window\.requestAnimationFrame/);
+  assert.match(inkCursorSource, /if \(dabs\.length \|\| pendingPointer\) animationFrame = window\.requestAnimationFrame/);
   assert.match(homePageSource, /work-01-fu-lu-shou-xi\.webp/);
   assert.match(homePageSource, /work-07-horses\.webp/);
   assert.match(homePageSource, /正好作品陈列/);
@@ -113,6 +120,20 @@ test("admin preview uses the catalog cover and homepage ink trail renders only o
   assert.match(homePageSource, /role="dialog" aria-modal="true"/);
   assert.match(homePageSource, /loading="lazy" decoding="async"/);
   assert.doesNotMatch(homePageSource, /work-01-fu-lu-shou-xi\.png/);
+});
+
+test("artwork uploads are decoded before swap and initialize the frame from image aspect", () => {
+  assert.match(artworkUploadSource, /image\/jpeg/);
+  assert.match(artworkUploadSource, /image\/png/);
+  assert.match(artworkUploadSource, /image\/webp/);
+  assert.match(artworkUploadSource, /MAX_UPLOAD_BYTES = 40 \* 1024 \* 1024/);
+  assert.match(artworkUploadSource, /MAX_PREVIEW_DIMENSION = 3072/);
+  assert.match(artworkUploadSource, /await createImageBitmap/);
+  assert.match(tryonPageSource, /const prepared = await prepareArtworkUpload\(file\)/);
+  assert.match(tryonPageSource, /if \(sequence !== uploadSequence\.current\) return/);
+  assert.match(artworkPanelSource, /event\.currentTarget\.value = ""/);
+  assert.deepEqual(dimensionsForAspect(4000, 2000), { widthCm: 56, heightCm: 28 });
+  assert.deepEqual(dimensionsForAspect(2000, 4000), { widthCm: 28, heightCm: 56 });
 });
 
 test("material admin lists only managed records and supports selecting them for editing", () => {
@@ -126,6 +147,15 @@ test("material admin lists only managed records and supports selecting them for 
   assert.match(materialAdminSource, /还没有后台卡纸/);
   assert.doesNotMatch(materialAdminSource, /sampleFront|sampleCover|sampleSide|sampleProfile/);
   assert.match(materialAdminSource, /已新建空白框料草稿/);
+  assert.match(materialAdminSource, /draftGeneration\.current/);
+  assert.match(materialAdminSource, /uploadSequences\.current\[kind\]/);
+  assert.match(materialAdminSource, /generation !== draftGeneration\.current/);
+  assert.match(materialAdminSource, /portableFrameRecord/);
+  assert.match(materialAdminSource, /portableAsset/);
+  assert.doesNotMatch(materialAdminSource, /\?\? managed\[0\]/);
+  assert.match(storageSource, /sideWidthMm: record\.geometry\.sideWidthMm/);
+  assert.match(storageSource, /innerLipMm: record\.geometry\.innerLipMm/);
+  assert.match(storageSource, /bevelMm: record\.geometry\.bevelMm/);
 });
 
 test("frame taxonomy keeps redwood under solid wood and oil-painting moulding under plaster", () => {
@@ -155,7 +185,18 @@ test("dimension editing allows an empty draft and clamps only on commit", () => 
   assert.equal(normalizeDimensionInput("", 42), 42);
   assert.equal(normalizeDimensionInput("86.25", 42), 86.3);
   assert.equal(normalizeDimensionInput("0", 42), 1);
-  assert.equal(normalizeDimensionInput("900", 42), 500);
+  assert.equal(normalizeDimensionInput("900", 42), 900);
+  assert.equal(normalizeDimensionInput("1000", 42), 1000);
+  assert.equal(normalizeDimensionInput("1001", 42), 1000);
+});
+
+test("website quote charges frame rail length without a separate glass or backing line", () => {
+  const frame = frameMaterials[0];
+  const quote = calculateQuote(42, 56, frame);
+  const frameWidthCm = frame.widthMm / 10;
+  const expectedRailMeters = (2 * (42 + frameWidthCm * 2 + 56 + frameWidthCm * 2)) / 100 * 1.08;
+  assert.equal(quote.total, Math.round(expectedRailMeters * frame.pricePerMeter));
+  assert.doesNotMatch(tryonPageSource, /玻璃与背板|glazingAndBacking/);
 });
 
 test("desktop try-on stays within one viewport and edits artwork size with framing controls", () => {
@@ -163,6 +204,10 @@ test("desktop try-on stays within one viewport and edits artwork size with frami
   assert.match(tryonStylesSource, /grid-template-rows: auto auto auto minmax\(0, 1fr\)/);
   assert.match(framingControlsSource, /<ArtworkDimensions widthCm=\{props\.widthCm\}/);
   assert.doesNotMatch(artworkPanelSource, /try-size-fields/);
+  assert.match(tryonPageSource, /previewCenterRef\.current\?\.requestFullscreen\(\)/);
+  assert.match(tryonPageSource, /document\.exitFullscreen\(\)/);
+  assert.match(tryonPageSource, /fullscreenchange/);
+  assert.match(tryonPageSource, /try-center-view-actions/);
 });
 
 test("mat library supports ranked partial and non-contiguous fuzzy search", () => {

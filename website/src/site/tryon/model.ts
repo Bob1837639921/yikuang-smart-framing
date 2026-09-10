@@ -31,6 +31,10 @@ export type FrameMaterial = {
   pricePerMeter: number;
   widthMm: number;
   depthMm: number;
+  sideWidthMm?: number;
+  innerLipMm?: number;
+  bevelMm?: number;
+  profileType?: string;
 };
 
 export type MatMaterial = {
@@ -103,11 +107,9 @@ export function calculateQuote(widthCm: number, heightCm: number, frame: FrameMa
   const railLengthMeters = (2 * (widthCm + frameWidthCm * 2 + heightCm + frameWidthCm * 2)) / 100;
   const billableRailMeters = railLengthMeters * 1.08;
   const frameCost = billableRailMeters * frame.pricePerMeter;
-  const glazingAndBacking = widthCm * heightCm * 0.035;
   return {
-    total: Math.round(frameCost + glazingAndBacking),
+    total: Math.round(frameCost),
     railMeters: Number(billableRailMeters.toFixed(2)),
-    glazingAndBacking: Math.round(glazingAndBacking),
   };
 }
 

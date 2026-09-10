@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { frameMaterials, type FrameMaterial } from "./tryon/model";
 import { goToTryOn } from "./navigation";
 import "./studio-home.css";
@@ -11,10 +11,50 @@ const stages = [
   { name: "上墙", summary: "复检结构与陈列环境", title: "让喜欢，留在日常。", copy: "最后复检灰尘、平整度、框角与挂件承重，校准水平，并避开直射阳光、潮湿和温差剧烈的位置，让作品安全回到日常。", image: "/assets/studio/craft-stage-05-hanging-v2.webp", detail: "装裱师用水平尺复检并悬挂完成装裱的水墨作品" },
 ];
 
+const stageImageCache = new Map<string, Promise<void>>();
+
+function preloadStageImage(src: string) {
+  const cached = stageImageCache.get(src);
+  if (cached) return cached;
+
+  const request = new Promise<void>((resolve, reject) => {
+    const image = new Image();
+    image.decoding = "async";
+    image.onload = () => {
+      if (typeof image.decode === "function") image.decode().then(resolve, resolve);
+      else resolve();
+    };
+    image.onerror = () => reject(new Error(`Unable to load craft image: ${src}`));
+    image.src = src;
+  });
+  stageImageCache.set(src, request);
+  return request;
+}
+
 export function CraftStory() {
   const [active, setActive] = useState(0);
+  const [visual, setVisual] = useState({ current: 0, previous: null as number | null, sequence: 0 });
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const requestSequence = useRef(0);
   const stage = stages[active];
+
+  useEffect(() => {
+    const sequence = ++requestSequence.current;
+    if (active === visual.current) return;
+
+    void preloadStageImage(stages[active].image).then(() => {
+      if (sequence !== requestSequence.current) return;
+      setVisual((current) => ({ current: active, previous: current.current, sequence: current.sequence + 1 }));
+    });
+  }, [active, visual.current]);
+
+  useEffect(() => {
+    if (visual.previous === null) return;
+    const timer = window.setTimeout(() => {
+      setVisual((current) => ({ ...current, previous: null }));
+    }, 520);
+    return () => window.clearTimeout(timer);
+  }, [visual.sequence, visual.previous]);
   const selectWithKeyboard = (event: React.KeyboardEvent, index: number) => {
     let next = index;
     if ((event.key === "ArrowRight" || event.key === "ArrowDown")) next = (index + 1) % stages.length;
@@ -30,11 +70,12 @@ export function CraftStory() {
 
   return <section className="paper-craft" id="story" aria-labelledby="story-title">
     <div className="paper-craft-inner">
-      <div className="paper-operation" role="tabpanel" id="craft-panel" aria-labelledby={`craft-tab-${active}`} tabIndex={0}>
-        <img className="paper-operation-image" key={stage.image} src={stage.image} alt={stage.detail} loading="lazy" decoding="async" width="1536" height="1024" />
+      <div className="paper-operation" role="tabpanel" id="craft-panel" aria-labelledby={`craft-tab-${active}`} aria-busy={visual.current !== active} tabIndex={0}>
+        {visual.previous !== null && <img className="paper-operation-image is-leaving" key={`previous-${visual.sequence}`} src={stages[visual.previous].image} alt="" aria-hidden="true" decoding="async" width="1536" height="1024" />}
+        <img className={visual.previous === null ? "paper-operation-image" : "paper-operation-image is-entering"} key={`${stages[visual.current].image}-${visual.sequence}`} src={stages[visual.current].image} alt={stages[visual.current].detail} loading="lazy" decoding="async" width="1536" height="1024" />
       </div>
       <div className="paper-craft-content"><h2 id="story-title">装裱工艺</h2><p className="paper-subtitle">五步匠心，成就一幅好作品</p><div className="paper-process" role="tablist" aria-label="装裱的五道工序" aria-orientation="vertical">
-        {stages.map((item,index)=><button ref={node=>{tabRefs.current[index]=node;}} id={`craft-tab-${index}`} key={item.name} role="tab" aria-selected={active===index} aria-controls="craft-panel" tabIndex={active===index?0:-1} onClick={()=>setActive(index)} onKeyDown={event=>selectWithKeyboard(event,index)}><span>{String(index+1).padStart(2,"0")}</span><strong>{item.name}</strong><small>{item.summary}</small></button>)}
+        {stages.map((item,index)=><button ref={node=>{tabRefs.current[index]=node;}} id={`craft-tab-${index}`} key={item.name} role="tab" aria-selected={active===index} aria-controls="craft-panel" tabIndex={active===index?0:-1} onPointerEnter={()=>{void preloadStageImage(item.image);}} onFocus={()=>{void preloadStageImage(item.image);}} onClick={()=>setActive(index)} onKeyDown={event=>selectWithKeyboard(event,index)}><span>{String(index+1).padStart(2,"0")}</span><strong>{item.name}</strong><small>{item.summary}</small></button>)}
       </div><p className="paper-process-description" key={active}>{stage.copy}</p></div>
     </div>
   </section>;

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { getCameraFitDistance } from "./interaction";
 import { getMatMaterial, type FrameMaterial, type MatLayer, type MatMaterial } from "./model";
 
 type ThreeFrameStageProps = {
@@ -28,8 +29,19 @@ type StageRuntime = {
   matFaceMaterials: THREE.MeshStandardMaterial[];
   animationFrame: number;
   resizeObserver: ResizeObserver;
+  frameBounds: { width: number; height: number; depth: number } | null;
   requestRender: () => void;
 };
+
+function fitCameraToFrame(runtime: StageRuntime) {
+  const bounds = runtime.frameBounds;
+  if (!bounds) return;
+  const cameraDistance = getCameraFitDistance(bounds.width, bounds.height, bounds.depth, runtime.camera.fov, runtime.camera.aspect);
+  runtime.camera.position.set(0, 0, cameraDistance);
+  runtime.camera.far = Math.max(100, cameraDistance + Math.hypot(bounds.width, bounds.height, bounds.depth) * 2);
+  runtime.camera.updateProjectionMatrix();
+  runtime.camera.lookAt(0, 0, 0);
+}
 
 type TextureCacheEntry = {
   refs: number;
@@ -279,14 +291,15 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
       const height = Math.max(1, Math.floor(rect.height));
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
-      camera.updateProjectionMatrix();
+      if (runtimeRef.current) fitCameraToFrame(runtimeRef.current);
+      else camera.updateProjectionMatrix();
       requestRender();
     };
     resize();
     const resizeObserver = new ResizeObserver(resize);
     resizeObserver.observe(host);
 
-    const runtime: StageRuntime = { renderer, scene, camera, activeGroup: null, activeDisposables: [], matFaceMaterials: [], animationFrame: 0, resizeObserver, requestRender: () => {} };
+    const runtime: StageRuntime = { renderer, scene, camera, activeGroup: null, activeDisposables: [], matFaceMaterials: [], animationFrame: 0, resizeObserver, frameBounds: null, requestRender: () => {} };
     runtimeRef.current = runtime;
     const render = () => {
       runtime.animationFrame = 0;
@@ -346,6 +359,7 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
     const selectedMats = props.matEnabled ? props.matLayers.map((layer) => getMatMaterial(layer.materialId, props.matMaterials)) : [];
     const matUrls = selectedMats.map((material) => material.texture).filter((url): url is string => Boolean(url));
     const requestedUrls = [...railUrls, ...heightUrls, ...sideUrls, ...matUrls, props.artworkUrl];
+    setStageError("");
     const textureLease = textureCacheRef.current.acquire(requestedUrls);
 
     textureLease.ready.then((textures) => {
@@ -470,7 +484,10 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
       applyCover(artworkTexture, openingWidth / openingHeight);
       artworkTexture.needsUpdate = true;
       const artworkMaterial = new THREE.MeshBasicMaterial({ map: artworkTexture, toneMapped: false });
-      const artworkGeometry = new THREE.PlaneGeometry(openingWidth * 1.04, openingHeight * 1.04);
+      // Use a fixed sub-millimetre overlap to hide raster seams. A percentage
+      // overlap grows into centimetres on long scrolls and can pierce the rail.
+      const artworkOverlap = 0.006;
+      const artworkGeometry = new THREE.PlaneGeometry(openingWidth + artworkOverlap * 2, openingHeight + artworkOverlap * 2);
       const artwork = new THREE.Mesh(artworkGeometry, artworkMaterial);
       artwork.position.z = matFront - 0.02;
       frameGroup.add(artwork);
@@ -500,17 +517,18 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
       runtime.activeDisposables = disposables;
       runtime.matFaceMaterials = matFaceMaterials;
       adopted = true;
-      const maxDimension = Math.max(outerWidth, outerHeight);
-      const cameraDistance = maxDimension / (2 * Math.tan(THREE.MathUtils.degToRad(runtime.camera.fov / 2))) * 1.18;
-      runtime.camera.position.set(0, 0, cameraDistance);
-      runtime.camera.lookAt(0, 0, 0);
+      runtime.frameBounds = { width: outerWidth, height: outerHeight, depth };
+      fitCameraToFrame(runtime);
       runtime.requestRender();
 
       if (previousGroup) runtime.scene.remove(previousGroup);
       previousDisposables.forEach((item) => item.dispose());
     }).catch((error) => {
       if (!adopted) textureLease.dispose();
-      if (!cancelled && !(error instanceof DOMException && error.name === "AbortError")) console.error("Unable to prepare the framing preview", error);
+      if (!cancelled && !(error instanceof DOMException && error.name === "AbortError")) {
+        setStageError("作品或材质加载失败，请重新选择图片后再试");
+        console.error("Unable to prepare the framing preview", error);
+      }
     });
 
     return () => {

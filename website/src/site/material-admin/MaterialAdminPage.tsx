@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import BrandMark from "../BrandMark";
 import { goHome, goToTryOn } from "../navigation";
 import { frameLineCategories, frameLineSubcategories } from "../tryon/model";
@@ -25,6 +25,7 @@ import "./material-admin.css";
 
 type SourceAsset = { url: string; name: string };
 type AdminMaterialKind = "frame" | "mat";
+type UploadKind = "cover" | "front" | "side" | "profile" | "mat";
 
 const emptyAsset = (): SourceAsset => ({ url: "", name: "尚未上传" });
 
@@ -191,8 +192,38 @@ async function readUpload(file: File) {
   }
 }
 
-function Field({ label, value, unit, onChange, min = 0, step = 1 }: { label: string; value: number; unit: string; onChange: (value: number) => void; min?: number; step?: number }) {
-  return <label className="material-number-field"><span>{label}</span><div><input type="number" min={min} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} /><small>{unit}</small></div></label>;
+function Field({ label, value, unit, onChange, min = 0, max, step = 1 }: { label: string; value: number; unit: string; onChange: (value: number) => void; min?: number; max?: number; step?: number }) {
+  return <label className="material-number-field"><span>{label}</span><div><input type="number" min={min} max={max} step={step} value={value} onChange={(event) => onChange(Number(event.target.value))} /><small>{unit}</small></div></label>;
+}
+
+function blobToDataUrl(blob: Blob) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function portableAsset(url: string) {
+  if (url.startsWith("data:")) return url;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`资源读取失败：${response.status}`);
+  return blobToDataUrl(await response.blob());
+}
+
+async function portableFrameRecord(record: ManagedFrameRecord): Promise<ManagedFrameRecord> {
+  const [coverImage, frontTexture, sideTexture, profileReference, top, right, bottom, left, heightTop, heightRight, heightBottom, heightLeft] = await Promise.all([
+    portableAsset(record.sources.coverImage), portableAsset(record.sources.frontTexture), portableAsset(record.sources.sideTexture), portableAsset(record.sources.profileReference),
+    portableAsset(record.website.railTextures.top), portableAsset(record.website.railTextures.right), portableAsset(record.website.railTextures.bottom), portableAsset(record.website.railTextures.left),
+    portableAsset(record.website.heightTextures.top), portableAsset(record.website.heightTextures.right), portableAsset(record.website.heightTextures.bottom), portableAsset(record.website.heightTextures.left),
+  ]);
+  return { ...record, sources: { coverImage, frontTexture, sideTexture, profileReference }, website: { ...record.website, railTextures: { top, right, bottom, left }, heightTextures: { top: heightTop, right: heightRight, bottom: heightBottom, left: heightLeft } } };
+}
+
+async function portableMatRecord(record: ManagedMatRecord): Promise<ManagedMatRecord> {
+  const frontTexture = await portableAsset(record.sources.frontTexture);
+  return { ...record, sources: { frontTexture }, website: { ...record.website, faceTexture: frontTexture } };
 }
 
 function createFrameDraft(existingSkus: string[] = []): MaterialDraft {
@@ -217,10 +248,13 @@ export default function MaterialAdminPage() {
   const [selectedFrameId, setSelectedFrameId] = useState<string | null>(null);
   const [selectedMatId, setSelectedMatId] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const draftGeneration = useRef(0);
+  const uploadSequences = useRef<Record<UploadKind, number>>({ cover: 0, front: 0, side: 0, profile: 0, mat: 0 });
   const [notice, setNotice] = useState("请选择左侧已发布材料进行编辑，或新建一条真实材料记录");
   const catalogCount = adminKind === "frame" ? managed.length : managedMats.length;
-  const selectedFrame = managed.find((record) => record.id === selectedFrameId) ?? managed[0] ?? null;
-  const selectedMat = managedMats.find((record) => record.id === selectedMatId) ?? managedMats[0] ?? null;
+  const selectedFrame = managed.find((record) => record.id === selectedFrameId) ?? null;
+  const selectedMat = managedMats.find((record) => record.id === selectedMatId) ?? null;
   const miniProjection = useMemo(() => selectedFrame ? toMiniProgramProjection(selectedFrame) : null, [selectedFrame]);
   const miniMatProjection = useMemo(() => selectedMat ? toMiniProgramMatProjection(selectedMat) : null, [selectedMat]);
 
@@ -235,6 +269,7 @@ export default function MaterialAdminPage() {
   const updateLineCategory = (lineCategory: MaterialDraft["lineCategory"]) => setDraft((current) => ({ ...current, lineCategory, lineSubcategory: frameLineSubcategories[lineCategory][0] }));
 
   const selectFrameRecord = (record: ManagedFrameRecord) => {
+    draftGeneration.current += 1;
     setSelectedFrameId(record.id);
     setDraft({
       name: record.name,
@@ -262,6 +297,7 @@ export default function MaterialAdminPage() {
   };
 
   const selectMatRecord = (record: ManagedMatRecord) => {
+    draftGeneration.current += 1;
     setSelectedMatId(record.id);
     setMatDraft({ name: record.name, sku: record.sku, color: record.color, thicknessMm: record.thicknessMm, defaultTopBottomMm: record.defaultTopBottomMm, defaultLeftRightMm: record.defaultLeftRightMm });
     setMatFront({ url: record.sources.frontTexture, name: `${record.sku}-front` });
@@ -269,6 +305,7 @@ export default function MaterialAdminPage() {
   };
 
   const newMaterial = () => {
+    draftGeneration.current += 1;
     setSelectedFrameId(null);
     setDraft(createFrameDraft(managed.map((record) => record.sku)));
     setCover(emptyAsset());
@@ -280,6 +317,7 @@ export default function MaterialAdminPage() {
   };
 
   const newMat = () => {
+    draftGeneration.current += 1;
     setSelectedMatId(null);
     setMatDraft(createMatDraft(managedMats.map((record) => record.sku)));
     setMatFront(emptyAsset());
@@ -289,36 +327,47 @@ export default function MaterialAdminPage() {
 
   const selectFile = async (file: File | undefined, kind: "cover" | "front" | "side" | "profile") => {
     if (!file) return;
+    const generation = draftGeneration.current;
+    const sequence = ++uploadSequences.current[kind];
     const kindLabel = kind === "cover" ? "封面展示图" : kind === "front" ? "正面纹理" : kind === "side" ? "侧面纹理" : "截面轮廓";
     setNotice(`正在整理${kindLabel}…`);
     try {
       const url = await readUpload(file);
+      if (generation !== draftGeneration.current || sequence !== uploadSequences.current[kind]) return;
       const asset = { url, name: file.name };
       if (kind === "cover") setCover(asset); else if (kind === "front") setFront(asset); else if (kind === "side") setSide(asset); else setProfile(asset);
       setNotice(`${file.name} 已读取，原图已压缩为发布尺寸`);
     } catch {
+      if (generation !== draftGeneration.current || sequence !== uploadSequences.current[kind]) return;
       setNotice("图片读取失败，请换一张 JPG、PNG 或 WebP");
     }
   };
 
   const selectMatFile = async (file: File | undefined) => {
     if (!file) return;
+    const generation = draftGeneration.current;
+    const sequence = ++uploadSequences.current.mat;
     setNotice("正在整理卡纸正面纹理并识别基础色…");
     try {
       const url = await readUpload(file);
+      if (generation !== draftGeneration.current || sequence !== uploadSequences.current.mat) return;
       const asset = { url, name: file.name };
       setMatFront(asset);
       const image = await loadImage(url);
+      if (generation !== draftGeneration.current || sequence !== uploadSequences.current.mat) return;
       updateMat("color", rgbToHex(averageImageColor(image)));
       setNotice(`${file.name} 已读取，基础色已在浏览器本地自动识别`);
     } catch {
+      if (generation !== draftGeneration.current || sequence !== uploadSequences.current.mat) return;
       setNotice("图片读取失败，请换一张 JPG、PNG 或 WebP");
     }
   };
 
   const publish = async () => {
-    if (!draft.name.trim() || !cover.url || !front.url || !side.url || !profile.url || draft.pricePerMeter <= 0 || draft.widthMm <= 0 || draft.depthMm <= 0 || draft.sideWidthMm <= 0) {
-      setNotice("请补全名称、价格、尺寸，并上传封面图、正面纹理、侧面纹理和截面轮廓图");
+    const generation = draftGeneration.current;
+    const geometryInvalid = draft.widthMm <= 0 || draft.depthMm <= 0 || draft.sideWidthMm <= 0 || draft.sideWidthMm > draft.depthMm || draft.innerLipMm < 0 || draft.innerLipMm >= draft.widthMm || draft.bevelMm < 0 || draft.bevelMm > draft.widthMm / 2 || draft.profileReliefMm > draft.depthMm;
+    if (!draft.name.trim() || !cover.url || !front.url || !side.url || !profile.url || draft.pricePerMeter <= 0 || geometryInvalid) {
+      setNotice("请补全必填项；侧显宽不得大于框深，内沿须小于框宽，倒角不得超过框宽一半，型面起伏不得超过框深");
       return;
     }
     setProcessing(true);
@@ -358,8 +407,10 @@ export default function MaterialAdminPage() {
         updatedAt: new Date().toISOString(),
       };
       setManaged(await saveManagedMaterial(record));
-      setSelectedFrameId(record.id);
-      setNotice(`“${record.name}”已发布：网页 PBR 与微信轻量数据均已就绪`);
+      if (generation === draftGeneration.current) {
+        setSelectedFrameId(record.id);
+        setNotice(`“${record.name}”已发布：网页 PBR 与微信轻量数据均已就绪`);
+      }
     } catch (error) {
       console.error(error);
       setNotice("生成失败，请检查图片格式后重试");
@@ -369,8 +420,9 @@ export default function MaterialAdminPage() {
   };
 
   const publishMat = async () => {
-    if (!matDraft.name.trim() || !matFront.url || matDraft.thicknessMm <= 0 || matDraft.defaultTopBottomMm <= 0 || matDraft.defaultLeftRightMm <= 0) {
-      setNotice("请补全卡纸名称、厚度、默认留边，并上传一张正面纹理图");
+    const generation = draftGeneration.current;
+    if (!matDraft.name.trim() || !matFront.url || matDraft.thicknessMm <= 0 || matDraft.defaultTopBottomMm <= 0 || matDraft.defaultTopBottomMm > 200 || matDraft.defaultLeftRightMm <= 0 || matDraft.defaultLeftRightMm > 200) {
+      setNotice("请补全卡纸名称、厚度和正面纹理；默认上下、左右留边须在 1–200 mm 内");
       return;
     }
     setProcessing(true);
@@ -392,8 +444,10 @@ export default function MaterialAdminPage() {
         updatedAt: new Date().toISOString(),
       };
       setManagedMats(await saveManagedMat(record));
-      setSelectedMatId(record.id);
-      setNotice(`“${record.name}”已发布：基础色和切边色均已由正面纹理自动生成`);
+      if (generation === draftGeneration.current) {
+        setSelectedMatId(record.id);
+        setNotice(`“${record.name}”已发布：基础色和切边色均已由正面纹理自动生成`);
+      }
     } catch (error) {
       console.error(error);
       setNotice("卡纸资源生成失败，请检查图片格式后重试");
@@ -402,18 +456,28 @@ export default function MaterialAdminPage() {
     }
   };
 
-  const downloadBundle = () => {
+  const downloadBundle = async () => {
     const record = adminKind === "frame" ? selectedFrame : selectedMat;
     if (!record) return setNotice(`请先生成一条${adminKind === "frame" ? "框料" : "卡纸"}记录`);
-    const bundle = adminKind === "frame"
-      ? { kind: "frame", canonical: selectedFrame, miniprogram: toMiniProgramProjection(selectedFrame!) }
-      : { kind: "mat", canonical: selectedMat, miniprogram: toMiniProgramMatProjection(selectedMat!) };
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" }));
-    link.download = `${record.sku}-渠道材料包.json`;
-    link.click();
-    URL.revokeObjectURL(link.href);
-    setNotice("渠道材料包已导出，可交给服务端或微信端同步任务");
+    setExporting(true);
+    setNotice("正在打包材料数据与图片资源…");
+    try {
+      const canonical = adminKind === "frame" ? await portableFrameRecord(selectedFrame!) : await portableMatRecord(selectedMat!);
+      const bundle = adminKind === "frame"
+        ? { kind: "frame", canonical, miniprogram: toMiniProgramProjection(canonical as ManagedFrameRecord) }
+        : { kind: "mat", canonical, miniprogram: toMiniProgramMatProjection(canonical as ManagedMatRecord) };
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" }));
+      link.download = `${record.sku}-渠道材料包.json`;
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      setNotice("渠道材料包已导出，图片资源已完整嵌入，可跨设备同步");
+    } catch (error) {
+      console.error(error);
+      setNotice("材料包导出失败，请重新载入当前材料后重试");
+    } finally {
+      setExporting(false);
+    }
   };
 
   return (
@@ -457,7 +521,7 @@ export default function MaterialAdminPage() {
           <section className="material-section">
             <div className="material-section-number">02</div><div className="material-section-title"><h3>录入物理参数</h3><p>尺寸由管理员按实物测量录入，官网和微信端共用同一份数据。</p></div>
             <div className="material-text-fields"><label><span>框料名称</span><input value={draft.name} onChange={(event) => update("name", event.target.value)} /></label><div className="material-generated-code"><span>材料编号 <em>系统生成</em></span><strong>{draft.sku}</strong><small>发布后保持不变</small></div><label><span>一级分类</span><select value={draft.lineCategory} onChange={(event) => updateLineCategory(event.target.value as MaterialDraft["lineCategory"])}>{frameLineCategories.map((category) => <option key={category}>{category}</option>)}</select></label><label><span>二级系列</span><select value={draft.lineSubcategory} onChange={(event) => update("lineSubcategory", event.target.value as MaterialDraft["lineSubcategory"])}>{frameLineSubcategories[draft.lineCategory].map((subcategory) => <option key={subcategory}>{subcategory}</option>)}</select></label><label><span>材质名称</span><input value={draft.materialLabel} onChange={(event) => update("materialLabel", event.target.value)} /></label><label><span>型面类型</span><select value={draft.profileType} onChange={(event) => update("profileType", event.target.value)}><option>平直微弧</option><option>平直</option><option>阶梯</option><option>欧式曲线</option></select></label></div>
-            <div className="material-number-grid"><Field label="框宽" value={draft.widthMm} unit="mm" onChange={(value) => update("widthMm", value)} /><Field label="实测框深" value={draft.depthMm} unit="mm" onChange={(value) => update("depthMm", value)} /><Field label="侧面显示宽度" value={draft.sideWidthMm} unit="mm" onChange={(value) => update("sideWidthMm", value)} /><Field label="内沿" value={draft.innerLipMm} unit="mm" onChange={(value) => update("innerLipMm", value)} /><Field label="倒角" value={draft.bevelMm} unit="mm" onChange={(value) => update("bevelMm", value)} /><Field label="框料单价" value={draft.pricePerMeter} unit="元/米" onChange={(value) => update("pricePerMeter", value)} /></div>
+            <div className="material-number-grid"><Field label="框宽" value={draft.widthMm} unit="mm" min={1} onChange={(value) => update("widthMm", value)} /><Field label="实测框深" value={draft.depthMm} unit="mm" min={1} onChange={(value) => update("depthMm", value)} /><Field label="侧面显示宽度" value={draft.sideWidthMm} unit="mm" min={1} max={draft.depthMm} onChange={(value) => update("sideWidthMm", value)} /><Field label="内沿" value={draft.innerLipMm} unit="mm" min={0} max={Math.max(0, draft.widthMm - 0.1)} step={0.1} onChange={(value) => update("innerLipMm", value)} /><Field label="倒角" value={draft.bevelMm} unit="mm" min={0} max={draft.widthMm / 2} step={0.1} onChange={(value) => update("bevelMm", value)} /><Field label="框料单价" value={draft.pricePerMeter} unit="元/米" min={0.01} step={0.01} onChange={(value) => update("pricePerMeter", value)} /></div>
           </section>
 
           <section className="material-section material-web-section">
@@ -478,7 +542,7 @@ export default function MaterialAdminPage() {
             <section className="material-section">
               <div className="material-section-number">02</div><div className="material-section-title"><h3>录入卡纸参数</h3><p>基础色由正面图自动识别。厚度控制真实层叠深度，默认留边只作为新方案初始值。</p></div>
               <div className="material-text-fields material-mat-text-fields"><label><span>卡纸名称</span><input value={matDraft.name} onChange={(event) => updateMat("name", event.target.value)} /></label><div className="material-generated-code"><span>材料编号 <em>系统生成</em></span><strong>{matDraft.sku}</strong><small>发布后保持不变</small></div><div className="material-detected-color"><span>自动识别色</span><i style={{ background: matDraft.color }} /><strong>{matDraft.color.toUpperCase()}</strong></div></div>
-              <div className="material-number-grid material-mat-number-grid"><Field label="实测厚度" value={matDraft.thicknessMm} unit="mm" min={0.1} step={0.1} onChange={(value) => updateMat("thicknessMm", value)} /><Field label="默认上下留边" value={matDraft.defaultTopBottomMm} unit="mm" min={1} onChange={(value) => updateMat("defaultTopBottomMm", value)} /><Field label="默认左右留边" value={matDraft.defaultLeftRightMm} unit="mm" min={1} onChange={(value) => updateMat("defaultLeftRightMm", value)} /></div>
+              <div className="material-number-grid material-mat-number-grid"><Field label="实测厚度" value={matDraft.thicknessMm} unit="mm" min={0.1} step={0.1} onChange={(value) => updateMat("thicknessMm", value)} /><Field label="默认上下留边" value={matDraft.defaultTopBottomMm} unit="mm" min={1} max={200} onChange={(value) => updateMat("defaultTopBottomMm", value)} /><Field label="默认左右留边" value={matDraft.defaultLeftRightMm} unit="mm" min={1} max={200} onChange={(value) => updateMat("defaultLeftRightMm", value)} /></div>
             </section>
           </>}
         </section>
@@ -497,7 +561,7 @@ export default function MaterialAdminPage() {
             <div className="material-pipeline"><span>发布流程</span><ol><li className={matFront.url ? "is-ready" : ""}>正面素材校验</li><li className={processing ? "is-working" : "is-ready"}>颜色与纹理生成</li><li className={managedMats[0] ? "is-ready" : ""}>卡纸记录发布</li></ol></div>
             <button type="button" className="material-publish-button" disabled={processing} onClick={() => void publishMat()}>{processing ? "正在识别并生成…" : "生成并发布卡纸"}</button>
           </>}
-          <button type="button" className="material-export-button" onClick={downloadBundle} disabled={adminKind === "frame" ? !miniProjection : !miniMatProjection}>导出当前渠道材料包</button>
+          <button type="button" className="material-export-button" onClick={() => void downloadBundle()} disabled={exporting || (adminKind === "frame" ? !miniProjection : !miniMatProjection)}>{exporting ? "正在打包图片资源…" : "导出当前渠道材料包"}</button>
           <button type="button" className="material-preview-button" onClick={goToTryOn}>去网页试装查看效果</button>
           <p className="material-notice" role="status">{notice}</p>
         </aside>

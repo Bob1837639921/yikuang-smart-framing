@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { normalizeDimensionInput } from "./dimension-input";
+import { MAX_ARTWORK_DIMENSION_CM, normalizeDimensionInput } from "./dimension-input";
 
 type ArtworkDimensionsProps = {
   widthCm: number;
@@ -25,7 +25,7 @@ export default function ArtworkDimensions({ widthCm, heightCm, onDimensionChange
       type="number"
       inputMode="decimal"
       min="1"
-      max="500"
+      max={MAX_ARTWORK_DIMENSION_CM}
       step="0.1"
       value={draft}
       onFocus={(event) => event.currentTarget.select()}
@@ -33,7 +33,7 @@ export default function ArtworkDimensions({ widthCm, heightCm, onDimensionChange
         const next = event.target.value;
         setDraft(next);
         const parsed = Number(next);
-        if (next.trim() && Number.isFinite(parsed) && parsed >= 1 && parsed <= 500) onDimensionChange(dimension, parsed);
+        if (next.trim() && Number.isFinite(parsed) && parsed >= 1 && parsed <= MAX_ARTWORK_DIMENSION_CM) onDimensionChange(dimension, parsed);
       }}
       onBlur={commit}
       onKeyDown={(event) => {
