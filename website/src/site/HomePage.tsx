@@ -25,7 +25,8 @@ function loadHanziStrokeData(character: string) {
   const cached = hanziStrokeCache.get(character);
   if (cached) return cached;
 
-  const request = fetch(`/assets/hero-strokes/${encodeURIComponent(character)}.json`).then((response) => {
+  const codePoint = character.codePointAt(0)?.toString(16);
+  const request = fetch(`/assets/hero-strokes/u${codePoint}.json`).then((response) => {
     if (!response.ok) throw new Error(`Unable to load stroke data for ${character}`);
     return response.json() as Promise<HanziStrokeData>;
   });
