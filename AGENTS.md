@@ -22,6 +22,7 @@ Before making substantial visual changes, use the Product Design plugin's `get-c
 
 ## Editing boundary and checks
 
+- Keep implementation componentized and free of duplicated behavior: page components should compose focused UI components, reusable domain logic belongs in dedicated modules or hooks, and repeated markup or async workflows must have one shared implementation. Avoid cosmetic one-line wrapper components that add indirection without ownership or reuse.
 - Build official website UI in `website/src/`; build native mini-program UI only in `miniprogram/`.
 - Keep the website entrypoint conventional React (`website/src/App.tsx`, `website/src/main.tsx`, and `website/src/site/`). It must not import device frames, simulated keyboards, or mini-program page flows.
 - The native mini-program assets and pages are independent from website assets. Do not reference `miniprogram/` files from website code or vice versa.
