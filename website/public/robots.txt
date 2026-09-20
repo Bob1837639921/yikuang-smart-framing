@@ -1,0 +1,13 @@
+User-agent: Baiduspider
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: *
+Allow: /
+
+Sitemap: https://zhenghao.novasolo.cloud/sitemap.xml
