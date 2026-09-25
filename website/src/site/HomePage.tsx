@@ -386,7 +386,7 @@ export default function HomePage() {
             </h1>
             <p className="home-hero-lede">正好书画社，以审美为尺，以手作为度。让每一幅作品，找到安放的气度与光。</p>
             <div className="home-hero-actions">
-              <button className="home-button home-button-primary" type="button" onClick={goToTryOn}>进入试装空间 <span aria-hidden="true">→</span></button>
+              <button className="home-button home-button-primary" type="button" onClick={goToTryOn}>进入试装空间（测试中） <span aria-hidden="true">→</span></button>
               <a className="home-text-link" href="#story">认识正好的故事 <span aria-hidden="true">↘</span></a>
             </div>
           </div>

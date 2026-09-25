@@ -86,7 +86,7 @@ export function StudioTryOn() {
   const [selectedId,setSelectedId]=useState("oak");
   const selected=samples.find(material=>material.id===selectedId)??samples[0];
   return <section className="paper-tryon" id="experience" aria-labelledby="experience-title">
-    <div className="paper-tryon-intro"><p className="paper-tryon-kicker">ZHENGHAO / TRY-ON</p><h2 id="experience-title">试装体验</h2><p className="paper-subtitle">上传作品，即刻预览装裱效果</p><button className="home-button home-button-dark" onClick={goToTryOn}>上传作品</button><p className="paper-tryon-note">按作品比例预览 · 自由搭配框与卡纸</p></div>
+    <div className="paper-tryon-intro"><p className="paper-tryon-kicker">ZHENGHAO / TRY-ON</p><h2 id="experience-title">试装体验</h2><p className="paper-subtitle">上传作品，即刻预览装裱效果</p><p className="paper-tryon-testing">功能测试中，预览与参考报价仅供体验，最终方案请以门店沟通为准。</p><button className="home-button home-button-dark" onClick={goToTryOn}>上传作品</button><p className="paper-tryon-note">按作品比例预览 · 自由搭配框与卡纸</p></div>
     <figure className="paper-tryon-art">
       <div className="paper-frame-preview">
         <img src="/assets/studio/paper-tryon-hd.webp" alt={`使用${selected.name}与米白卡纸装裱的水墨山水示意`} loading="lazy" decoding="async" width="1000" height="1000" draggable="false"/>
