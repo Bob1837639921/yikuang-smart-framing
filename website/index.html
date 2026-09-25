@@ -16,6 +16,23 @@
       content="正好书画社,杭州书画装裱,萧山书画装裱,杭州字画装裱,萧山字画装裱,国画装裱,书法装裱,字画装框,画框定制,卡纸装裱,在线装裱试装"
     />
     <meta name="theme-color" content="#f3eee4" />
+    <style>
+      .initial-site { min-height: 100vh; background: #f3eee4; color: #25221d; font-family: "Noto Serif SC", "Songti SC", serif; }
+      .initial-site * { box-sizing: border-box; }
+      .initial-site a { color: inherit; }
+      .initial-site-header { max-width: 1888px; margin: auto; padding: 24px clamp(24px, 5vw, 88px); display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+      .initial-site-header strong { font-size: 20px; letter-spacing: .18em; }
+      .initial-site-header nav { display: flex; flex-wrap: wrap; gap: 24px; font-size: 13px; }
+      .initial-site-hero { max-width: 1888px; min-height: min(760px, 86vh); margin: auto; padding: clamp(32px, 6vw, 100px) clamp(24px, 5vw, 88px); display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 6%; }
+      .initial-site-hero h1 { max-width: 8em; font-size: clamp(48px, 6vw, 112px); font-weight: 500; letter-spacing: .08em; line-height: 1.35; }
+      .initial-site-hero p { max-width: 27em; font-size: 16px; line-height: 2; }
+      .initial-site-hero img { display: block; width: 100%; max-height: 680px; object-fit: contain; }
+      .initial-site-sections { max-width: 1888px; margin: auto; padding: 24px clamp(24px, 5vw, 88px) 80px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
+      .initial-site-sections section { border-top: 1px solid #bdb3a5; padding-top: 24px; }
+      .initial-site-sections h2 { font-size: 25px; font-weight: 500; }
+      .initial-site-sections p { line-height: 1.9; }
+      @media (max-width: 720px) { .initial-site-header { display: block; } .initial-site-header nav { margin-top: 16px; gap: 12px; } .initial-site-hero { grid-template-columns: 1fr; min-height: auto; } .initial-site-hero h1 { font-size: clamp(42px, 12vw, 70px); } .initial-site-hero img { max-height: 460px; } .initial-site-sections { grid-template-columns: 1fr; } }
+    </style>
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="canonical" href="https://zhenghao.novasolo.cloud/" />
@@ -88,7 +105,24 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <main class="initial-site" id="top">
+        <header class="initial-site-header">
+          <strong>正好书画社</strong>
+          <nav aria-label="网站导航"><a href="#story">装裱工艺</a><a href="#materials">作品陈列</a><a href="#experience">在线试装</a><a href="#contact">关于我们</a></nav>
+        </header>
+        <section class="initial-site-hero" aria-labelledby="initial-title">
+          <div><h1 id="initial-title">给作品一个正好的归处</h1><p>正好书画社扎根杭州萧山近三十年，提供国画、书法与字画装裱、画框定制和卡纸搭配。以审美为尺，以手作为度，让每一幅作品找到安放的气度与光。</p><p><a href="#experience">上传作品，在线试装</a></p></div>
+          <img src="/assets/studio/paper-hero-hd.webp" width="1200" height="800" alt="正好书画社展出的木框水墨山水作品" />
+        </section>
+        <div class="initial-site-sections">
+          <section id="story"><h2>书画装裱工艺</h2><p>从作品检查、框料与卡纸搭配，到托画、封装和上墙检查，正好书画社用细致工序保护作品，呈现适合它的装裱效果。</p></section>
+          <section id="materials"><h2>书法与国画作品陈列</h2><p>浏览已完成装裱的书法、篆书、扇面和水墨作品，了解不同画框、卡纸和尺寸的搭配。</p></section>
+          <section id="experience"><h2>在线装裱试装</h2><p>上传自己的作品，按实际比例预览装框与上墙效果，选择框料和卡纸，再决定适合的方案。</p><p><a href="#try-on">进入试装空间</a></p></section>
+          <section id="contact"><h2>杭州萧山正好书画社</h2><p>地址：杭州市萧山区文化路158号。提供书画装裱、字画装框和画框定制服务。</p></section>
+        </div>
+      </main>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
