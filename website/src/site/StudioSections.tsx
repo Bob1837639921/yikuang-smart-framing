@@ -76,7 +76,7 @@ export function CraftStory() {
       </div>
       <div className="paper-craft-content"><h2 id="story-title">装裱工艺</h2><p className="paper-subtitle">五步匠心，成就一幅好作品</p><div className="paper-process" role="tablist" aria-label="装裱的五道工序" aria-orientation="vertical">
         {stages.map((item,index)=><button ref={node=>{tabRefs.current[index]=node;}} id={`craft-tab-${index}`} key={item.name} role="tab" aria-selected={active===index} aria-controls="craft-panel" tabIndex={active===index?0:-1} onPointerEnter={()=>{void preloadStageImage(item.image);}} onFocus={()=>{void preloadStageImage(item.image);}} onClick={()=>setActive(index)} onKeyDown={event=>selectWithKeyboard(event,index)}><span>{String(index+1).padStart(2,"0")}</span><strong>{item.name}</strong><small>{item.summary}</small></button>)}
-      </div><p className="paper-process-description" key={active}>{stage.copy}</p></div>
+      </div><p className="paper-process-description" key={active}>{stage.copy}</p><a className="paper-craft-service-link" href="/guohua-zhuangbiao/">了解国画装裱与裱画服务 <span aria-hidden="true">→</span></a></div>
     </div>
   </section>;
 }
