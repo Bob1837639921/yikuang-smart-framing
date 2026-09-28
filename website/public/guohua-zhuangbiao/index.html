@@ -50,6 +50,13 @@
     .steps article { border-top:1px solid #aaa195; padding-top:16px; }
     .steps span { display:block; margin-bottom:18px; color:var(--red); font:600 11px Arial,sans-serif; }
     .steps h3 { font-size:19px; }
+    .case-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:22px; margin-top:42px; }
+    .case-card { margin:0; padding:18px 18px 24px; background:#faf8f3; }
+    .case-card img { display:block; width:100%; height:230px; object-fit:contain; }
+    .case-card figcaption { margin:20px 4px 0; }
+    .case-card strong { display:block; color:var(--ink); font-size:17px; font-weight:500; }
+    .case-card span { display:block; margin-top:8px; line-height:1.8; }
+    .case-more { display:inline-block; margin-top:26px; }
     .faq { display:grid; grid-template-columns:230px 1fr; gap:60px; }
     .faq-list { display:grid; gap:23px; }
     .faq article { padding-bottom:22px; border-bottom:1px solid var(--line); }
@@ -57,7 +64,7 @@
     .visit p { max-width:680px; color:var(--muted); font-size:14px; }
     .visit a[href^="tel"] { color:var(--ink); text-decoration:none; }
     footer { display:flex; justify-content:space-between; gap:20px; padding:28px 0 42px; border-top:1px solid var(--line); color:var(--muted); font-size:12px; }
-    @media(max-width:760px) { .site-header{min-height:75px}.site-header nav{gap:14px}.hero{grid-template-columns:1fr;padding-block:48px 62px}.hero figure{margin-top:12px}.hero h1{font-size:clamp(38px,10vw,60px)}.section{padding-block:52px}.section-heading,.faq{grid-template-columns:1fr;gap:20px}.services{grid-template-columns:1fr;gap:13px;margin-top:30px}.steps{grid-template-columns:1fr 1fr;gap:25px}.visit{grid-template-columns:1fr} }
+    @media(max-width:760px) { .site-header{min-height:75px}.site-header nav{gap:14px}.hero{grid-template-columns:1fr;padding-block:48px 62px}.hero figure{margin-top:12px}.hero h1{font-size:clamp(38px,10vw,60px)}.section{padding-block:52px}.section-heading,.faq{grid-template-columns:1fr;gap:20px}.services,.case-grid{grid-template-columns:1fr;gap:13px;margin-top:30px}.case-card img{height:210px}.steps{grid-template-columns:1fr 1fr;gap:25px}.visit{grid-template-columns:1fr} }
     @media(max-width:470px) { .wrap{width:min(100% - 32px,1160px)}.brand strong{font-size:14px}.site-header nav a:first-child{display:none}.steps{grid-template-columns:1fr}footer{display:block} }
     @media(prefers-reduced-motion:reduce) { html{scroll-behavior:auto} }
   </style>
@@ -80,7 +87,8 @@
       <div class="services"><article><h3>国画与水墨</h3><p>山水、花鸟等画作重视画面呼吸感。框色、卡纸开窗与留白比例应与画心尺寸、墨色和计划悬挂的位置一起考虑。</p></article><article><h3>书法与字画</h3><p>横幅、竖幅或斗方的比例差异很大。先测量画心，再确认外框宽度、背板和挂件，避免让边框压过笔墨。</p></article><article><h3>扇面与异形作品</h3><p>扇面、册页或不规则纸本需要单独考虑窗口形状与固定位置，让作品边缘清晰可见，并留出合适的间隔。</p></article></div>
     </section>
     <section class="section process" aria-labelledby="process-title"><div class="wrap"><div class="section-heading"><p class="eyebrow">02 / 装裱流程</p><div><h2 id="process-title">从检查原作，到复检上墙。</h2><p class="intro">以下是沟通装裱方案时会考虑的五个环节。托画等操作并非每幅作品都需要，具体材料与步骤以实物检查后的方案为准。</p></div></div><div class="steps"><article><span>01</span><h3>检查</h3><p>观察纸面、边缘、颜料和旧装裱状态，记录尺寸与保存需求。</p></article><article><span>02</span><h3>搭配</h3><p>比较框线、卡纸和留白，让外框比例与作品、陈列空间协调。</p></article><article><span>03</span><h3>托画</h3><p>需要承托的作品可评估覆托纸、上板绷平及阴干；不对所有作品套用同一工序。</p></article><article><span>04</span><h3>封装</h3><p>根据方案装入面板、作品和背板，并检查固定件与挂装结构。</p></article><article><span>05</span><h3>上墙</h3><p>复检平整度、框角与承重，并考虑日照、潮湿和悬挂位置。</p></article></div></div></section>
-    <section class="section wrap faq" aria-labelledby="questions-title"><div><p class="eyebrow">03 / 常见问题</p><h2 id="questions-title">装裱前，先聊清楚。</h2></div><div class="faq-list"><article><h3>已有画心，还没确定尺寸，可以先咨询吗？</h3><p>可以带作品到店检查和测量。画心尺寸、留白、框料宽度以及是否需要托画，会共同影响最终外尺寸。</p></article><article><h3>在线试装能直接确定成品效果和价格吗？</h3><p>网站试装功能仍在测试中，可用来比较框料与卡纸搭配。预览及参考报价仅供体验，最终方案和费用请以门店检查、沟通为准。</p></article><article><h3>旧画或受潮作品能直接装框吗？</h3><p>建议先检查纸张、颜料、旧胶和潮湿情况。是否适合托画、换装或进一步修复，需要依作品实际状态判断。</p></article></div></section>
+    <section class="section wrap" aria-labelledby="cases-title"><div class="section-heading"><p class="eyebrow">03 / 完成作品</p><div><h2 id="cases-title">看真实作品如何安放。</h2><p class="intro">同样是纸本作品，幅面、笔墨密度和留白都不同。以下装裱案例来自正好书画社的作品陈列；框料与卡纸的选择随作品而定，不是一套固定模板。</p></div></div><div class="case-grid"><figure class="case-card"><img src="/assets/cases/cutouts/work-06-mountain-exact.webp" alt="水墨山水作品采用浅木色窄框与白色卡纸装裱" width="1280" height="960" loading="lazy" decoding="async" /><figcaption><strong>山河入画 · 水墨山水</strong><span>浅木色窄框退到画面之外，白色卡纸延伸山势的节奏，让细密线条与墨色保持呼吸感。</span></figcaption></figure><figure class="case-card"><img src="/assets/cases/cutouts/work-02-seal-script.webp" alt="篆书作品采用棕红色圆弧框与米白卡纸装裱" width="1179" height="812" loading="lazy" decoding="async" /><figcaption><strong>篆书作品 · 书法方幅</strong><span>棕红色圆弧框和较宽的米白留白，缓和篆书的结构密度，也让远观时的字形更清楚。</span></figcaption></figure><figure class="case-card"><img src="/assets/cases/cutouts/work-03-fan.webp" alt="扇面作品采用深棕色框与白色卡纸装裱" width="1280" height="706" loading="lazy" decoding="async" /><figcaption><strong>扇面雅集 · 扇面作品</strong><span>顺着扇面的弧线安排开窗与留白，深棕色外框收住画面的静气，使作品轮廓完整可见。</span></figcaption></figure></div><a class="text-link case-more" href="/#materials">查看完整作品陈列 →</a></section>
+    <section class="section wrap faq" aria-labelledby="questions-title"><div><p class="eyebrow">04 / 常见问题</p><h2 id="questions-title">装裱前，先聊清楚。</h2></div><div class="faq-list"><article><h3>已有画心，还没确定尺寸，可以先咨询吗？</h3><p>可以带作品到店检查和测量。画心尺寸、留白、框料宽度以及是否需要托画，会共同影响最终外尺寸。</p></article><article><h3>在线试装能直接确定成品效果和价格吗？</h3><p>网站试装功能仍在测试中，可用来比较框料与卡纸搭配。预览及参考报价仅供体验，最终方案和费用请以门店检查、沟通为准。</p></article><article><h3>旧画或受潮作品能直接装框吗？</h3><p>建议先检查纸张、颜料、旧胶和潮湿情况。是否适合托画、换装或进一步修复，需要依作品实际状态判断。</p></article></div></section>
     <section class="visit wrap" aria-labelledby="visit-title"><div><p class="eyebrow">ZHENGHAO / VISIT</p><h2 id="visit-title">带上作品，到店看看。</h2><p>门店地址：杭州市萧山区文化路158号<br />营业时间：09:00—18:00 · 电话：<a href="tel:13588255891">135 8825 5891</a></p></div><a class="button" href="https://uri.amap.com/search?keyword=%E6%9D%AD%E5%B7%9E%E5%B8%82%E8%90%A7%E5%B1%B1%E5%8C%BA%E6%96%87%E5%8C%96%E8%B7%AF158%E5%8F%B7&city=%E6%9D%AD%E5%B7%9E%E5%B8%82&view=map&src=zhenghao-shuhuashe&callnative=1" target="_blank" rel="noopener noreferrer">查看门店路线</a></section>
   </main>
   <footer class="wrap"><span>© 2026 正好书画社 · 杭州萧山</span><a href="/">返回官网首页</a></footer>
