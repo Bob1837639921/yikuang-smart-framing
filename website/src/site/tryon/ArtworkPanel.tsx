@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { repairLevels, type RepairLevel, type RepairStatus } from "./dewrinkle";
 
 type ArtworkPanelProps = {
+  inactive?: boolean;
   artworkUrl: string;
   originalArtworkUrl: string;
   artworkName: string;
@@ -15,7 +16,7 @@ type ArtworkPanelProps = {
   onRepairLevelChange: (level: RepairLevel) => void;
 };
 
-export default function ArtworkPanel({ artworkUrl, originalArtworkUrl, artworkName, repairLevel, repairStatus, repairError, uploadStatus, uploadError, onArtworkChange, onDemoArtworkChange, onRepairLevelChange }: ArtworkPanelProps) {
+export default function ArtworkPanel({ inactive, artworkUrl, originalArtworkUrl, artworkName, repairLevel, repairStatus, repairError, uploadStatus, uploadError, onArtworkChange, onDemoArtworkChange, onRepairLevelChange }: ArtworkPanelProps) {
   const acceptFile = (file?: File) => {
     if (file) void onArtworkChange(file);
   };
@@ -32,7 +33,7 @@ export default function ArtworkPanel({ artworkUrl, originalArtworkUrl, artworkNa
   };
 
   return (
-    <aside className="try-panel try-artwork-panel" aria-label="作品设置">
+    <aside inert={inactive} className="try-panel try-artwork-panel" aria-label="作品设置">
       <div className="try-panel-heading"><span>01</span><div><h2>作品</h2><p>先还原作品的真实比例</p></div></div>
       <label className={`try-upload${uploadStatus === "processing" ? " is-processing" : ""}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); acceptFile(event.dataTransfer.files[0]); }}>
         <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => { acceptFile(event.target.files?.[0]); event.currentTarget.value = ""; }} />

@@ -6,6 +6,7 @@ import { fuzzyFilter } from "./fuzzy-search";
 export type ControlTab = "frame" | "mat" | "scene";
 
 type FramingControlsProps = {
+  inactive?: boolean;
   tab: ControlTab;
   onTabChange: (tab: ControlTab) => void;
   frame: FrameMaterial;
@@ -81,7 +82,7 @@ export default function FramingControls(props: FramingControlsProps) {
   };
 
   return (
-    <aside className="try-panel try-control-panel" aria-label="装裱设置">
+    <aside inert={props.inactive} className="try-panel try-control-panel" aria-label="装裱设置">
       <div className="try-panel-heading"><span>02</span><div><h2>装裱</h2><p>每一次选择都会立即呈现</p></div></div>
       <ArtworkDimensions widthCm={props.widthCm} heightCm={props.heightCm} onDimensionChange={props.onDimensionChange} />
       <div className="try-control-tabs" role="tablist" aria-label="装裱设置分类">
@@ -108,8 +109,8 @@ export default function FramingControls(props: FramingControlsProps) {
 
         {props.tab === "mat" && (
           <div className="try-mat-controls" role="tabpanel">
-            <div className="try-toggle-row"><span><strong>使用卡纸</strong><small>卡纸材质与层数不影响报价</small></span><button type="button" className={props.matEnabled ? "try-switch is-on" : "try-switch"} role="switch" aria-checked={props.matEnabled} onClick={() => props.onMatEnabledChange(!props.matEnabled)}><span /></button></div>
-            <div className={props.matEnabled ? "try-mat-workbench" : "try-mat-workbench is-disabled"}>
+            <div className="try-toggle-row"><span><strong>使用卡纸</strong><small>卡纸不另收费，留边影响框料用量</small></span><button type="button" aria-label="使用卡纸" className={props.matEnabled ? "try-switch is-on" : "try-switch"} role="switch" aria-checked={props.matEnabled} onClick={() => props.onMatEnabledChange(!props.matEnabled)}><span /></button></div>
+            <div inert={!props.matEnabled} className={props.matEnabled ? "try-mat-workbench" : "try-mat-workbench is-disabled"}>
               <div className="try-mat-layer-tools">
                 <div className="try-layer-tabs">
                   {props.matLayers.map((layer, index) => <button type="button" className={index === props.activeLayerIndex ? "is-active" : ""} key={layer.id} onClick={() => props.onActiveLayerChange(index)}>第{index + 1}层 <small>上下 {layer.topBottomMm} · 左右 {layer.leftRightMm}mm</small></button>)}

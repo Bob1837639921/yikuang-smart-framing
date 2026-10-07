@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MAX_ARTWORK_DIMENSION_CM, normalizeDimensionInput } from "./dimension-input";
 
 type ArtworkDimensionsProps = {
@@ -10,13 +10,15 @@ type ArtworkDimensionsProps = {
 export default function ArtworkDimensions({ widthCm, heightCm, onDimensionChange }: ArtworkDimensionsProps) {
   const [widthDraft, setWidthDraft] = useState(String(widthCm));
   const [heightDraft, setHeightDraft] = useState(String(heightCm));
+  const cancelled = useRef(false);
 
   useEffect(() => setWidthDraft(String(widthCm)), [widthCm]);
   useEffect(() => setHeightDraft(String(heightCm)), [heightCm]);
 
   const dimensionInput = (dimension: "width" | "height", draft: string, fallback: number, setDraft: (value: string) => void) => {
-    const commit = () => {
-      const value = normalizeDimensionInput(draft, fallback);
+    const commit = (event: React.FocusEvent<HTMLInputElement>) => {
+      if (cancelled.current) { cancelled.current = false; return; }
+      const value = normalizeDimensionInput(event.currentTarget.value, fallback);
       setDraft(String(value));
       onDimensionChange(dimension, value);
     };
@@ -39,6 +41,7 @@ export default function ArtworkDimensions({ widthCm, heightCm, onDimensionChange
       onKeyDown={(event) => {
         if (event.key === "Enter") event.currentTarget.blur();
         if (event.key === "Escape") {
+          cancelled.current = true;
           setDraft(String(fallback));
           event.currentTarget.blur();
         }

@@ -8,8 +8,9 @@ import { dimensionsForAspect, prepareArtworkUpload } from "./artwork-upload";
 import { processArtwork, type RepairLevel, type RepairStatus } from "./dewrinkle";
 import FramePreview from "./FramePreview";
 import FramingControls, { type ControlTab } from "./FramingControls";
-import { calculateQuote, defaultMatLayers, frameMaterials, matMaterials, sceneOptions, type MatLayer, type SceneId } from "./model";
+import { calculateQuote, removeMatLayer, defaultMatLayers, frameMaterials, matMaterials, sceneOptions, type MatLayer, type SceneId } from "./model";
 import "./tryon.css";
+import { loadFramingPlan, storeFramingPlan, type SavedFramingPlan } from "./plan-storage";
 
 const SAMPLE_ARTWORK = "/assets/tryon/sample-ink.jpg";
 const SAMPLE_WRINKLED_ARTWORK = "/assets/tryon/sample-ink-wrinkled-demo.png";
@@ -38,9 +39,11 @@ export default function TryOnPage() {
   const [uploadStatus, setUploadStatus] = useState<"idle" | "processing" | "error">("idle");
   const [uploadError, setUploadError] = useState("");
   const uploadSequence = useRef(0);
+  const draftReady = useRef(false);
+  const [saving, setSaving] = useState(false);
   const previewCenterRef = useRef<HTMLDivElement>(null);
   const [isPreviewFullscreen, setIsPreviewFullscreen] = useState(false);
-  const quote = useMemo(() => calculateQuote(widthCm, heightCm, frame), [frame, heightCm, widthCm]);
+  const quote = useMemo(() => calculateQuote(widthCm, heightCm, frame, matEnabled ? matLayers : []), [frame, heightCm, widthCm, matEnabled, matLayers]);
 
   useEffect(() => () => { if (originalArtworkUrl.startsWith("blob:")) URL.revokeObjectURL(originalArtworkUrl); }, [originalArtworkUrl]);
   useEffect(() => () => { if (artworkUrl.startsWith("blob:") && artworkUrl !== originalArtworkUrl) URL.revokeObjectURL(artworkUrl); }, [artworkUrl, originalArtworkUrl]);
@@ -73,21 +76,55 @@ export default function TryOnPage() {
   }, [artworkSource, originalArtworkUrl, repairLevel]);
   useEffect(() => {
     let active = true;
-    void Promise.all([getPublishedWebsiteFrames(), getPublishedWebsiteMats()]).then(([frames, mats]) => {
+    void Promise.all([getPublishedWebsiteFrames(), getPublishedWebsiteMats(), loadFramingPlan().catch(() => null)]).then(([frames, mats, saved]) => {
       if (!active) return;
       setAvailableFrames(frames);
       setAvailableMats(mats);
-      if (frames[0]) setFrame(frames[0]);
+      if (saved && !draftReady.current) {
+        const restoredFrame = frames.find(item => item.id === saved.frameId);
+        const preview = saved.artworkPreview instanceof Blob ? URL.createObjectURL(saved.artworkPreview) : saved.artworkPreview;
+        setOriginalArtworkUrl(preview);
+        setArtworkUrl(preview);
+        setArtworkSource(saved.artworkSource);
+        setArtworkName(saved.artworkName);
+        setWidthCm(saved.widthCm);
+        setHeightCm(saved.heightCm);
+        setFrame(restoredFrame ?? frames[0] ?? frameMaterials[0]);
+        setMatEnabled(saved.matEnabled);
+        setMatLayers(saved.matLayers.map(layer => ({ ...layer, materialId: mats.some(m => m.id === layer.materialId) ? layer.materialId : (mats[0]?.id ?? "ivory") })));
+        setRepairLevel(saved.repairLevel);
+        setScene(saved.scene);
+        setBrightness(saved.brightness);
+        showNotice(restoredFrame ? "已恢复上次保存的方案" : "已恢复方案，原框料已下架，请重新选择");
+      } else {
+        setFrame(current => frames.find(item => item.id === current.id) ?? frames[0] ?? current);
+        setMatLayers(current => current.map(layer => ({ ...layer, materialId: mats.some(m => m.id === layer.materialId) ? layer.materialId : (mats[0]?.id ?? "ivory") })));
+      }
+      draftReady.current = true;
+    }).catch(() => {
+      draftReady.current = true;
+      if (active) showNotice("材质库暂不可用，当前使用演示材质");
     });
     return () => { active = false; };
   }, []);
   useEffect(() => {
     const syncFullscreenState = () => setIsPreviewFullscreen(document.fullscreenElement === previewCenterRef.current);
+    const exitExpandedPreview = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      if (document.fullscreenElement === previewCenterRef.current) {
+        void document.exitFullscreen().catch(() => setIsPreviewFullscreen(false));
+      } else setIsPreviewFullscreen(false);
+    };
     document.addEventListener("fullscreenchange", syncFullscreenState);
-    return () => document.removeEventListener("fullscreenchange", syncFullscreenState);
+    document.addEventListener("keydown", exitExpandedPreview);
+    return () => {
+      document.removeEventListener("fullscreenchange", syncFullscreenState);
+      document.removeEventListener("keydown", exitExpandedPreview);
+    };
   }, []);
 
   const changeArtwork = async (file: File) => {
+    draftReady.current = true;
     const sequence = ++uploadSequence.current;
     setUploadStatus("processing");
     setUploadError("");
@@ -115,6 +152,7 @@ export default function TryOnPage() {
   };
 
   const loadWrinkleDemo = () => {
+    draftReady.current = true;
     uploadSequence.current += 1;
     setOriginalArtworkUrl(SAMPLE_WRINKLED_ARTWORK);
     setArtworkSource(SAMPLE_WRINKLED_ARTWORK);
@@ -131,12 +169,26 @@ export default function TryOnPage() {
   };
 
   const togglePreviewFullscreen = async () => {
-    if (document.fullscreenElement === previewCenterRef.current) await document.exitFullscreen();
-    else await previewCenterRef.current?.requestFullscreen();
+    try {
+      if (document.fullscreenElement === previewCenterRef.current) await document.exitFullscreen();
+      else if (isPreviewFullscreen) setIsPreviewFullscreen(false);
+      else if (previewCenterRef.current?.requestFullscreen) await previewCenterRef.current?.requestFullscreen();
+      else setIsPreviewFullscreen(true);
+    } catch { setIsPreviewFullscreen(true); }
   };
 
-  const plan = { artworkName, widthCm, heightCm, frame: frame.name, framePricePerMeter: frame.pricePerMeter, matEnabled, matLayers, repairLevel, quote: quote.total };
-  const savePlan = () => { localStorage.setItem("zhenghao-framing-plan", JSON.stringify(plan)); showNotice("方案已保存在当前浏览器"); };
+  const plan = { artworkName, widthCm, heightCm, frameId: frame.id, frame: frame.name, framePricePerMeter: frame.pricePerMeter, matEnabled, matLayers, repairLevel, scene, brightness, railMeters: quote.railMeters, quote: quote.total };
+  const savePlan = async () => {
+    if (saving || uploadStatus === "processing") return;
+    setSaving(true);
+    try {
+      const artworkPreview = originalArtworkUrl.startsWith("blob:") ? await (await fetch(originalArtworkUrl)).blob() : originalArtworkUrl;
+      const saved: SavedFramingPlan = { ...plan, version: 1, artworkSource, artworkPreview };
+      await storeFramingPlan(saved);
+      showNotice("作品与方案已保存在当前浏览器，刷新可恢复");
+    } catch { showNotice("保存失败，浏览器存储不可用或空间不足，请导出方案"); }
+    finally { setSaving(false); }
+  };
   const exportPlan = () => {
     const blob = new Blob([JSON.stringify(plan, null, 2)], { type: "application/json" });
     const link = document.createElement("a");
@@ -148,13 +200,13 @@ export default function TryOnPage() {
   };
 
   return (
-    <div className="try-page">
-      <header className="try-header"><button type="button" className="try-brand" onClick={() => goHome("top")}><BrandMark /><span><strong>正好书画社</strong><small>一框智能装裱</small></span></button><div className="try-header-center"><span>网页试装空间</span><small>所有调整均为实时预览</small></div><div className="try-header-actions"><button type="button" onClick={exportPlan}>导出方案</button><button type="button" className="is-primary" onClick={savePlan}>保存方案</button></div></header>
+    <div className="try-page" onPointerDownCapture={() => { draftReady.current = true; }} onKeyDownCapture={() => { draftReady.current = true; }}>
+      <header inert={isPreviewFullscreen} className="try-header"><button type="button" className="try-brand" onClick={() => goHome("top")}><BrandMark /><span><strong>正好书画社</strong><small>一框智能装裱</small></span></button><div className="try-header-center"><span>网页试装空间</span><small>所有调整均为实时预览</small></div><div className="try-header-actions"><button type="button" onClick={exportPlan}>导出方案</button><button type="button" className="is-primary" disabled={saving || uploadStatus === "processing"} onClick={() => void savePlan()}>{saving ? "正在保存…" : "保存方案"}</button></div></header>
       <p className="try-testing-notice"><strong>功能测试中</strong><span>预览效果与参考报价仅供体验，最终装裱方案请以门店沟通为准。</span></p>
       <main className="try-workspace">
-        <ArtworkPanel artworkUrl={artworkUrl} originalArtworkUrl={originalArtworkUrl} artworkName={artworkName} repairLevel={repairLevel} repairStatus={repairStatus} repairError={repairError} uploadStatus={uploadStatus} uploadError={uploadError} onArtworkChange={changeArtwork} onDemoArtworkChange={loadWrinkleDemo} onRepairLevelChange={setRepairLevel} />
-        <div ref={previewCenterRef} className="try-center"><div className="try-center-toolbar"><div><span>方案 01</span><strong>{artworkName}</strong></div><div className="try-center-view-actions"><div className="try-scene-shortcuts" aria-label="快速切换空间">{sceneOptions.map((option) => <button key={option.id} className={scene === option.id ? "is-active" : ""} type="button" onClick={() => setScene(option.id)}>{option.label}</button>)}</div><button className="try-fullscreen-button" type="button" aria-pressed={isPreviewFullscreen} onClick={() => void togglePreviewFullscreen()}>{isPreviewFullscreen ? "退出全屏" : "全屏"}</button></div></div><FramePreview artworkUrl={artworkUrl} widthCm={widthCm} heightCm={heightCm} frame={frame} matEnabled={matEnabled} matMaterials={availableMats} matLayers={matLayers} activeLayerIndex={activeLayerIndex} scene={scene} brightness={brightness} zoom={zoom} onZoomChange={setZoom} /><div className="try-quote-bar"><div><span>当前方案</span><strong>{frame.name} · {matEnabled ? `${matLayers.length} 层卡纸` : "无卡纸"}</strong></div><div><span>框料用量</span><strong>{quote.railMeters} 米</strong></div><div className="try-quote-total"><span>预计参考价</span><strong>¥{quote.total}</strong></div><button type="button" onClick={savePlan}>保存这套搭配</button></div></div>
-        <FramingControls tab={tab} onTabChange={setTab} frame={frame} widthCm={widthCm} heightCm={heightCm} onDimensionChange={(dimension, value) => { const safeValue = Math.max(1, Math.min(MAX_ARTWORK_DIMENSION_CM, value)); if (dimension === "width") setWidthCm(safeValue); else setHeightCm(safeValue); }} frameMaterials={availableFrames} onFrameChange={(next) => { setFrame(next); setZoom(1); }} matEnabled={matEnabled} matMaterials={availableMats} onMatEnabledChange={setMatEnabled} matLayers={matLayers} activeLayerIndex={activeLayerIndex} onActiveLayerChange={setActiveLayerIndex} onAddLayer={() => { if (matLayers.length >= 3) return; const revealMm = matLayers.length === 1 ? 5 : 2; const nextMaterial = availableMats[Math.min(matLayers.length, availableMats.length - 1)] ?? availableMats[0]; const next = [...matLayers, { id: `layer-${Date.now()}`, materialId: nextMaterial?.id ?? "ivory", topBottomMm: revealMm, leftRightMm: revealMm }]; setMatLayers(next); setActiveLayerIndex(next.length - 1); setMatEnabled(true); }} onRemoveLayer={() => { if (matLayers.length <= 1) return; const next = matLayers.filter((_, index) => index !== activeLayerIndex); setMatLayers(next); setActiveLayerIndex(Math.max(0, activeLayerIndex - 1)); }} onLayerChange={(layer) => setMatLayers((layers) => layers.map((item, index) => index === activeLayerIndex ? layer : item))} scene={scene} onSceneChange={setScene} brightness={brightness} onBrightnessChange={setBrightness} />
+        <ArtworkPanel inactive={isPreviewFullscreen} artworkUrl={artworkUrl} originalArtworkUrl={originalArtworkUrl} artworkName={artworkName} repairLevel={repairLevel} repairStatus={repairStatus} repairError={repairError} uploadStatus={uploadStatus} uploadError={uploadError} onArtworkChange={changeArtwork} onDemoArtworkChange={loadWrinkleDemo} onRepairLevelChange={setRepairLevel} />
+        <div ref={previewCenterRef} className={`try-center${isPreviewFullscreen ? " is-expanded" : ""}`}><div className="try-center-toolbar"><div><span>方案 01</span><strong>{artworkName}</strong></div><div className="try-center-view-actions"><div className="try-scene-shortcuts" aria-label="快速切换空间">{sceneOptions.map((option) => <button key={option.id} className={scene === option.id ? "is-active" : ""} type="button" onClick={() => setScene(option.id)}>{option.label}</button>)}</div><button className="try-fullscreen-button" type="button" aria-pressed={isPreviewFullscreen} onClick={() => void togglePreviewFullscreen()}>{isPreviewFullscreen ? "退出全屏" : "全屏"}</button></div></div><FramePreview artworkUrl={artworkUrl} widthCm={widthCm} heightCm={heightCm} frame={frame} matEnabled={matEnabled} matMaterials={availableMats} matLayers={matLayers} activeLayerIndex={activeLayerIndex} scene={scene} brightness={brightness} zoom={zoom} onZoomChange={setZoom} /><div className="try-quote-bar"><div><span>当前方案</span><strong>{frame.name} · {matEnabled ? `${matLayers.length} 层卡纸` : "无卡纸"}</strong></div><div><span>框料用量</span><strong>{quote.railMeters} 米</strong></div><div className="try-quote-total"><span>预计参考价</span><strong>¥{quote.total}</strong></div><button type="button" disabled={saving || uploadStatus === "processing"} onClick={() => void savePlan()}>保存这套搭配</button></div></div>
+        <FramingControls inactive={isPreviewFullscreen} tab={tab} onTabChange={setTab} frame={frame} widthCm={widthCm} heightCm={heightCm} onDimensionChange={(dimension, value) => { const safeValue = Math.max(1, Math.min(MAX_ARTWORK_DIMENSION_CM, value)); if (dimension === "width") setWidthCm(safeValue); else setHeightCm(safeValue); }} frameMaterials={availableFrames} onFrameChange={(next) => { setFrame(next); setZoom(1); }} matEnabled={matEnabled} matMaterials={availableMats} onMatEnabledChange={setMatEnabled} matLayers={matLayers} activeLayerIndex={activeLayerIndex} onActiveLayerChange={setActiveLayerIndex} onAddLayer={() => { if (matLayers.length >= 3) return; const revealMm = matLayers.length === 1 ? 5 : 2; const nextMaterial = availableMats[Math.min(matLayers.length, availableMats.length - 1)] ?? availableMats[0]; const next = [...matLayers, { id: `layer-${Date.now()}`, materialId: nextMaterial?.id ?? "ivory", topBottomMm: revealMm, leftRightMm: revealMm }]; setMatLayers(next); setActiveLayerIndex(next.length - 1); setMatEnabled(true); }} onRemoveLayer={() => { if (matLayers.length <= 1) return; const next = removeMatLayer(matLayers, activeLayerIndex); setMatLayers(next); setActiveLayerIndex(Math.max(0, activeLayerIndex - 1)); }} onLayerChange={(layer) => setMatLayers((layers) => layers.map((item, index) => index === activeLayerIndex ? layer : item))} scene={scene} onSceneChange={setScene} brightness={brightness} onBrightnessChange={setBrightness} />
       </main>
       {notice && <div className="try-toast" role="status">{notice}</div>}
     </div>

@@ -1,6 +1,7 @@
-import { lazy, Suspense, useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
-import { getDraggedRotation, getDragDegreesPerPixel, INITIAL_PREVIEW_ROTATION } from "./interaction";
+import { lazy, Suspense, useEffect, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from "react";
+import { getDraggedRotation, getDragDegreesPerPixel, getPinchZoom, INITIAL_PREVIEW_ROTATION } from "./interaction";
 import { STATIC_SCENE_CANVAS, STATIC_SCENE_VIEWS, type FrameMaterial, type MatLayer, type MatMaterial, type SceneId } from "./model";
+import type { PreviewStageHandle } from "./ThreeFrameStage";
 
 const ThreeFrameStage = lazy(() => import("./ThreeFrameStage"));
 
@@ -24,13 +25,18 @@ type DragState =
   | { mode: "move"; pointerId: number; x: number; y: number; offsetX: number; offsetY: number; limitX: number; limitY: number };
 
 export default function FramePreview({ artworkUrl, widthCm, heightCm, frame, matEnabled, matMaterials, matLayers, activeLayerIndex, scene, brightness, zoom, onZoomChange }: FramePreviewProps) {
-  const [rotation, setRotation] = useState(INITIAL_PREVIEW_ROTATION);
+  const rotationRef = useRef(INITIAL_PREVIEW_ROTATION);
+  const stageRef = useRef<PreviewStageHandle>(null);
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
   const [isDragging, setIsDragging] = useState(false);
   const [staticOffset, setStaticOffset] = useState({ x: 0, y: 0 });
   const dragRef = useRef<DragState | null>(null);
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  const pinchRef = useRef<{ distance: number; zoom: number } | null>(null);
   const isInteractive = scene === "gallery";
   const staticView = scene === "gallery" ? null : STATIC_SCENE_VIEWS[scene];
-  const renderedRotation = staticView?.rotation ?? rotation;
+  const renderedRotation = staticView?.rotation ?? INITIAL_PREVIEW_ROTATION;
   const totalTopBottomMm = matEnabled ? matLayers.reduce((sum, layer) => sum + Math.max(0, layer.topBottomMm), 0) : 0;
   const totalLeftRightMm = matEnabled ? matLayers.reduce((sum, layer) => sum + Math.max(0, layer.leftRightMm), 0) : 0;
   const frameWidthCm = widthCm + frame.widthMm / 5 + totalLeftRightMm / 5;
@@ -41,9 +47,15 @@ export default function FramePreview({ artworkUrl, widthCm, heightCm, frame, mat
   const sceneScale = staticView ? referenceWallDiagonal / Math.hypot(staticView.wallWidthCm, staticView.wallHeightCm) : 1;
   const renderedZoom = staticView ? Math.max(0.26, Math.min(0.92, staticView.zoom * sceneScale * frameScale)) : zoom;
 
+  useLayoutEffect(() => {
+    if (isInteractive) stageRef.current?.setRotation(rotationRef.current);
+  }, [scene, isInteractive]);
+
   useEffect(() => {
     if (!isInteractive) {
       dragRef.current = null;
+      pointers.current.clear();
+      pinchRef.current = null;
       setIsDragging(false);
     }
   }, [isInteractive]);
@@ -53,6 +65,8 @@ export default function FramePreview({ artworkUrl, widthCm, heightCm, frame, mat
   }, [scene, isInteractive]);
 
   const finishDrag = (event?: ReactPointerEvent<HTMLDivElement>) => {
+    pointers.current.clear();
+    pinchRef.current = null;
     if (event && event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
@@ -61,9 +75,13 @@ export default function FramePreview({ artworkUrl, widthCm, heightCm, frame, mat
   };
 
   const resetView = () => {
+    pointers.current.clear();
+    pinchRef.current = null;
     dragRef.current = null;
     setIsDragging(false);
-    setRotation(INITIAL_PREVIEW_ROTATION);
+    rotationRef.current = INITIAL_PREVIEW_ROTATION;
+    stageRef.current?.setRotation(INITIAL_PREVIEW_ROTATION);
+    stageRef.current?.setZoom(1);
     onZoomChange(1);
   };
 
@@ -74,16 +92,27 @@ export default function FramePreview({ artworkUrl, widthCm, heightCm, frame, mat
   };
 
   return (
-    <section className={`try-preview-scene scene-${scene}${isInteractive ? "" : " is-static-scene"}`} aria-label={`${scene === "gallery" ? "可旋转" : "静态陈列"}装裱预览`} style={{ "--try-brightness": brightness / 100 } as React.CSSProperties}>
+    <section className={`try-preview-scene scene-${scene}${isInteractive ? "" : " is-static-scene"}`} aria-label={`${scene === "gallery" ? "可旋转" : "静态陈列"}装裱预览`} style={{ "--try-brightness": brightness / 100, filter: brightness === 100 ? "none" : `brightness(${brightness / 100})` } as React.CSSProperties}>
       <div className="try-preview-topline"><div><span className="try-live-dot" />{isInteractive ? "实时预览" : "静态陈列"}</div><span>{frame.widthMm} × {frame.depthMm} mm · {widthCm} × {heightCm} cm</span></div>
       <div
         className={`try-stage${isDragging ? " is-dragging" : ""}${isInteractive ? "" : " is-static"}`}
         onPointerDown={(event) => {
+          if (isInteractive && event.pointerType === "touch") {
+            if (pointers.current.size >= 2) return;
+            pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+            if (pointers.current.size === 2) {
+              const [a, b] = [...pointers.current.values()];
+              pinchRef.current = { distance: Math.hypot(a.x - b.x, a.y - b.y), zoom: zoomRef.current };
+              dragRef.current = null;
+              event.currentTarget.setPointerCapture(event.pointerId);
+              return;
+            }
+          }
           if (event.button !== 0 || !event.isPrimary) return;
           const rect = event.currentTarget.getBoundingClientRect();
           event.currentTarget.setPointerCapture(event.pointerId);
           dragRef.current = isInteractive
-            ? { mode: "rotate", pointerId: event.pointerId, x: event.clientX, y: event.clientY, rx: rotation.x, ry: rotation.y, degreesPerPixel: getDragDegreesPerPixel(rect.width, rect.height) }
+            ? { mode: "rotate", pointerId: event.pointerId, x: event.clientX, y: event.clientY, rx: rotationRef.current.x, ry: rotationRef.current.y, degreesPerPixel: getDragDegreesPerPixel(rect.width, rect.height) }
             : {
               mode: "move",
               pointerId: event.pointerId,
@@ -97,12 +126,22 @@ export default function FramePreview({ artworkUrl, widthCm, heightCm, frame, mat
           setIsDragging(true);
         }}
         onPointerMove={(event) => {
+          if (pinchRef.current && pointers.current.has(event.pointerId)) {
+            pointers.current.set(event.pointerId, { x: event.clientX, y: event.clientY });
+            const [a, b] = [...pointers.current.values()];
+            const next = getPinchZoom(pinchRef.current.zoom, pinchRef.current.distance, Math.hypot(a.x - b.x, a.y - b.y));
+            zoomRef.current = next;
+            stageRef.current?.setZoom(next);
+            onZoomChange(next);
+            return;
+          }
           const drag = dragRef.current;
           if (!drag || drag.pointerId !== event.pointerId) return;
           const dx = event.clientX - drag.x;
           const dy = event.clientY - drag.y;
           if (drag.mode === "rotate") {
-            setRotation(getDraggedRotation({ x: drag.rx, y: drag.ry }, dx, dy, drag.degreesPerPixel));
+            rotationRef.current = getDraggedRotation({ x: drag.rx, y: drag.ry }, dx, dy, drag.degreesPerPixel);
+            stageRef.current?.setRotation(rotationRef.current);
           } else {
             setStaticOffset({
               x: Math.max(-drag.limitX, Math.min(drag.limitX, drag.offsetX + dx)),
@@ -113,15 +152,15 @@ export default function FramePreview({ artworkUrl, widthCm, heightCm, frame, mat
         onPointerUp={finishDrag}
         onPointerCancel={finishDrag}
         onLostPointerCapture={() => finishDrag()}
-        onWheel={(event) => { if (!isInteractive) return; event.preventDefault(); onZoomChange(Math.max(0.72, Math.min(1.55, zoom - event.deltaY * 0.001))); }}
+        onWheel={(event) => { if (!isInteractive) return; event.preventDefault(); const next = Math.max(0.72, Math.min(1.55, zoomRef.current - event.deltaY * 0.001)); zoomRef.current = next; stageRef.current?.setZoom(next); onZoomChange(next); }}
       >
         <Suspense fallback={<div className="try-stage-loading" role="status">正在构建真实三维画框…</div>}>
           <div className={`try-frame-layer${isInteractive ? "" : " is-static"}`} style={isInteractive ? undefined : { transform: `translate3d(${staticOffset.x}px, ${staticOffset.y}px, 0)` }}>
-            <ThreeFrameStage artworkUrl={artworkUrl} widthCm={widthCm} heightCm={heightCm} frame={frame} matEnabled={matEnabled} matMaterials={matMaterials} matLayers={matLayers} activeLayerIndex={activeLayerIndex} brightness={brightness} rotation={renderedRotation} zoom={renderedZoom} />
+            <ThreeFrameStage viewRef={stageRef} artworkUrl={artworkUrl} widthCm={widthCm} heightCm={heightCm} frame={frame} matEnabled={matEnabled} matMaterials={matMaterials} matLayers={matLayers} activeLayerIndex={activeLayerIndex} brightness={brightness} rotation={renderedRotation} zoom={renderedZoom} />
           </div>
         </Suspense>
       </div>
-      <div className="try-preview-controls">{isInteractive ? <><span>拖动旋转 · 滚轮缩放</span><div><label>缩放 <input aria-label="预览缩放" type="range" min="72" max="155" value={Math.round(zoom * 100)} onChange={(event) => onZoomChange(Number(event.target.value) / 100)} /></label><output>{Math.round(zoom * 100)}%</output><button type="button" onClick={resetView}>复位视角</button></div></> : <><span className="try-static-note">参考墙面 {staticView?.wallWidthCm} × {staticView?.wallHeightCm} cm · 拖动画框平移</span><div><button type="button" onClick={resetStaticPosition}>复位位置</button></div></>}</div>
+      <div className="try-preview-controls">{isInteractive ? <><span>拖动旋转 · 滚轮 / 双指缩放</span><div><label>缩放 <input aria-label="预览缩放" type="range" min="72" max="155" value={Math.round(zoom * 100)} onChange={(event) => onZoomChange(Number(event.target.value) / 100)} /></label><output>{Math.round(zoom * 100)}%</output><button type="button" onClick={resetView}>复位视角</button></div></> : <><span className="try-static-note">参考墙面 {staticView?.wallWidthCm} × {staticView?.wallHeightCm} cm · 拖动画框平移</span><div><button type="button" onClick={resetStaticPosition}>复位位置</button></div></>}</div>
     </section>
   );
 }

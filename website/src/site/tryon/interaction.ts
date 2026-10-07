@@ -4,6 +4,14 @@ export const INITIAL_PREVIEW_ROTATION: PreviewRotation = { x: 0, y: 0 };
 
 const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
 
+export const PREVIEW_PIXEL_BUDGET = 2_400_000;
+export function getPinchZoom(startZoom: number, startDistance: number, distance: number) {
+  return clamp(startZoom * Math.max(1, distance) / Math.max(1, startDistance), 0.72, 1.55);
+}
+export function getPreviewPixelRatio(width: number, height: number, devicePixelRatio: number) {
+  return Math.min(Math.max(0.1, devicePixelRatio), 1.5, Math.sqrt(PREVIEW_PIXEL_BUDGET / Math.max(1, width * height)));
+}
+
 export function getDragDegreesPerPixel(width: number, height: number) {
   const shortSide = Math.max(320, Math.min(width, height));
   return 52 / shortSide;

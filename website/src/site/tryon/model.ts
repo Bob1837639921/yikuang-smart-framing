@@ -60,6 +60,13 @@ export type MatLayer = {
 
 export const MAX_OUTER_MAT_WIDTH_MM = 200;
 
+export function removeMatLayer(layers: MatLayer[], index: number): MatLayer[] {
+  if (layers.length <= 1) return layers;
+  return layers.filter((_, i) => i !== index).map((layer, i) => i === 0
+    ? { ...layer, topBottomMm: Math.max(12, layer.topBottomMm), leftRightMm: Math.max(12, layer.leftRightMm) }
+    : layer);
+}
+
 export type SceneId = "gallery" | "exhibition" | "study";
 
 /**
@@ -102,9 +109,11 @@ export const defaultMatLayers: MatLayer[] = [
   { id: "layer-2", materialId: "oat", topBottomMm: 5, leftRightMm: 5 },
 ];
 
-export function calculateQuote(widthCm: number, heightCm: number, frame: FrameMaterial) {
+export function calculateQuote(widthCm: number, heightCm: number, frame: FrameMaterial, layers: MatLayer[] = []) {
   const frameWidthCm = frame.widthMm / 10;
-  const railLengthMeters = (2 * (widthCm + frameWidthCm * 2 + heightCm + frameWidthCm * 2)) / 100;
+  const horizontalBorderCm = layers.reduce((sum, layer) => sum + layer.leftRightMm / 10, 0);
+  const verticalBorderCm = layers.reduce((sum, layer) => sum + layer.topBottomMm / 10, 0);
+  const railLengthMeters = (2 * (widthCm + horizontalBorderCm * 2 + frameWidthCm * 2 + heightCm + verticalBorderCm * 2 + frameWidthCm * 2)) / 100;
   const billableRailMeters = railLengthMeters * 1.08;
   const frameCost = billableRailMeters * frame.pricePerMeter;
   return {

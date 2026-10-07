@@ -34,7 +34,8 @@ test("3D preview uses abortable deduplicated texture batches", () => {
 });
 
 test("3D preview renders on demand and updates mat selection without rebuilding", () => {
-  assert.match(stageSource, /if \(unsettled\) runtime\.animationFrame/);
+  assert.match(stageSource, /if \(!runtime\.animationFrame && !document\.hidden\)/);
+  assert.doesNotMatch(stageSource, /MathUtils\.lerp/);
   assert.match(stageSource, /document\.hidden/);
   assert.match(stageSource, /runtime\.matFaceMaterials\.forEach/);
   const sceneDependencies = stageSource.match(/\}, \[(props\.artworkUrl[^\]]+)\]\);/)?.[1] || "";

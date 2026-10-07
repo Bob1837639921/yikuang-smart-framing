@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type Ref } from "react";
 import * as THREE from "three";
-import { getCameraFitDistance } from "./interaction";
+import { getCameraFitDistance, getPreviewPixelRatio, type PreviewRotation } from "./interaction";
 import { getMatMaterial, type FrameMaterial, type MatLayer, type MatMaterial } from "./model";
 
 type ThreeFrameStageProps = {
+  viewRef?: Ref<PreviewStageHandle>;
   artworkUrl: string;
   widthCm: number;
   heightCm: number;
@@ -18,6 +19,10 @@ type ThreeFrameStageProps = {
 };
 
 type RailSide = "top" | "right" | "bottom" | "left";
+export type PreviewStageHandle = {
+  setRotation: (rotation: PreviewRotation) => void;
+  setZoom: (zoom: number) => void;
+};
 type Disposable = { dispose: () => void };
 
 type StageRuntime = {
@@ -238,11 +243,22 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
   const runtimeRef = useRef<StageRuntime | null>(null);
   const textureCacheRef = useRef(new StageTextureCache());
 
-  useEffect(() => {
+  useImperativeHandle(props.viewRef, () => ({
+    setRotation: (rotation) => {
+      rotationRef.current = rotation;
+      runtimeRef.current?.requestRender();
+    },
+    setZoom: (zoom) => {
+      zoomRef.current = zoom;
+      runtimeRef.current?.requestRender();
+    },
+  }), []);
+
+  useLayoutEffect(() => {
     rotationRef.current = props.rotation;
     runtimeRef.current?.requestRender();
   }, [props.rotation]);
-  useEffect(() => {
+  useLayoutEffect(() => {
     zoomRef.current = props.zoom;
     runtimeRef.current?.requestRender();
   }, [props.zoom]);
@@ -269,7 +285,7 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
       setStageError("当前浏览器暂时无法建立 3D 画布，请刷新页面后重试");
       return;
     }
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.transmissionResolutionScale = 0.5;
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1 * (props.brightness / 100);
@@ -289,6 +305,7 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
       const rect = host.getBoundingClientRect();
       const width = Math.max(1, Math.floor(rect.width));
       const height = Math.max(1, Math.floor(rect.height));
+      renderer.setPixelRatio(getPreviewPixelRatio(width, height, window.devicePixelRatio));
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
       if (runtimeRef.current) fitCameraToFrame(runtimeRef.current);
@@ -305,20 +322,13 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
       runtime.animationFrame = 0;
       if (document.hidden) return;
       const frameGroup = runtime.activeGroup;
-      let unsettled = false;
       if (frameGroup) {
-        const targetX = THREE.MathUtils.degToRad(rotationRef.current.x);
-        const targetY = THREE.MathUtils.degToRad(rotationRef.current.y);
-        frameGroup.rotation.x = THREE.MathUtils.lerp(frameGroup.rotation.x, targetX, 0.14);
-        frameGroup.rotation.y = THREE.MathUtils.lerp(frameGroup.rotation.y, targetY, 0.14);
-        const scale = THREE.MathUtils.lerp(frameGroup.scale.x, zoomRef.current, 0.13);
-        frameGroup.scale.setScalar(scale);
-        unsettled = Math.abs(frameGroup.rotation.x - targetX) > 0.0004
-          || Math.abs(frameGroup.rotation.y - targetY) > 0.0004
-          || Math.abs(scale - zoomRef.current) > 0.0004;
+        // Follow the latest input directly; requestRender coalesces input per frame.
+        frameGroup.rotation.x = THREE.MathUtils.degToRad(rotationRef.current.x);
+        frameGroup.rotation.y = THREE.MathUtils.degToRad(rotationRef.current.y);
+        frameGroup.scale.setScalar(zoomRef.current);
       }
       renderer.render(scene, camera);
-      if (unsettled) runtime.animationFrame = window.requestAnimationFrame(render);
     };
     requestRender = () => {
       if (!runtime.animationFrame && !document.hidden) runtime.animationFrame = window.requestAnimationFrame(render);
@@ -375,14 +385,14 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
         return texture;
       };
       const frameGroup = new THREE.Group();
-      const artworkWidth = Math.max(0.8, props.widthCm / 10);
-      const artworkHeight = Math.max(0.8, props.heightCm / 10);
+      const artworkWidth = Math.max(0.1, props.widthCm / 10);
+      const artworkHeight = Math.max(0.1, props.heightCm / 10);
       const totalTopBottomReveal = props.matEnabled ? props.matLayers.reduce((sum, layer) => sum + Math.max(0, layer.topBottomMm / 100), 0) : 0;
       const totalLeftRightReveal = props.matEnabled ? props.matLayers.reduce((sum, layer) => sum + Math.max(0, layer.leftRightMm / 100), 0) : 0;
       const frameInnerWidth = artworkWidth + totalLeftRightReveal * 2;
       const frameInnerHeight = artworkHeight + totalTopBottomReveal * 2;
-      const railWidth = Math.max(0.18, props.frame.widthMm / 100);
-      const depth = Math.max(0.08, props.frame.depthMm / 100);
+      const railWidth = Math.max(0.001, props.frame.widthMm / 100);
+      const depth = Math.max(0.001, props.frame.depthMm / 100);
       const outerWidth = frameInnerWidth + railWidth * 2;
       const outerHeight = frameInnerHeight + railWidth * 2;
       const sideTexture = props.frame.sideTexture ? textureAt(props.frame.sideTexture) : undefined;
@@ -451,15 +461,16 @@ export default function ThreeFrameStage(props: ThreeFrameStageProps) {
       if (props.matEnabled) {
         props.matLayers.forEach((layer, index) => {
           const material = getMatMaterial(layer.materialId, props.matMaterials);
-          const topBottomReveal = Math.max(0.015, layer.topBottomMm / 100);
-          const leftRightReveal = Math.max(0.015, layer.leftRightMm / 100);
-          const nextWidth = Math.max(0.25, openingWidth - leftRightReveal * 2);
-          const nextHeight = Math.max(0.25, openingHeight - topBottomReveal * 2);
+          const topBottomReveal = Math.max(0, layer.topBottomMm / 100);
+          const leftRightReveal = Math.max(0, layer.leftRightMm / 100);
+          const nextWidth = Math.max(0.001, openingWidth - leftRightReveal * 2);
+          const nextHeight = Math.max(0.001, openingHeight - topBottomReveal * 2);
           const thickness = Math.max(0.015, material.thicknessMm / 100);
           const geometry = new THREE.ExtrudeGeometry(rectangleRing(openingWidth, openingHeight, nextWidth, nextHeight), { depth: thickness, bevelEnabled: true, bevelSize: 0.008, bevelThickness: 0.006, bevelSegments: 1 });
           geometry.translate(0, 0, matFront - thickness);
-          const faceTexture = material.texture ? textureAt(material.texture) : undefined;
+          const faceTexture = material.texture ? textureAt(material.texture).clone() : undefined;
           if (faceTexture) {
+            disposables.push(faceTexture);
             faceTexture.colorSpace = THREE.SRGBColorSpace;
             faceTexture.wrapS = THREE.RepeatWrapping;
             faceTexture.wrapT = THREE.RepeatWrapping;

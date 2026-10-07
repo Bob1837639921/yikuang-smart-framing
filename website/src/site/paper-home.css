@@ -131,13 +131,19 @@
 .home-gallery-scroll-track,.home-gallery-corridor {height:clamp(590px,46vw,860px);}
 .home-gallery-corridor {background:#e6e1d7 url('/assets/studio/paper-wall-hd.webp') center/cover no-repeat;box-shadow:none;border:0;}
 .home-gallery-corridor::after {display:none;}
-.home-gallery-wall-slot-0 {top:31%;left:5.3%;width:23%;}
-.home-gallery-wall-slot-1 {top:14%;left:31%;width:18%;}
-.home-gallery-wall-slot-2 {top:22%;left:52.5%;width:21.5%;}
-.home-gallery-wall-slot-3 {top:11%;left:79%;width:13%;}
-.home-gallery-wall-slot-4 {top:64%;left:9%;width:23%;}
-.home-gallery-wall-slot-5 {top:57%;left:36%;width:29%;}
-.home-gallery-wall-slot-6 {top:65%;left:69%;width:23%;}
+.home-gallery-wall-slot-0 {top:21%;left:5%;width:19%;}
+.home-gallery-wall-slot-1 {top:7%;left:29%;width:14%;}
+.home-gallery-wall-slot-2 {top:14%;left:46%;width:17%;}
+.home-gallery-wall-slot-3 {top:9%;left:66%;width:11%;}
+.home-gallery-wall-slot-4 {top:67%;left:5%;width:19%;}
+.home-gallery-wall-slot-5 {top:71%;left:44%;width:23%;}
+.home-gallery-wall-slot-6 {top:72%;left:71%;width:22%;}
+.home-gallery-wall-slot-7 {top:38%;left:5%;width:20%;}
+.home-gallery-wall-slot-8 {top:47%;left:29%;width:10%;}
+.home-gallery-wall-slot-9 {top:18%;left:81%;width:13%;}
+.home-gallery-wall-slot-10 {top:40%;left:44%;width:19%;}
+.home-gallery-wall-slot-11 {top:45%;left:67%;width:9%;}
+.home-gallery-focus-art.home-gallery-size-tall {top:8%;width:min(28vw, calc(580px * .52));max-height:70%;}
 .home-gallery-frame-crop {filter:drop-shadow(1px 2px 1px #2b211d55) drop-shadow(4px 8px 5px #31251d32);}
 .home-gallery-plaque {opacity:0;pointer-events:none;transition:opacity 160ms;}
 .home-gallery-work-button:hover .home-gallery-plaque,.home-gallery-work-button:focus-visible .home-gallery-plaque {opacity:1;}
@@ -151,7 +157,16 @@
 .home-gallery-scroll-track,.home-gallery-corridor {height:720px;}
 .home-gallery-corridor {background-position:50% center;}
 .home-gallery-label{top:35px;left:6%;}.home-gallery-label b{font-size:22px;}.home-gallery-instruction{display:none;}
-.home-gallery-wall-slot-0 {top:20%;left:3%;width:43%;}.home-gallery-wall-slot-1 {top:18%;left:54%;width:34%;}.home-gallery-wall-slot-2 {top:40%;left:4%;width:39%;}.home-gallery-wall-slot-3 {top:38%;left:55%;width:27%;}.home-gallery-wall-slot-4 {top:60%;left:3%;width:43%;}.home-gallery-wall-slot-5 {top:59%;left:51%;width:46%;}.home-gallery-wall-slot-6 {top:79%;left:17%;width:60%;}
+.home-gallery-wall-slot-0 {top:18%;left:4%;width:40%;}.home-gallery-wall-slot-1 {top:16%;left:55%;width:32%;}.home-gallery-wall-slot-2 {top:33%;left:5%;width:38%;}.home-gallery-wall-slot-3 {top:34%;left:57%;width:26%;}.home-gallery-wall-slot-4 {top:49%;left:4%;width:40%;}.home-gallery-wall-slot-5 {top:52%;left:50%;width:45%;}.home-gallery-wall-slot-6 {top:64%;left:51%;width:44%;}
+.home-gallery-wall-slot-7 {top:60%;left:4%;width:39%;}.home-gallery-wall-slot-8 {top:75%;left:9%;width:17%;}.home-gallery-wall-slot-9 {top:76%;left:54%;width:31%;}
+.home-gallery-scroll-track,.home-gallery-corridor {height:940px;}
+.home-gallery-wall-slot-0 {top:15%;}.home-gallery-wall-slot-1 {top:14%;width:28%;}
+.home-gallery-wall-slot-2 {top:28%;}.home-gallery-wall-slot-3 {top:28%;}
+.home-gallery-wall-slot-4 {top:40%;}.home-gallery-wall-slot-5 {top:42%;}
+.home-gallery-wall-slot-7 {top:51%;}.home-gallery-wall-slot-6 {top:54%;}
+.home-gallery-wall-slot-10 {top:65%;left:5%;width:36%;}.home-gallery-wall-slot-11 {top:64%;left:57%;width:27%;}
+.home-gallery-wall-slot-8 {top:80%;}.home-gallery-wall-slot-9 {top:80%;width:28%;}
+.home-gallery-focus-art.home-gallery-size-tall {top:12%;width:min(35vw,240px);}
 }
 @media(min-width:721px){
 .home-hero-copy h1{font-size:clamp(76px,8.4vw,140px);}
